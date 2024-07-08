@@ -33,6 +33,20 @@ function () {
             ->name('dashboard');
 
         /**
+         * Route for the 手当控除項目マスタ
+         */
+        Route::view('masterallowdeduct', 'masterallowdeduct')
+            ->middleware(['auth', 'verified'])
+            ->name('masterallowdeduct');
+
+        /**
+         * Route for the アカウント一覧
+         */
+        Route::view('user', 'user')
+            ->middleware(['auth', 'verified'])
+            ->name('user');
+
+        /**
          * Routes for the 勤怠インポート
          */
         Route::view('importkintai', 'importkintai')

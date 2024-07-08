@@ -142,13 +142,13 @@ new class extends Component
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Work Type') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('masterallowdeduct')" wire:navigate>
                             {{ __('Deduct Item') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Employee') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('user')" wire:navigate>
                             {{ __('Account') }}
                         </x-dropdown-link>
                     </x-slot>
