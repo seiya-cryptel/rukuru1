@@ -55,10 +55,10 @@ new class extends Component
                             <x-dropdown-link  :href="route('importkintai')" :active="request()->routeIs('importkintai')" wire:navigate>
                             {{ __('Import Kintai') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('kintaientry')" :active="request()->routeIs('kintaientry')" wire:navigate>
+                            <x-dropdown-link :href="route('workemployee')" :active="request()->routeIs('workemployee')" wire:navigate>
                             {{ __('Kintai Entry') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('kintaiclose')" :active="request()->routeIs('kintaientry')" wire:navigate>
+                            <x-dropdown-link :href="route('closepayroll')" :active="request()->routeIs('closepayroll')" wire:navigate>
                             {{ __('Kintai Close') }}
                             </x-dropdown-link>
                         </x-slot>
@@ -82,7 +82,7 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
-                            <x-dropdown-link  :href="route('billexport')" :active="request()->routeIs('billexport')" wire:navigate>
+                            <x-dropdown-link  :href="route('bills')" :active="request()->routeIs('bills')" wire:navigate>
                             {{ __('Bill Export') }}
                             </x-dropdown-link>
                         </x-slot>
@@ -133,19 +133,22 @@ new class extends Component
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('masterclient')" wire:navigate>
+                        <x-dropdown-link :href="route('client')" wire:navigate>
                             {{ __('Client') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('clientplace')" wire:navigate>
                             {{ __('Work Place') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('clientworktype')" wire:navigate>
                             {{ __('Work Type') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('pricetable')" wire:navigate>
+                            {{ __('Price Table') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('masterallowdeduct')" wire:navigate>
                             {{ __('Deduct Item') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('employee')" wire:navigate>
                             {{ __('Employee') }}
                         </x-dropdown-link>
                         <x-dropdown-link :href="route('user')" wire:navigate>

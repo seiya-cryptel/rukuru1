@@ -34,6 +34,9 @@ return new class extends Migration
             $table->string('notes')->nullable();
         });
 
+        DB::unprepared('DROP TRIGGER IF EXISTS trg_employeepays_update');
+        DB::unprepared('DROP TRIGGER IF EXISTS trg_employeepays_delete');
+        
         DB::unprepared('CREATE TRIGGER trg_employeepays_update AFTER UPDATE ON `employeepays` FOR EACH ROW
             BEGIN
                 INSERT INTO `xlog_employeepays`

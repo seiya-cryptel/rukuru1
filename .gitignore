@@ -20,3 +20,6 @@ yarn-error.log
 .DS_Store
 afterup.sh
 docker-compose.yml
+.gitignore
+.gitattributes
+/storage/data

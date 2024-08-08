@@ -5,19 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class clients extends Model
+class clientplaces extends Model
 {
     use HasFactory;
 
     /**
-     * Relationship with client places
+     * Relationship with client
      */
-    public function clientplaces()
+    public function client()
     {
-        return $this->hasMany(clientplaces::class);
+        return $this->belongsTo(clients::class);
     }
     /**
-     * Relationship with price tables
+     * Relationship with client places
      */
     public function pricetables()
     {
@@ -30,28 +30,19 @@ class clients extends Model
     {
         return $this->hasMany(bills::class);
     }
-    
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'cl_cd',
-        'cl_name',
-        'cl_kana',
-        'cl_alpha',
-        'cl_zip',
-        'cl_addr1',
-        'cl_addr2',
-        'cl_psn_div',
-        'cl_psn_title',
-        'cl_psn_name',
-        'cl_psn_kana',
-        'cl_psn_mail',
-        'cl_psn_tel',
-        'cl_psn_fax',
-        'cl_notes',
+        'client_id',
+        'cl_pl_cd',
+        'cl_pl_name',
+        'cl_pl_kana',
+        'cl_pl_alpha',
+        'cl_pl_notes',
     ];
 
     /**

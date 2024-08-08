@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Middleware\Localization;
 
+use App\Livewire\Employeeworks;
+
 /**
  * Redirect to the default locale
 */
@@ -33,11 +35,46 @@ function () {
             ->name('dashboard');
 
         /**
+         * Route for the 顧客マスタ
+         */
+        Route::view('client', 'client')
+            ->middleware(['auth', 'verified'])
+            ->name('client');
+
+        /**
+         * Route for the 顧客事業所マスタ
+         */
+        Route::view('clientplace', 'clientplace')
+            ->middleware(['auth', 'verified'])
+            ->name('clientplace');
+
+        /**
+         * Route for the 作業種別マスタ
+         */
+        Route::view('clientworktype', 'clientworktype')
+            ->middleware(['auth', 'verified'])
+            ->name('clientworktype');
+
+        /**
+         * Route for the 請求単価マスタ
+         */
+        Route::view('pricetable', 'pricetable')
+            ->middleware(['auth', 'verified'])
+            ->name('pricetable');
+
+        /**
          * Route for the 手当控除項目マスタ
          */
         Route::view('masterallowdeduct', 'masterallowdeduct')
             ->middleware(['auth', 'verified'])
             ->name('masterallowdeduct');
+
+        /**
+         * Route for the 従業員マスタ
+         */
+        Route::view('employee', 'employee')
+            ->middleware(['auth', 'verified'])
+            ->name('employee');
 
         /**
          * Route for the アカウント一覧
@@ -56,30 +93,37 @@ function () {
         /**
          * Routes for the 勤怠エントリー 従業員一覧
          */
-        Route::view('kintaientry', 'kintaientry')
+        Route::view('workemployee', 'workemployee')
             ->middleware(['auth', 'verified'])
-            ->name('kintaientry');
+            ->name('workemployee');
     
         /**
         * Routes for the 勤怠エントリー 個人別  
         */
-        Route::view('kintaipersonday', 'kintaipersonday')
+        Route::view('employeework/', 'employeework')
             ->middleware(['auth', 'verified'])
-            ->name('kintaipersonday');
+            ->name('employeework');
 
         /**
          * Routes for the 勤怠エントリー 勤怠締め
          */
-        Route::view('kintaiclose', 'kintaiclose')
+        Route::view('closepayroll/', 'closepayroll')
             ->middleware(['auth', 'verified'])
-            ->name('kintaiclose');
+            ->name('closepayroll');
 
         /**
          * Routes for the 請求　請求書出力
          */
-        Route::view('billexport', 'billexport')
+        Route::view('bills', 'bills')
             ->middleware(['auth', 'verified'])
-            ->name('billexport');
+            ->name('bills');
+
+        /**
+         * Routes for the 請求　請求明細表示
+         */
+        Route::view('billdetails', 'billdetails')
+            ->middleware(['auth', 'verified'])
+            ->name('billdetails');
 
         /**
          * Routes for the 給与　手当控除入力
@@ -101,20 +145,6 @@ function () {
         Route::view('salarycalc', 'salarycalc')
             ->middleware(['auth', 'verified'])
             ->name('salarycalc');
-
-        /**
-         * Routes for the マスタ　顧客
-         */
-        Route::view('masterclient', 'masterclient')
-            ->middleware(['auth', 'verified'])
-            ->name('masterclient');
-
-        /**
-         * Routes for the マスタ　顧客　編集
-         */
-        Route::view('masterclientedit', 'masterclientedit')
-            ->middleware(['auth', 'verified'])
-            ->name('masterclientedit');
     
         Route::view('profile', 'profile')
             ->middleware(['auth'])
