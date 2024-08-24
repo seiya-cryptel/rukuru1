@@ -5,7 +5,10 @@ namespace App\Livewire;
 use DateTime;
 use DateInterval;
 
+use Illuminate\Support\Facades\Session;
+
 use Livewire\Component;
+
 use App\Models\closepayrolls as modelClosePayrolls;
 use App\Models\employees as modelEmployees;
 use App\Models\employeepays as modelEmployeePays;
@@ -325,7 +328,7 @@ class Closepayrolls extends Component
     /**
      * reopen button click event
      */
-    public function openPayroll()
+    public function reopenPayroll()
     {
         // 従業員給与レコードを削除
         $this->deleteEmployeeSalary();
@@ -339,6 +342,6 @@ class Closepayrolls extends Component
             'closed' => false, 
             'operation_date' => date('Y-m-d H:i:s')
         ]);
-        Session::flash('message', '解除処理が完了しました。');
+        Session::flash('success', '解除処理が完了しました。');
     }
 }

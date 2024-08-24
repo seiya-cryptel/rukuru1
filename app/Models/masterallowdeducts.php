@@ -10,6 +10,14 @@ class masterallowdeducts extends Model
     use HasFactory;
 
     /**
+     * relationships
+     */
+    public function employeeallowdeducts()
+    {
+        return $this->hasMany(employeeallowdeduct::class);
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

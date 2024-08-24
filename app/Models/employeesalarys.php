@@ -65,11 +65,19 @@ class employeesalarys extends Model
     }
 
     /**
-     * Accesor/Mutator for wrk_work_start
+     * Accesor/Mutator
      *
      * @param  string  $value
      * @return void
      */
+    public function wrkDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === '0000-00-00 00:00:00' || $value === null) ? '' : date('Y-m-d', strtotime($value)),
+            set: fn ($value) => $this->attributes['wrk_date'] = $value === '' ? null : $value, 
+        );
+    }
+
     public function wrkWorkStart(): Attribute
     {
         return Attribute::make(
@@ -78,12 +86,6 @@ class employeesalarys extends Model
         );
     }
 
-    /**
-     * Accesor/Mutator for wrk_work_end
-     *
-     * @param  string  $value
-     * @return void
-     */
     public function wrkWorkEnd(): Attribute
     {
         return Attribute::make(
@@ -92,12 +94,6 @@ class employeesalarys extends Model
         );
     }
 
-    /**
-     * Accesor/Mutator for wrk_work_hours
-     *
-     * @param  string  $value
-     * @return void
-     */
     public function wrkWorkHours(): Attribute
     {
         return Attribute::make(

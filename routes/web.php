@@ -28,7 +28,12 @@ Route::get('/setlocale/{lang}', function($lang) {
  */
 Route::group(['prefix' => '{locale}', 'middleware' => Localization::class], 
 function () {
-        Route::view('/', 'welcome');
+        // Route::view('/', 'welcome');
+
+        // トップ
+        Route::view('/', 'dashboard')
+            ->middleware(['auth', 'verified'])
+            ->name('/');
 
         Route::view('dashboard', 'dashboard')
             ->middleware(['auth', 'verified'])
@@ -128,24 +133,27 @@ function () {
         /**
          * Routes for the 給与　手当控除入力
          */
-        Route::view('deductentry', 'deductentry')
+        Route::view('salaryemployee', 'salaryemployee')
             ->middleware(['auth', 'verified'])
-            ->name('deductentry');
-
+            ->name('salaryemployee');
+    
         /**
-         * Routes for the 給与　従業員手当控除
-         */
-        Route::view('deductperson', 'deductperson')
+        * Routes for the 手当控除入力 個人別  
+        */
+        Route::view('employeesalary', 'employeesalary')
             ->middleware(['auth', 'verified'])
-            ->name('deductperson');
+            ->name('employeesalary');
 
         /**
          * Routes for the 給与　給与計算
          */
-        Route::view('salarycalc', 'salarycalc')
+        Route::view('closesalaries', 'closesalaries')
             ->middleware(['auth', 'verified'])
-            ->name('salarycalc');
+            ->name('closesalaries');
     
+        /**
+         * ユーザ プロファイル
+         */
         Route::view('profile', 'profile')
             ->middleware(['auth'])
             ->name('profile');

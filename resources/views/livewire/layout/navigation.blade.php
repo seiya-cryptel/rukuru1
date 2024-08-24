@@ -106,10 +106,10 @@ new class extends Component
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('deductentry')" wire:navigate>
+                        <x-dropdown-link :href="route('salaryemployee')" wire:navigate>
                             {{ __('Salary Deduct') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('salarycalc')" wire:navigate>
+                        <x-dropdown-link :href="route('closesalaries')" wire:navigate>
                         {{ __('Salary Calc') }}
                         </x-dropdown-link>
                     </x-slot>

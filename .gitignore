@@ -23,3 +23,9 @@ docker-compose.yml
 .gitignore
 .gitattributes
 /storage/data
+/app/Providers/AppServiceProvider.php
+composer.json
+composer.lock
+package.json
+package-lock.json
+.git

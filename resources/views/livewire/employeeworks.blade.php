@@ -71,8 +71,8 @@
                     @enderror
                 </td>
                 <td style="width: 4rem;" align="center">
-                    <span class="form-control py-1 text-sm bg-gray-100" id="TimekeepingSlots.{{$key}}.{{$slotNo}}.wrk_work_time" wire:model="TimekeepingSlots.{{$key}}.{{$slotNo}}.wrk_work_time">
-                        {{ empty($TimekeepingSlots[$key][$slotNo]['wrk_work_time']) ? '' : $TimekeepingSlots[$key][$slotNo]['wrk_work_time'] }}
+                    <span class="form-control py-1 text-sm bg-gray-100" id="TimekeepingSlots.{{$key}}.{{$slotNo}}.wrk_work_hours" wire:model="TimekeepingSlots.{{$key}}.{{$slotNo}}.wrk_work_hours">
+                        {{ empty($TimekeepingSlots[$key][$slotNo]['wrk_work_hours']) ? '' : $TimekeepingSlots[$key][$slotNo]['wrk_work_hours'] }}
                     </span>
                 </td>
                 @endfor

@@ -16,19 +16,17 @@ class clients extends Model
     {
         return $this->hasMany(clientplaces::class);
     }
-    /**
-     * Relationship with price tables
-     */
     public function pricetables()
     {
         return $this->hasMany(pricetables::class);
     }
-    /**
-     * Relationship with bills
-     */
     public function bills()
     {
         return $this->hasMany(bills::class);
+    }
+    public function employeeallowdeducts()
+    {
+        return $this->hasMany(employeeallowdeduct::class);
     }
     
     /**

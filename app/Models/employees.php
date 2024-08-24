@@ -25,6 +25,14 @@ class employees extends Model
     {
         return $this->hasMany(employeesalarys::class);
     }
+
+    /**
+     * Relationship with salary
+     */
+    public function salarys()
+    {
+        return $this->hasMany(salary::class);
+    }
     
     /**
      * The attributes that are mass assignable.
