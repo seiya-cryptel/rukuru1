@@ -4,6 +4,7 @@ use App\Livewire\Forms\LoginForm;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use App\Models\applogs;
 
 new #[Layout('layouts.guest')] class extends Component
 {
@@ -21,6 +22,8 @@ new #[Layout('layouts.guest')] class extends Component
         Session::regenerate();
 
         Session::flash('message', __("You're logged in!"));
+        // ログイン履歴をアプリケーションログに記録
+        applogs::insertLog(applogs::LOG_TYPE_LOGIN, $this->form->email);
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 }; ?>

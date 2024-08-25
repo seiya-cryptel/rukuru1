@@ -18,8 +18,8 @@ new class extends Component
 
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+    <div class="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4">
+        <div class="flex justify-between h-12">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
@@ -90,72 +90,73 @@ new class extends Component
                 </div>
 
                 {{-- 給与 --}}
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div x-data="{ name_salary: '給与' }" x-text="name_salary" x-on:profile-updated.window="name_salary = $event.detail.name_salary"></div>
+                <!-- Settings Dropdown -->
+                <div class="hidden sm:flex sm:items-center sm:ms-6">
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                <div x-data="{ name_salary: '給与' }" x-text="name_salary" x-on:profile-updated.window="name_salary = $event.detail.name_salary"></div>
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('salaryemployee')" wire:navigate>
-                            {{ __('Salary Deduct') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('closesalaries')" wire:navigate>
-                        {{ __('Salary Calc') }}
-                        </x-dropdown-link>
-                    </x-slot>
-                </x-dropdown>
-            </div>
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('salaryemployee')" wire:navigate>
+                                {{ __('Salary Deduct') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('closesalaries')" wire:navigate>
+                            {{ __('Salary Calc') }}
+                            </x-dropdown-link>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
 
-{{-- マスタ更新 --}}
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div x-data="{ name: 'マスタ' }" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+                {{-- マスタ更新 --}}
+                <!-- Settings Dropdown -->
+                <div class="hidden sm:flex sm:items-center sm:ms-6">
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                <div x-data="{ name: 'マスタ' }" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('client')" wire:navigate>
-                            {{ __('Client') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('clientplace')" wire:navigate>
-                            {{ __('Work Place') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('clientworktype')" wire:navigate>
-                            {{ __('Work Type') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('pricetable')" wire:navigate>
-                            {{ __('Price Table') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('masterallowdeduct')" wire:navigate>
-                            {{ __('Deduct Item') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('employee')" wire:navigate>
-                            {{ __('Employee') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('user')" wire:navigate>
-                            {{ __('Account') }}
-                        </x-dropdown-link>
-                    </x-slot>
-                </x-dropdown>
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('client')" wire:navigate>
+                                {{ __('Client') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('clientplace')" wire:navigate>
+                                {{ __('Work Place') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('clientworktype')" wire:navigate>
+                                {{ __('Work Type') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('pricetable')" wire:navigate>
+                                {{ __('Price Table') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('masterallowdeduct')" wire:navigate>
+                                {{ __('Deduct Item') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('employee')" wire:navigate>
+                                {{ __('Employee') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('user')" wire:navigate>
+                                {{ __('Account') }}
+                            </x-dropdown-link>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
             </div>
 
             <!-- Settings Dropdown -->
