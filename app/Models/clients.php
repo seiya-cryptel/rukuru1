@@ -49,6 +49,12 @@ class clients extends Model
         'cl_psn_mail',
         'cl_psn_tel',
         'cl_psn_fax',
+        'cl_dow_statutory',
+        'cl_dow_non_statutory',
+        'cl_over_40hpw',
+        'cl_dow_first',
+        'cl_round_start',
+        'cl_round_end',
         'cl_notes',
     ];
 
@@ -61,5 +67,29 @@ class clients extends Model
     {
         return [
         ];
+    }
+
+    /**
+     * 顧客の休日判定
+     * @param string $date 日付
+     * return 1: 法定休日 2: 法定外休日 0: 平日
+     */
+    public function typeOfHoliday($date)
+    {
+        $dayOfWeek = date('w', strtotime($date));
+
+        // 顧客の休日判定
+        if($dayOfWeek == $this->cl_dow_statutory)
+        {
+            // 法定休日
+            return 1;
+        }
+        if(($this->cl_dow_non_statutory != null) && ($dayOfWeek == $this->cl_dow_non_statutory))
+        {
+            // 法定外休日
+            return 2;
+        }
+
+        return 0;
     }
 }

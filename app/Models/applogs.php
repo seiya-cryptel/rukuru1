@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class applogs extends Model
@@ -20,6 +21,33 @@ class applogs extends Model
     public const LOG_MESSAGES = [
         self::LOG_TYPE_LOGIN => 'ログイン',
     ];
+
+    /**
+     * プロキシーを考慮したクライアントIPアドレスを取得
+     * 将来的にはヘルパー関数に移動して共通化する
+     * https://qiita.com/miriwo/items/aec51864a9aa3082fee0
+     */
+    protected static function getClientIpAttribute(): string
+    {
+        $forwardedFor = request()->headers->get('X-Forwarded-For');
+        $realIp = request()->headers->get('X-Real-IP');
+        $clientIp = null;
+        $isClientIpUnreliable = false;
+
+        if ($forwardedFor) {
+            $ipAddresses = explode(',', $forwardedFor);
+            $clientIp = trim($ipAddresses[0]);
+        } elseif ($realIp) {
+            $clientIp = $realIp;
+        }
+
+        if (!$clientIp) {
+            $clientIp = request()->ip();
+            $isClientIpUnreliable = true;
+        }
+
+        return $clientIp;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -73,7 +101,7 @@ class applogs extends Model
             'log_type' => $logType,
             'log_user' => $logUser,
             'log_message' => $logMessage,
-            'remote_addr' => request()->ip(),
+            'remote_addr' => self::getClientIpAttribute(),
         ]);
     }   
 }

@@ -10,28 +10,17 @@
                 {{ session()->get('error') }}
             </div>
         @endif
-        @if($addEmployee)
-            @include('livewire.employeecreate')
-        @endif            
-        @if($updateEmployee)
-            @include('livewire.employeeupdate')
-        @endif
-        @if($hourlyWageEmployee)
-            @livewire('employeepays', ['employee_id' => $employeeId])
-        @endif
     </div>
     <div class="col-md-8">
         <div class="text-right">            
-            @if(!$addEmployee && !$updateEmployee && !$hourlyWageEmployee)
-                <button wire:click="newEmployee()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">{{ __('Employee') . __('Add') }}</button>
-            @endif
+            <button wire:click="newEmployee()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold text-sm py-1 px-2 rounded">{{ __('Employee') . __('Add') }}</button>
         </div>
         <!-- 検索窓の追加 -->
         <div>
-            <input wire:model.live="search" type="text" class="form-control" id="search" placeholder="{{ __('Search Employees...') }}">
+            <input wire:model.live="search" type="text" class="form-control text-sm py-1" id="search" placeholder="{{ __('Search Employees...') }}">
         </div>
         <div>
-            <table class="min-w-full table-auto">
+            <table class="min-w-full table-auto text-sm">
                 <thead class="bg-gray-200">
                     <tr>
                         <th>{{ __('Code') }}</th>

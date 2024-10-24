@@ -24,6 +24,16 @@ class Workemployees extends Component
     use WithPagination;
 
     /**
+     * session variable key
+     */
+    public const __CLASS__ = 'Workemployees';
+    public const SESS_WORKYEAR = self::__CLASS__ . '_workYear';
+    public const SESS_WORKMONTH = self::__CLASS__ . '_workMonth';
+    public const SESS_CLIENTID = self::__CLASS__ . '_clientId';
+    public const SESS_CLIENTPLACEID = self::__CLASS__ . '_clientPlaceId';
+    public const SESS_SEARCH = self::__CLASS__ . '_search';
+
+    /**
      * work year, month and client information
      * */
     public $workYear, $workMonth, $client_id, $clientplace_id;
@@ -34,14 +44,10 @@ class Workemployees extends Component
     public $search = '';
 
     /**
-     * client records for select box
+     * records for select box
      * */
     public $refClients;
-
-    /**
-     * client place records for select box
-     * */
-    public $refClientPlaces;
+    public $refClientPlaces = [];
 
     protected $rules = [
         'workYear' => 'required',
@@ -58,16 +64,15 @@ class Workemployees extends Component
         // set default values
         // 対象年月を設定
         // セッション変数にキー（workYear、workMonth）が設定されている場合は、その値を取得
-        // 値を取得したあとは、セッション変数を削除
-        if (session()->has('workYear')) {
-            $this->workYear = session('workYear');
-            session()->forget('workYear');
+        if (session()->has(self::SESS_WORKYEAR)) {
+            $this->workYear = session(self::SESS_WORKYEAR);
         } else {
             $this->workYear = date('Y');
+            session([self::SESS_WORKYEAR => $this->workYear]);
         }
-        if(session()->has('workMonth')) {
-            $this->workMonth = session('workMonth');
-            session()->forget('workMonth');
+        
+        if(session()->has(self::SESS_WORKMONTH)) {
+            $this->workMonth = session(self::SESS_WORKMONTH);
         } else {
             $this->workMonth = date('m');
             $Day = date('d');
@@ -75,17 +80,26 @@ class Workemployees extends Component
                 $this->workYear = date('Y', strtotime('-1 month'));
                 $this->workMonth = date('m', strtotime('-1 month'));
             }
+            session([self::SESS_WORKYEAR => $this->workYear]);
+            session([self::SESS_WORKMONTH => $this->workMonth]);
         }
-        if(session()->has('client_id')) {
-            $this->client_id = session('client_id');
-            session()->forget('client_id');
+
+        if(session()->has(self::SESS_CLIENTID)) {
+            $this->client_id = session(self::SESS_CLIENTID);
         } else {
             $this->client_id = null;
-        }if(session()->has('clientplace_id')) {
-            $this->clientplace_id = session('clientplace_id');
-            session()->forget('clientplace_id');
+        }
+        if(session()->has(self::SESS_CLIENTPLACEID)) {
+            $this->clientplace_id = session(self::SESS_CLIENTPLACEID);
         } else {
             $this->clientplace_id = null;
+        }
+
+        // 従業員検索条件を取得
+        if(session()->has(self::SESS_SEARCH)) {
+            $this->search = session(self::SESS_SEARCH);
+        } else {
+            $this->search = '';
         }
 
         // if client_id or clientplace_id is null then show guide message
@@ -95,7 +109,10 @@ class Workemployees extends Component
         }
 
         $this->refClients = modelClients::all();
-        $this->refClientPlaces = [];
+        if($this->client_id != null)
+        {
+            $this->refClientPlaces = modelClientPlaces::where('client_id', $this->client_id)->get();
+        }
     }
 
     /**
@@ -106,6 +123,9 @@ class Workemployees extends Component
         // 勤怠対象月の初日と最終日を取得
         $firstDay = date('Y-m-01', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
         $lastDay = date('Y-m-t', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
+
+        // 従業員検索条件をセッションに保存
+        session([self::SESS_SEARCH => $this->search]);
 
         $query = modelEmployees::where(function ($query) {
             $query->where('empl_name_last', 'like', '%'.$this->search.'%')
@@ -150,6 +170,8 @@ class Workemployees extends Component
         // client_idが更新されたときに呼び出される
         $this->refClientPlaces = modelClientPlaces::where('client_id', $value)->get(); // 新しいclient_idに基づいて場所のデータを取得
         $this->clientplace_id = null; // clientplace_idをリセット
+        session([self::SESS_CLIENTID => $value]);
+        session([self::SESS_CLIENTPLACEID => null]);
     }
 
     /**
@@ -159,6 +181,23 @@ class Workemployees extends Component
     {
         // clientplace_idが更新されたときに呼び出される
         $this->clientplace_id = $value;
+        session([self::SESS_CLIENTPLACEID => $value]);
+    }
+
+    /**
+     * work year updated
+     */
+    public function updateWorkYear($value)
+    {
+        session([self::SESS_WORKYEAR => $value]);
+    }
+
+    /**
+     * work month updated
+     */
+    public function updateWorkMonth($value)
+    {
+        session([self::SESS_WORKMONTH => $value]);
     }
 
     /**
@@ -176,19 +215,11 @@ class Workemployees extends Component
         $firstDay = date('Y-m-01', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
         $lastDay = date('Y-m-t', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
 
-        /*
-        $query = modelEmployees::where('employeeId', $employeeId)
-        ->where('empl_hire_date', '<=', $lastDay)
-        ->where(function ($query) use ($firstDay) {
-            $query->where('empl_resign_date', '>=', $firstDay)
-            ->orWhere('empl_resign_date', null)
-            ->orWhere('empl_resign_date', '0000-00-00 00:00:00')
-            ->orWhere('empl_resign_date', '');
-        });
-
-        return $query->exists();
-        */
-        return 'exists';
+        $Query = modelEmployeeWorkss::where('employee_id', $employeeId)
+            ->where('client_id', $this->client_id)
+            ->where('clientplace_id', $this->clientplace_id)
+            ->whereBetween('wrk_date',[$firstDay, $lastDay]);
+        return $Query->exists() ? 'exists' : 'notexists';
     }
 
     /**
@@ -196,12 +227,8 @@ class Workemployees extends Component
      * */
     public function editTimekeeping($employeeId)
     {
-        // セッション変数にキー（employeeId、workYear、workMonth、client_id、clientplace_id）を設定
-        session(['employee_id' => $employeeId]);
-        session(['workYear' => $this->workYear]);
-        session(['workMonth' => $this->workMonth]);
-        session(['client_id' => $this->client_id]);
-        session(['clientplace_id' => $this->clientplace_id]);
-        return redirect()->route('employeework');
+        return redirect()->route('employeework', 
+            ['workYear' => $this->workYear, 'workMonth' => $this->workMonth, 
+            'clientId' => $this->client_id, 'clientPlaceId' => $this->clientplace_id, 'employeeId' => $employeeId]);
     }
 }

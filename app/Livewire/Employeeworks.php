@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use DateTime;
+use App\Traits\rukuruUtilites;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
@@ -12,9 +13,19 @@ use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
 
+use App\Services\WorkhoursType1;
+
+/**
+ * 勤怠入力画面
+ */
 class Employeeworks extends Component
 {
+    use rukuruUtilites;
+    
     #[Layout('layouts.app')]
+
+    // constants
+    private const MAX_SLOTS = 4;
 
     // parameters
     public $workYear;
@@ -42,6 +53,7 @@ class Employeeworks extends Component
      * possible work types
      */
     public $PossibleWorkTypes;
+    public $WorkTypes = [];
 
     /**
      * timekeeping array
@@ -50,30 +62,178 @@ class Employeeworks extends Component
     public $TimekeepingSlots = [];      // slots of the day
 
     /**
+     * 勤怠データ クラス変数
+     */
+    protected $Workhours;
+
+    /**
+     * validation rules
+     */
+    protected $rules = [
+    ];
+
+    /**
+     * fill timekeeping array
+     */
+    protected function fillTimekeepings()
+    {
+        $dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
+
+        $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
+        $lastDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($firstDate))));
+
+        for($day = 1; $day <= date('t', strtotime($firstDate)); $day++)
+        {
+            $DateCur = new DateTime($this->workYear . '-' . $this->workMonth . '-' . $day);
+            $this->TimekeepingDays[$day]['DateTime'] = $DateCur;    // DateTime object
+            $this->TimekeepingDays[$day]['day'] = $day;             // day of the month
+            $this->TimekeepingDays[$day]['dispDayOfWeek'] = $dayOfWeek[$DateCur->format('w')];    // day of the week
+            $this->TimekeepingDays[$day]['leave'] = false;          // 有給 flag
+
+            $curDate = $this->workYear . '-' . $this->workMonth . '-' . substr('0' . $day, -2);
+            $this->TimekeepingDays[$day]['date'] = $curDate;
+
+            // スロットデータ配列をクリアする
+            for($slotNo=1; $slotNo<=self::MAX_SLOTS; $slotNo++)
+            {
+                $this->TimekeepingSlots[$day][$slotNo] = [
+                    'wrk_seq' => $slotNo,
+                    'wt_cd' => '',
+                    'wt_name' => '',
+                    'wrk_log_start' => '',
+                    'wrk_log_end' => '',
+                    'wrk_work_start' => '',
+                    'wrk_work_end' => '',
+                    'wrk_work_hours' => '',
+                    'class_bg_color' => '',
+                    'readonly' => '',
+                ];
+            }
+
+            // スロットのデータを読み出す
+            $targetDate = $this->workYear . '-' . $this->workMonth . '-' . substr('0' . $day, -2);
+            $Slots = modelEmployeeWorks::where('employee_id', $this->employee_id)
+                ->where('wrk_date', $targetDate)
+                ->orderBy('wrk_seq')
+                ->get();
+            foreach($Slots as $Slot)
+            {
+                $slotNo = $Slot->wrk_seq;
+                $this->TimekeepingSlots[$day][$slotNo] = [
+                    'wrk_seq' => $slotNo,
+                    'wt_cd' => $Slot->wt_cd,
+                    'wt_name' => $clientworktype ? $clientworktype->wt_name : '',
+                    'wrk_log_start' => $Slot->wrk_log_start,
+                    'wrk_log_end' => $Slot->wrk_log_end,
+                    'wrk_work_start' => $Slot->wrk_work_start,
+                    'wrk_work_end' => $Slot->wrk_work_end,
+                    'wrk_work_hours' => $Slot->wrk_work_hours,
+                    'class_bg_color' => $this->TimekeepingDays[$day]['leave'] ? 'bg-gray-100' : '',
+                    'readonly' => $this->TimekeepingDays[$day]['leave'] ? 'readonly=\"readonly\"' : '',
+                ];
+            }
+        }
+    }
+
+    /**
+     * fill timekeeping array
+     * use Workhours class version
+     */
+    protected function fillTimekeepings2()
+    {
+        $dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
+
+        // 顧客によってWorkhoursクラスを切り替える
+        switch($this->Client->cl_cd)
+        {
+            case '001':
+                $this->Workhours = new WorkhoursType1($this->client_id, $this->clientplace_id, $this->workYear, $this->workMonth, $this->employee_id);
+                break;
+            default:
+                $this->Workhours = new WorkhoursType1($this->client_id, $this->clientplace_id, $this->workYear, $this->workMonth, $this->employee_id);
+                break;
+        }
+        $this->Workhours->load();
+
+        $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
+        $lastDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($firstDate))));
+
+        for($day = 1; $day <= date('t', strtotime($firstDate)); $day++)
+        {
+            $DateCur = new DateTime($this->workYear . '-' . $this->workMonth . '-' . $day);
+            $this->TimekeepingDays[$day]['DateTime'] = $DateCur;    // DateTime object
+            $this->TimekeepingDays[$day]['day'] = $day;             // day of the month
+            $this->TimekeepingDays[$day]['dispDayOfWeek'] = $dayOfWeek[$DateCur->format('w')];    // day of the week
+            $this->TimekeepingDays[$day]['leave'] = false;          // 有給 flag
+
+            $curDate = $this->workYear . '-' . $this->workMonth . '-' . substr('0' . $day, -2);
+            $this->TimekeepingDays[$day]['date'] = $curDate;
+
+            // スロットデータ配列をクリアする
+            for($slotNo=1; $slotNo<=self::MAX_SLOTS; $slotNo++)
+            {
+                $this->TimekeepingSlots[$day][$slotNo] = [
+                    'wrk_seq' => $slotNo,
+                    'wt_cd' => '',
+                    'wt_name' => '',
+                    'wrk_log_start' => '',
+                    'wrk_log_end' => '',
+                    'wrk_work_start' => '',
+                    'wrk_work_end' => '',
+                    'wrk_work_hours' => '',
+                    'class_bg_color' => '',
+                    'readonly' => '',
+                ];
+            }
+
+            // スロットのデータを読み出す
+            $WorkDay = $this->Workhours->getWorkDay($day);
+            $WorkSlots = $WorkDay->getWorkSlots();
+            $slotNo = 0;
+            foreach($WorkSlots as $Slot)
+            {
+                $this->TimekeepingSlots[$day][$slotNo] = [
+                    'wrk_seq' => $slotNo,
+                    'wt_cd' => $Slot->wt_cd,
+                    'wt_name' => $clientworktype ? $clientworktype->wt_name : '',
+                    'wrk_log_start' => $Slot->wrk_log_start,
+                    'wrk_log_end' => $Slot->wrk_log_end,
+                    'wrk_work_start' => $Slot->wrk_work_start,
+                    'wrk_work_end' => $Slot->wrk_work_end,
+                    'wrk_work_hours' => $Slot->wrk_work_hours,
+                    'class_bg_color' => $this->TimekeepingDays[$day]['leave'] ? 'bg-gray-100' : '',
+                    'readonly' => $this->TimekeepingDays[$day]['leave'] ? 'readonly=\"readonly\"' : '',
+                ];
+                $slotNo++;
+            }
+        }
+    }
+
+    /**
      * mount function
      * */
-    public function mount()
+    // public function mount()
+    public function mount($workYear, $workMonth, $client_id, $clientplace_id, $employee_id)
     {
-        // セッション変数から取得する
-        $this->employee_id = session('employee_id');
-        $this->workYear = session('workYear');
-        $this->workMonth = session('workMonth');
-        $this->client_id = session('client_id');
-        $this->clientplace_id = session('clientplace_id');
-        // セッション変数を削除する
-        session()->forget('employee_id');
-        session()->forget('workYear');
-        session()->forget('workMonth');
-        session()->forget('client_id');
-        session()->forget('clientplace_id');
-
+        $this->workYear = $workYear;
+        $this->workMonth = $workMonth;
+        $this->client_id = $client_id;
+        $this->clientplace_id = $clientplace_id;
+        $this->employee_id = $employee_id;
         $this->Client = modelClients::find($this->client_id);
         $this->ClientPlace = modelClientPlaces::find($this->clientplace_id);
         $this->Employee = modelEmployees::find($this->employee_id);
         $this->PossibleWorkTypes = modelClientWorktypes::possibleWorkTypes($this->client_id, $this->clientplace_id);
+        // 作業種別の選択肢を作成する
+        $this->WorkTypes[''] = '';
+        foreach($this->PossibleWorkTypes as $wt_cd => $wt_name)
+        {
+            $this->WorkTypes[$wt_cd] = $wt_name;
+        }
 
-        $this->fillTimekeepings();
-     }
+        // $this->fillTimekeepings();
+        $this->fillTimekeepings2();
+    }
 
     /**
      * render function
@@ -193,6 +353,61 @@ class Employeeworks extends Component
     }
 
     /**
+     * 有給フラグの変更
+     * param bool $value 有給フラグ, int $day 日
+     * return void
+     */
+    public function leaveChange($value, $day)
+    {
+        $this->TimekeepingDays[$day]['leave'] = $value;
+        for($slotNo=1; $slotNo<=self::MAX_SLOTS; $slotNo++)
+        {
+            $this->TimekeepingSlots[$day][$slotNo]['class_bg_color'] = $value ? 'bg-gray-100' : '';
+            $this->TimekeepingSlots[$day][$slotNo]['readonly'] = $value ? 'readonly=\"readonly\"' : '';
+        }
+    }
+
+    /**
+     * 作業種別の変更
+     */
+    public function workTypeChange($value, $day, $slot) : void
+    {
+        // エラーメッセージをリセット
+        $this->resetErrorBag('TimekeepingSlots.' . $day . '.' . $slot . '.wt_cd');
+
+        // 正しい作業種別かどうかをチェック
+        $value = trim($value);
+        if(! array_key_exists($value, $this->WorkTypes))
+        {
+            $this->addError('TimekeepingSlots.' . $day . '.' . $slot . '.wt_cd', '作業');
+            return;
+        }
+
+        // スロットを取得する; 無い場合は空のスロットが作成される
+        $workSlot = $this->Workhours->getSlot($day, $slot);
+
+        // 作業種別を設定
+        $this->TimekeepingSlots[$day][$slot]['wt_cd'] = $value;
+        $this->TimekeepingSlots[$day][$slot]['wt_name'] = $this->WorkTypes[$value];
+        $workSlog->setWtCd($value);
+
+        // 作業開始・終了時刻が殻ならば、作業種別に設定されている時間を設定する
+        if(empty($this->TimekeepingSlots[$day][$slot]['wrk_log_start'])
+        && empty($this->TimekeepingSlots[$day][$slot]['wrk_log_end']))
+        {
+            $clientworktype = modelClientWorktypes::getSutable($this->client_id, $this->clientplace_id, $value);
+            if($clientworktype)
+            {
+                $this->TimekeepingSlots[$day][$slot]['wrk_log_start'] = $clientworktype->wt_work_start;
+                $this->TimekeepingSlots[$day][$slot]['wrk_log_end'] = $clientworktype->wt_work_end;
+                $workSlot->setLogStart($clientworktype->wt_work_start);
+                $workSlot->setLogEnd($clientworktype->wt_work_end);
+                $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $workSlot->getWorkHours();
+            }
+        }
+    }
+
+    /**
      * log start time change
      * */
     public function logStartTimeChange($value, $day, $slot)
@@ -247,63 +462,6 @@ class Employeeworks extends Component
             ->where('wrk_date', 'like', $this->workYear . '-' . $this->workMonth . '%')
             ->delete();
     }    
-
-    /**
-     * fill timekeeping array
-     */
-    protected function fillTimekeepings()
-    {
-        $dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
-
-        $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
-        $lastDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($firstDate))));
-
-        for($day = 1; $day <= date('t', strtotime($firstDate)); $day++)
-        {
-            $DateCur = new DateTime($this->workYear . '-' . $this->workMonth . '-' . $day);
-            $this->TimekeepingDays[$day]['DateTime'] = $DateCur;    // DateTime object
-            $this->TimekeepingDays[$day]['day'] = $day;             // day of the month
-            $this->TimekeepingDays[$day]['dispDayOfWeek'] = $dayOfWeek[$DateCur->format('w')];    // day of the week
-            $this->TimekeepingDays[$day]['leave'] = false;          // 有給 flag
-
-            $curDate = $this->workYear . '-' . $this->workMonth . '-' . substr('0' . $day, -2);
-            $this->TimekeepingDays[$day]['date'] = $curDate;
-
-            // スロットデータ配列をクリアする
-            for($slotNo=1; $slotNo<=4; $slotNo++)
-            {
-                $this->TimekeepingSlots[$day][$slotNo] = [
-                    'wrk_seq' => $slotNo,
-                    'wt_cd' => 'N',
-                    'wrk_log_start' => '',
-                    'wrk_log_end' => '',
-                    'wrk_work_start' => '',
-                    'wrk_work_end' => '',
-                    'wrk_work_hours' => '',
-                ];
-            }
-
-            // スローっとデータを読み出す
-            $targetDate = $this->workYear . '-' . $this->workMonth . '-' . substr('0' . $day, -2);
-            $Slots = modelEmployeeWorks::where('employee_id', $this->employee_id)
-                ->where('wrk_date', $targetDate)
-                ->orderBy('wrk_seq')
-                ->get();
-            foreach($Slots as $Slot)
-            {
-                $slotNo = $Slot->wrk_seq;
-                $this->TimekeepingSlots[$day][$slotNo] = [
-                    'wrk_seq' => $slotNo,
-                    'wt_cd' => $Slot->wt_cd,
-                    'wrk_log_start' => $Slot->wrk_log_start,
-                    'wrk_log_end' => $Slot->wrk_log_end,
-                    'wrk_work_start' => $Slot->wrk_work_start,
-                    'wrk_work_end' => $Slot->wrk_work_end,
-                    'wrk_work_hours' => $Slot->wrk_work_hours,
-                ];
-            }
-        }
-    }
 
     /**
      * save work time

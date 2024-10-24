@@ -15,14 +15,14 @@
         <table class="py-1 text-sm">
         <tr>
             <td>
-                <input type="text" class="form-control @error('workYear') is-invalid @enderror py-1 text-sm" id="workYear" wire:model="workYear" style="width: 4rem;">
+                <input type="text" class="form-control @error('workYear') is-invalid @enderror py-1 text-sm" id="workYear" wire:model="workYear" style="width: 4rem;" wire:change="updateWorkYear($event.target.value)">
                 @error('workYear') 
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
                 年
             </td>
             <td>
-                <input type="text" class="form-control @error('workMonth') is-invalid @enderror py-1 text-sm" id="workMonth" wire:model="workMonth" style="width: 3rem;">
+                <input type="text" class="form-control @error('workMonth') is-invalid @enderror py-1 text-sm" id="workMonth" wire:model="workMonth" style="width: 3rem;" wire:change="updateWorkMonth($event.target.value)">
                 @error('workMonth') 
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
@@ -81,9 +81,9 @@
                                     $cond = $this->timekeepingExists($Employee->id)
                                 @endphp
                                 @if($cond == 'exists')
-                                    <button wire:click="editTimekeeping({{ $Employee->id }})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Timekeeping') . __('Edit') }}</button>
-                                @elseif($cond == 'notexist')
-                                    <button wire:click="editTimekeeping({{ $Employee->id }})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">{{ __('Timekeeping') . __('Add') }}</button>
+                                    <button wire:click="editTimekeeping({{ $Employee->id }})" class="bg-green-500 hover:bg-green-700 text-white font-bold text-sm py-1 px-2 rounded">{{ __('Timekeeping') . __('Edit') }}</button>
+                                @elseif($cond == 'notexists')
+                                    <button wire:click="editTimekeeping({{ $Employee->id }})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold text-sm py-1 px-2 rounded">{{ __('Timekeeping') . __('Add') }}</button>
                                 @else
                                 @endif
                             </td>

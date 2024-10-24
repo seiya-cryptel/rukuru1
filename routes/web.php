@@ -40,11 +40,30 @@ function () {
             ->name('dashboard');
 
         /**
+         * Route for the 祝日マスタ
+         */
+        Route::view('holiday', 'holiday')
+            ->middleware(['auth', 'verified'])
+            ->name('holiday');
+        Route::view('holidaycreate', 'holidaycreate')
+            ->middleware(['auth', 'verified'])
+            ->name('holidaycreate');
+        Route::view('holidayupdate/{id}', 'holidayupdate')
+            ->middleware(['auth', 'verified'])
+            ->name('holidayupdate');
+
+        /**
          * Route for the 顧客マスタ
          */
         Route::view('client', 'client')
             ->middleware(['auth', 'verified'])
             ->name('client');
+        Route::view('clientcreate', 'clientcreate')
+            ->middleware(['auth', 'verified'])
+            ->name('clientcreate');
+        Route::view('clientupdate/{id}', 'clientupdate')
+            ->middleware(['auth', 'verified'])
+            ->name('clientupdate');
 
         /**
          * Route for the 顧客事業所マスタ
@@ -52,6 +71,12 @@ function () {
         Route::view('clientplace', 'clientplace')
             ->middleware(['auth', 'verified'])
             ->name('clientplace');
+        Route::view('clientplacecreate', 'clientplacecreate')
+            ->middleware(['auth', 'verified'])
+            ->name('clientplacecreate');
+        Route::view('clientplaceupdate/{id}', 'clientplaceupdate')
+            ->middleware(['auth', 'verified'])
+            ->name('clientplaceupdate');
 
         /**
          * Route for the 作業種別マスタ
@@ -59,9 +84,15 @@ function () {
         Route::view('clientworktype', 'clientworktype')
             ->middleware(['auth', 'verified'])
             ->name('clientworktype');
+        Route::view('clientworktypecreate', 'clientworktypecreate')
+            ->middleware(['auth', 'verified'])
+            ->name('clientworktypecreate');
+        Route::view('clientworktypeupdate/{id}', 'clientworktypeupdate')
+            ->middleware(['auth', 'verified'])
+            ->name('clientworktypeupdate');
 
         /**
-         * Route for the 請求単価マスタ
+         * Route for the 請求単価マスタ ※削除予定
          */
         Route::view('pricetable', 'pricetable')
             ->middleware(['auth', 'verified'])
@@ -73,6 +104,12 @@ function () {
         Route::view('masterallowdeduct', 'masterallowdeduct')
             ->middleware(['auth', 'verified'])
             ->name('masterallowdeduct');
+        Route::view('allowdeductcreate', 'allowdeductcreate')
+            ->middleware(['auth', 'verified'])
+            ->name('allowdeductcreate');
+        Route::view('allowdeductupdate/{id}', 'allowdeductupdate')
+            ->middleware(['auth', 'verified'])
+            ->name('allowdeductupdate');
 
         /**
          * Route for the 従業員マスタ
@@ -80,6 +117,25 @@ function () {
         Route::view('employee', 'employee')
             ->middleware(['auth', 'verified'])
             ->name('employee');
+        Route::view('employeecreate', 'employeecreate')
+            ->middleware(['auth', 'verified'])
+            ->name('employeecreate');
+        Route::view('employeeupdate/{id}', 'employeeupdate')
+            ->middleware(['auth', 'verified'])
+            ->name('employeeupdate');
+
+        /**
+         * Route for the 従業員時給マスタ
+         */
+        Route::view('hourlywage/{id}', 'hourlywage')
+            ->middleware(['auth', 'verified'])
+            ->name('hourlywage');
+        Route::view('hourlywagecreate/{id}', 'hourlywagecreate')
+            ->middleware(['auth', 'verified'])
+            ->name('hourlywagecreate');
+        Route::view('hourlywageupdate/{id}', 'hourlywageupdate')
+            ->middleware(['auth', 'verified'])
+            ->name('hourlywageupdate');
 
         /**
          * Route for the アカウント一覧
@@ -105,7 +161,8 @@ function () {
         /**
         * Routes for the 勤怠エントリー 個人別  
         */
-        Route::view('employeework/', 'employeework')
+        // Route::view('employeework/', 'employeework')
+        Route::view('employeework/{workYear}/{workMonth}/{clientId}/{clientPlaceId}/{employeeId}', 'employeework')
             ->middleware(['auth', 'verified'])
             ->name('employeework');
 

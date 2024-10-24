@@ -133,6 +133,9 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
+                            <x-dropdown-link :href="route('holiday')" wire:navigate>
+                                {{ __('Holiday') }}
+                            </x-dropdown-link>
                             <x-dropdown-link :href="route('client')" wire:navigate>
                                 {{ __('Client') }}
                             </x-dropdown-link>
@@ -142,9 +145,11 @@ new class extends Component
                             <x-dropdown-link :href="route('clientworktype')" wire:navigate>
                                 {{ __('Work Type') }}
                             </x-dropdown-link>
+                            {{--
                             <x-dropdown-link :href="route('pricetable')" wire:navigate>
                                 {{ __('Price Table') }}
                             </x-dropdown-link>
+                            --}}
                             <x-dropdown-link :href="route('masterallowdeduct')" wire:navigate>
                                 {{ __('Deduct Item') }}
                             </x-dropdown-link>

@@ -10,21 +10,13 @@
                 {{ session()->get('error') }}
             </div>
         @endif
-        @if($addMad)
-            @include('livewire.madcreate')
-        @endif            
-        @if($updateMad)
-            @include('livewire.madupdate')
-        @endif
     </div>
     <div class="col-md-8">
         <div class="text-right">            
-            @if(!$addMad)
-                <button wire:click="newMad()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">{{ __('Add') }}</button>
-            @endif
+            <button wire:click="newMad()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-sm">{{ __('Add') }}</button>
         </div>
         <div>
-            <table class="min-w-full table-auto">
+            <table class="min-w-full table-auto text-sm">
                 <thead class="bg-gray-200">
                     <tr>
                         <th>{{ __('Code') }}</th>

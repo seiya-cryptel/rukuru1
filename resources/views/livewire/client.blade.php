@@ -10,24 +10,16 @@
                 {{ session()->get('error') }}
             </div>
         @endif
-        @if($addClient)
-            @include('livewire.clientcreate')
-        @endif            
-        @if($updateClient)
-            @include('livewire.clientupdate')
-        @endif
     </div>
     <div class="col-md-8">
         <div class="text-right">            
-            @if(!$addClient)
-                <button wire:click="newClient()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">{{ __('Add') }}</button>
-            @endif
+            <button wire:click="newClient()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold text-sm py-1 px-2 rounded">{{ __('Add') }}</button>
         </div>
         <div>
-            <table class="min-w-full table-auto">
+            <table class="min-w-full table-auto text-sm">
                 <thead class="bg-gray-200">
                     <tr>
-                        <th>{{ __('Code') }}</th>
+                        <th style="width: 4rem;">{{ __('Code') }}</th>
                         <th>{{ __('Client') }}{{ __('Name') }}</th>
                         <th>{{ __('Client') }}{{ __('Kana') }}</th>
                         <th>{{ __('Client') }}{{ __('Alpha') }}</th>

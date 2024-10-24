@@ -72,6 +72,47 @@ class employeeworks extends Model
     }
 
     /**
+     * 顧客、事業所、従業員の指定年月データを削除する
+     * @param int $client_id
+     * @param int $clientplace_id
+     * @param int $employee_id
+     * @param int $targetYear
+     * @param int $targetMonth
+     */
+    public static function deleteWorkData(int $client_id, int $clientplace_id, int $employee_id, int $targetYear, int $targetMonth)
+    {
+        employeeworks::where('client_id', $client_id)
+            ->where('clientplace_id', $clientplace_id)
+            ->where('employee_id', $employee_id)
+            ->whereYear('wrk_date', $targetYear)
+            ->whereMonth('wrk_date', $targetMonth)
+            ->delete();
+    }
+
+    /**
+     * 顧客、事業所、従業員の指定年月以前の最後の勤怠データを取得
+     * @param int $client_id
+     * @param int $clientplace_id
+     * @param int $employee_id
+     * @param int $targetYear
+     * @param int $targetMonth
+     */
+    public static function getPreviousWorkData(int $client_id, int $clientplace_id, int $employee_id, int $targetYear, int $targetMonth)    
+    {
+        $targetDate = $targetYear . '-' . $targetMonth . '-01';
+
+        $workData = employeeworks::where('client_id', $client_id)
+            ->where('clientplace_id', $clientplace_id)
+            ->where('employee_id', $employee_id)
+            ->whereYear('wrk_date', '<', $targetDate)
+            ->orderBy('wrk_date', 'desc')
+            ->orderBy('wrk_seq', 'desc')
+            ->first();
+
+        return $workData;
+    }
+
+    /**
      * Accesor/Mutator for wrk_log_start
      *
      * @param  string  $value
