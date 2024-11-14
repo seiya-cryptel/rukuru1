@@ -2,6 +2,9 @@
 
 namespace App\Traits;
 
+use DateTime;
+use DateInterval;
+
 use Illuminate\Validation\ValidationException;
 
 use App\Models\clients as modelClients;
@@ -14,6 +17,28 @@ use App\Models\holiday as modelHoliday;
  */
 trait rukuruUtilites
 {
+    /**
+     * 引数が empty なら null を、そうでなければそのまま返す
+     */
+    public function rukuruUtilEmptyToNull($value)
+    {
+        return empty($value) ? null : $value;
+    }
+
+    /**
+     * DateInterval 型同士の引き算
+     * @param DateInterval $a
+     * @param DateInterval $b
+     * @return DateInterval
+     */
+    public function rukuruUtilDateIntervalSub($a, $b) : DateInterval
+    {
+        $date = new DateTime('00:00');
+        $date->add($a);
+        $date->sub($b);
+        return (new DateTime('00:00'))->diff($date);
+    }
+
     /**
      * 入力された時刻を正規化する
      * @param string $time
@@ -79,7 +104,29 @@ trait rukuruUtilites
     }
 
     /**
-     * 時刻をまるめる
+     * 文字列の時刻をDateTimeオブジェクトに変換する
+     * @param DateTime $date 日付
+     * @param string $time 時刻
+     * @return DateTime
+     * 5 時より前の場合は翌日として扱う
+     * 時刻は正規化されているものとする
+     */
+    public function rukuruUtilTimeToDateTime($date, $time) : DateTime
+    {
+        // 時刻を DateTime オブジェクトに変換する
+        $datetime = new DateTime($date->format('Y-m-d') . ' ' . $time);
+
+        // 5 時より前の場合は翌日として扱う
+        if($datetime->format('H') < 5)
+        {
+            $datetime->add(new DateInterval('P1D'));
+        }
+
+        return $datetime;
+    }
+
+    /**
+     * 開始時刻をまるめる
      * @param DateTime $time
      * @param integer $minutes
      * @return DateTime
@@ -95,7 +142,7 @@ trait rukuruUtilites
     }
 
     /**
-     * 時刻をまるめる
+     * 終了時刻をまるめる
      * @param DateTime $time
      * @param integer $minutes
      * @return DateTime
@@ -108,6 +155,315 @@ trait rukuruUtilites
         }
         $min = $time->format('i');
         $min = floor($min / $minutes) * $minutes;
+    }
+
+    /**
+     * 休憩時間を考慮した就業時間を計算する
+     * @param DateTime $currentDate 日付
+     * @param DateTime $start 開始時刻
+     * @param DateTime $end 終了時刻
+     * @param modelClientworktypes $ClientWorkType 作業種別レコード
+     * @return DateInterval
+     * @throws Exception
+     * 終了時刻は日替を考慮しているものとする
+     */
+    // 2.1. 日勤 a) 休憩時刻が決められている場合
+    public function rukuruUtilWorkHoursDayBreakTime($currentDate, $start, $end, $ClientWorkType) : DateInterval
+    {
+        // 休憩時間を 考慮しない就業時間
+        $work_hours = $start->diff($end);
+
+        // 作業種別の開始終業時刻をDateTimeに変換する
+        $wt_work_start = $this->rukuruUtilTimeToDateTime($currentDate, $ClientWorkType->wt_work_start);
+        $wt_work_end = $this->rukuruUtilTimeToDateTime($currentDate, $ClientWorkType->wt_work_end);
+        if($wt_work_end < $wt_work_start)
+        {
+            $wt_work_end->add(new DateInterval('P1D'));
+        }
+
+        // 開始時刻が終業時刻より後の場合はエラー
+        if($start > $wt_work_end)
+        {
+            throw new \Exception('開始時刻が終業時刻より後です');
+        }
+
+        // 終了時刻が始業時刻より前の場合はエラー
+        if($end < $wt_work_start)
+        {
+            throw new \Exception('終了時刻が始業時刻より前です');
+        }
+
+        // 昼休憩が設定されている場合
+        if(!empty($ClientWorkType->wt_lunch_break_start)
+        && !empty($ClientWorkType->wt_lunch_break_end)
+        )
+        {
+            $wt_lunch_break_start = $this->rukuruUtilTimeToDateTime($currentDate, $ClientWorkType->wt_lunch_break_start);
+            $wt_lunch_break_end = $this->rukuruUtilTimeToDateTime($currentDate, $ClientWorkType->wt_lunch_break_end);
+            if($wt_lunch_break_end < $wt_lunch_break_start)
+            {
+                $wt_lunch_break_end->add(new DateInterval('P1D'));
+            }
+    
+            // (1) 開始時刻≦昼休憩開始かつ昼休憩終了≦終了時刻　就業時間から昼休憩時間を引く
+            // 昼休憩をまたぐ場合
+            if($start <= $wt_lunch_break_start
+            && $wt_lunch_break_end <= $end)
+            {
+                // 昼休み時間を差し引く
+                $work_hours = $this->rukuruUtilDateIntervalSub($work_hours, $wt_lunch_break_start->diff($wt_lunch_break_end));
+            }
+
+            // (2) 開始時刻≧昼休憩開始かつ昼休憩終了≦終了時刻　昼休憩終了を開始時刻にする
+            // 昼休憩途中から勤務する場合
+            elseif($start >= $wt_lunch_break_start
+            && $wt_lunch_break_end <= $end)
+            {
+                $start = $wt_lunch_break_end;
+                $work_hours = $start->diff($end);
+            }
+            
+            // (3) 開始時刻≦昼休憩開始かつ昼休憩終了≧終了時刻　昼休憩開始を終了時刻にする
+            // 昼休憩途中まで勤務する場合
+            elseif($start <= $wt_lunch_break_start
+            && $wt_lunch_break_end >= $end)
+            {
+                $end = $wt_lunch_break_start;
+                $work_hours = $start->diff($end);
+            }
+            
+            // (4)終了時刻≦昼休憩開始または昼休憩終了≦開始時刻　昼休憩は無視する
+            // 昼休憩にかからない場合
+            elseif($start >= $wt_lunch_break_end
+            || $wt_lunch_break_start >= $end)
+            {
+                // 何もしない
+            }
+        }
+
+        // 夕休憩が設定されている場合
+        if(!empty($ClientWorkType->wt_evening_break_start)
+        && !empty($ClientWorkType->wt_evening_break_end)
+        )
+        {
+            $wt_evening_break_start = $this->rukuruUtilTimeToDateTime($currentDate, $ClientWorkType->wt_evening_break_start);
+            $wt_evening_break_end = $this->rukuruUtilTimeToDateTime($currentDate, $ClientWorkType->wt_evening_break_end);
+            if($wt_evening_break_end < $wt_evening_break_start)
+            {
+                $wt_evening_break_end->add(new DateInterval('P1D'));
+            }
+
+            // (11) 開始時刻≦深夜休憩開始かつ夕休憩終了≧終了時刻　夕休憩開始を終了時刻にする
+            // 夕休憩中に終業した場合
+            if($start <= $wt_evening_break_start
+            && $wt_evening_break_end >= $end)
+            {
+                $end = $wt_evening_break_start;
+                $work_hours = $start->diff($end);
+            }
+            // (12) 開始時刻≦夕休憩開始かつ夕休憩終了≦終了時刻　就業時間から夕休憩時間を引く
+            // 夕休憩後に終業した場合
+            if($start <= $wt_evening_break_start
+            && $wt_evening_break_end <= $end)
+            {
+                // 夕休憩時間を差し引く
+                $work_hours->sub($wt_evening_break_start->diff($wt_evening_break_end));
+                $work_hours = $this->rukuruUtilDateIntervalSub($work_hours, $wt_evening_break_start->diff($wt_evening_break_end));
+            }
+        }
+
+        // 就業時間がマイナスになった場合はゼロとする
+        return $work_hours->invert ? new DateInterval('PT0S') : $work_hours;
+    }
+    // 2.1. 日勤 b) 休憩時間が決められている場合
+    public function rukuruUtilWorkHoursDayBreakHours($currentDate, $start, $end, $ClientWorkType) : DateInterval
+    {
+        // 休憩時間を 考慮しない就業時間
+        $work_hours = $start->diff($end);
+
+        // (1) 終了時刻が終業時刻以前なら、就業時間から休憩時間を引く
+        if($end <= $ClientWorkType->wt_work_end)
+        {
+            $work_hours->sub($ClientWorkType->wt_lunch_break);
+        }
+
+        // (2) 終了時刻が終業時刻以降なら、就業時間から休憩時間を引く
+        if($end >= $ClientWorkType->wt_work_end)
+        {
+            $work_hours->sub($ClientWorkType->wt_evening_break);
+        }
+
+        // 就業時間がマイナスになった場合はゼロとする
+        return $work_hours->invert ? new DateInterval('PT0S') : $work_hours;
+    }
+    // 2.1. 日勤
+    public function rukuruUtilWorkHoursDay($currentDate, $start, $end, $ClientWorkType) : DateInterval
+    {
+        // b) 休憩時刻が決められていない場合
+        if(empty($ClientWorkType->wt_lunch_break_start)
+        && empty($ClientWorkType->wt_lunch_break_end)
+        && empty($ClientWorkType->wt_evening_break_start)
+        && empty($ClientWorkType->wt_evening_break_end)
+        )
+        {
+            return $this->rukuruUtilWorkHoursDayBreakHours($currentDate, $start, $end, $ClientWorkType);
+        }
+
+        // a) 休憩時刻が決められている場合
+        return $this->rukuruUtilWorkHoursDayBreakTime($currentDate, $start, $end, $ClientWorkType);
+    }
+    //
+    // 2.2. 夜勤 a) 休憩時刻が決められている場合
+    public function rukuruUtilWorkHoursNightBreakTime($currentDate, $start, $end, $ClientWorkType) : DateInterval
+    {
+        // 休憩時間を考慮しない就業時間
+        $work_hours = $start->diff($end);
+
+        // 開始時刻が終業時刻より後の場合はエラー
+        if($start > $ClientWorkType->wt_work_end)
+        {
+            throw new \Exception('開始時刻が終業時刻より後です');
+        }
+
+        // 終了時刻が始業時刻より後の場合はエラー
+        if($end < $ClientWorkType->wt_work_start)
+        {
+            throw new \Exception('終了時刻が始業時刻より前です');
+        }
+
+        // 夜休憩が設定されている場合
+        if(!empty($ClientWorkType->wt_night_break_start)
+        && !empty($ClientWorkType->wt_night_break_end)
+        )
+        {
+            // (1) 開始時刻≦夜休憩開始かつ夜休憩終了≦終了時刻　就業時間から夜休憩時間を引く
+            // 夜休憩をまたぐ場合
+            if($start <= $ClientWorkType->wt_night_break_start
+            && $ClientWorkType->wt_night_break_end <= $end)
+            {
+                // 夜休み時間を差し引く
+                $work_hours->sub($ClientWorkType->wt_night_break_start->diff($ClientWorkType->wt_night_break_end));
+            }
+
+            // (2) 開始時刻≧夜休憩開始かつ夜休憩終了≦終了時刻　夜休憩終了を開始時刻にする
+            // 夜休憩途中から勤務する場合
+            elseif($start >= $ClientWorkType->wt_night_break_start
+            && $ClientWorkType->wt_night_break_end <= $end)
+            {
+                $start = $ClientWorkType->wt_night_break_end;
+                $work_hours = $start->diff($end);
+            }
+            
+            // (3) 開始時刻≦夜休憩開始かつ夜休憩終了≧終了時刻　夜休憩開始を終了時刻にする
+            // 夜休憩途中まで勤務する場合
+            elseif($start <= $ClientWorkType->wt_night_break_start
+            && $ClientWorkType->wt_night_break_end >= $end)
+            {
+                $end = $ClientWorkType->wt_night_break_start;
+                $work_hours = $start->diff($end);
+            }
+            
+            // (4)終了時刻≦夜休憩開始または夜休憩終了≦開始時刻　夜休憩は無視する
+            // 夜休憩にかからない場合
+            elseif($start >= $ClientWorkType->wt_night_break_end
+            || $ClientWorkType->wt_night_break_start >= $end)
+            {
+                // 何もしない
+            }
+        }
+
+        // 深夜休憩が設定されている場合
+        if(!empty($ClientWorkType->wt_midnight_break_start)
+        && !empty($ClientWorkType->wt_midnight_break_end)
+        )
+        {
+            // (1) 開始時刻≦深夜休憩開始かつ深夜休憩終了≦終了時刻　就業時間から深夜休憩時間を引く
+            // 深夜休憩をまたぐ場合
+            if($start <= $ClientWorkType->wt_midnight_break_start
+            && $ClientWorkType->wt_midnight_break_end <= $end)
+            {
+                // 深夜休み時間を差し引く
+                $work_hours->sub($ClientWorkType->wt_midnight_break_start->diff($ClientWorkType->wt_midnight_break_end));
+            }
+
+            // (2) 開始時刻≧深夜休憩開始かつ深夜休憩終了≦終了時刻　深夜休憩終了を開始時刻にする
+            // 深夜休憩途中から勤務する場合
+            elseif($start >= $ClientWorkType->wt_midnight_break_start
+            && $ClientWorkType->wt_midnight_break_end <= $end)
+            {
+                $start = $ClientWorkType->wt_midnight_break_end;
+                $work_hours = $start->diff($end);
+            }
+            
+            // (3) 開始時刻≦深夜休憩開始かつ深夜休憩終了≧終了時刻　深夜休憩開始を終了時刻にする
+            // 深夜休憩途中まで勤務する場合
+            elseif($start <= $ClientWorkType->wt_midnight_break_start
+            && $ClientWorkType->wt_midnight_break_end >= $end)
+            {
+                $end = $ClientWorkType->wt_midnight_break_start;
+                $work_hours = $start->diff($end);
+            }
+            
+            // (4) 終了時刻≦深夜休憩開始または深夜休憩終了≦開始時刻　深夜休憩は無視する
+            // 深夜休憩にかからない場合
+            elseif($start >= $ClientWorkType->wt_midnight_break_end
+            || $ClientWorkType->wt_midnight_break_start >= $end)
+            {
+                // 何もしない
+            }
+        }
+
+        // 就業時間がマイナスになった場合はゼロとする
+        return $work_hours->invert ? new DateInterval('PT0S') : $work_hours;
+    }
+    // 2.2. 夜勤 b) 休憩時間が決められている場合
+    public function rukuruUtilWorkHoursNightBreakHours($currentDate, $start, $end, $ClientWorkType) : DateInterval
+    {
+        // 休憩時間を 考慮しない就業時間
+        $work_hours = $start->diff($end);
+
+        // 開始時間(H)
+        $start_hour = $start->format('H');
+        // 終了時間(H)
+        $end_hour = $end->format('H');
+
+        // (1) 夜休憩時間があり、開始時刻が05〜22時なら、就業時間から夜休憩時間を引く
+        if(!empty($ClientWorkType->wt_night_break)
+        && ($start_hour >= 5 && $start_hour < 22))
+        {
+            $work_hours->sub($ClientWorkType->wt_night_break);
+        }
+
+        // (2) 深夜休憩時間があり、終了時刻が22〜05時以降、就業時間から深夜休憩時間を引く
+        if(!empty($ClientWorkType->wt_midnight_break)
+        && ($end_hour >= 22 || $end_hour < 5))
+        {
+            $work_hours->sub($ClientWorkType->wt_midnight_break);
+        }
+    }
+    // 2.2. 夜勤
+    public function rukuruUtilWorkHoursNight($currentDate, $start, $end, $ClientWorkType) : DateInterval
+    {
+        // b) 休憩時刻が決められていない場合
+        if(empty($ClientWorkType->wt_night_break_start)
+        && empty($ClientWorkType->wt_night_break_end)
+        && empty($ClientWorkType->wt_midnight_break_start)
+        && empty($ClientWorkType->wt_midnight_break_end)
+        )
+        {
+            return $this->rukuruUtilWorkHoursNightBreakHours($currentDate, $start, $end, $ClientWorkType);
+        }
+
+        // a) 休憩時刻が決められている場合
+        return $this->rukuruUtilWorkHoursNightBreakTime($currentDate, $start, $end, $ClientWorkType);
+    }
+    // 2. 休憩を除く就業時間を計算する
+    public function rukuruUtilWorkHours($currentDate, $start, $end, $ClientWorkType) : DateInterval
+    {
+        // 日勤と夜勤の別
+        return ($ClientWorkType->wt_day_night == 2)
+         ? $this->rukuruUtilWorkHoursNight($currentDate, $start, $end, $ClientWorkType)
+          : $this->rukuruUtilWorkHoursDay($currentDate, $start, $end, $ClientWorkType);
     }
 
     /**

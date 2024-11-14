@@ -4,9 +4,11 @@ namespace App\Livewire;
 
 use DateTime;
 use App\Traits\rukuruUtilites;
+use App\Services\TimeSlotType1;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorktypes;
@@ -37,7 +39,7 @@ class Employeeworks extends Component
     /**
      * client record
      * */
-    public $Client;
+    public modelClients $Client;
 
     /**
      * client place record
@@ -52,7 +54,8 @@ class Employeeworks extends Component
     /**
      * possible work types
      */
-    public $PossibleWorkTypes;
+    //public $PossibleWorkTypes;
+    public $PossibleWorkTypeRecords;
     public $WorkTypes = [];
 
     /**
@@ -63,8 +66,9 @@ class Employeeworks extends Component
 
     /**
      * 勤怠データ クラス変数
+     * 2024/10/26 not primitive type variable makes trouble in Livewire component
      */
-    protected $Workhours;
+    // public $Workhours;
 
     /**
      * validation rules
@@ -147,13 +151,13 @@ class Employeeworks extends Component
         switch($this->Client->cl_cd)
         {
             case '001':
-                $this->Workhours = new WorkhoursType1($this->client_id, $this->clientplace_id, $this->workYear, $this->workMonth, $this->employee_id);
+                $this->Workhours2 = new WorkhoursType1($this->client_id, $this->clientplace_id, $this->workYear, $this->workMonth, $this->employee_id);
                 break;
             default:
-                $this->Workhours = new WorkhoursType1($this->client_id, $this->clientplace_id, $this->workYear, $this->workMonth, $this->employee_id);
+                $this->Workhours2 = new WorkhoursType1($this->client_id, $this->clientplace_id, $this->workYear, $this->workMonth, $this->employee_id);
                 break;
         }
-        $this->Workhours->load();
+        $this->Workhours2->load();
 
         $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
         $lastDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($firstDate))));
@@ -187,7 +191,7 @@ class Employeeworks extends Component
             }
 
             // スロットのデータを読み出す
-            $WorkDay = $this->Workhours->getWorkDay($day);
+            $WorkDay = $this->Workhours2->getWorkDay($day);
             $WorkSlots = $WorkDay->getWorkSlots();
             $slotNo = 0;
             foreach($WorkSlots as $Slot)
@@ -223,12 +227,12 @@ class Employeeworks extends Component
         $this->Client = modelClients::find($this->client_id);
         $this->ClientPlace = modelClientPlaces::find($this->clientplace_id);
         $this->Employee = modelEmployees::find($this->employee_id);
-        $this->PossibleWorkTypes = modelClientWorktypes::possibleWorkTypes($this->client_id, $this->clientplace_id);
+        $this->PossibleWorkTypeRecords = modelClientWorktypes::possibleWorkTypeRecords($this->client_id, $this->clientplace_id);
         // 作業種別の選択肢を作成する
         $this->WorkTypes[''] = '';
-        foreach($this->PossibleWorkTypes as $wt_cd => $wt_name)
+        foreach($this->PossibleWorkTypeRecords as $wt_cd => $Record)
         {
-            $this->WorkTypes[$wt_cd] = $wt_name;
+            $this->WorkTypes[$wt_cd] = $Record->wt_name;
         }
 
         // $this->fillTimekeepings();
@@ -313,14 +317,40 @@ class Employeeworks extends Component
     }
 
     /**
-     * calculate work hours
+     * 作業コード、開始打刻、終了打刻が更新された後、作業時間を計算する
+     * @param int $day 日, int $slot スロット番号
+     * 作業開始、作業終了時刻を更新する
+     * 作業時間を更新する
+     * 日替フラグを更新する
+     * 時刻形式チェックは終わっているものとする
      */
-    protected function calcWorkHours($timeStart, $timeEnd)
+    protected function calcWorkHours($day, $slot)
     {
-        $timeStart = new DateTime($timeStart);
-        $timeEnd = new DateTime($timeEnd);
-
-        $diff = $timeStart->diff($timeEnd);
+        switch($this->Client->cl_cd)
+        {
+            case '001':
+                $Slot = new TimeSlotType1();
+                break;
+            default:
+                $this->calcWorkHoursType1($day, $slot);
+                break;
+        }
+        $dtLogStart = new DateTime($this->TimekeepingSlots[$day][$slot]['wrk_log_start']);
+        $dtLogEnd = new DateTime($this->TimekeepingSlots[$day][$slot]['wrk_log_end']);
+        $dtWorkStart = rukuruUtilRoundUp($dtLogStart);
+        $dtWorkEnd = rukuruUtilRoundDown($dtLogEnd);
+        if($dtLogStart > $dtLogEnd)
+        {
+            $dtLogEnd->add(new DateInterval('P1D'));
+            $this->TimekeepingSlots[$day][$slot]['day_change'] = true;
+        }
+        else{
+            $this->TimekeepingSlots[$day][$slot]['day_change'] = false;
+        }
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $dtWorkStart;
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $dtWorkEnd;
+        $diff = $dtWorkStart->diff($dtWorkEnd);
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $diff;
         $hours = $diff->h;
         $minutes = $diff->i;
 
@@ -369,6 +399,7 @@ class Employeeworks extends Component
 
     /**
      * 作業種別の変更
+     * @param string $value 作業種別, int $day 日, int $slot スロット番号 >= 1
      */
     public function workTypeChange($value, $day, $slot) : void
     {
@@ -379,32 +410,53 @@ class Employeeworks extends Component
         $value = trim($value);
         if(! array_key_exists($value, $this->WorkTypes))
         {
-            $this->addError('TimekeepingSlots.' . $day . '.' . $slot . '.wt_cd', '作業');
+            $this->addError('TimekeepingSlots.' . $day . '.' . $slot . '.wt_cd', '作業CD');
             return;
         }
 
-        // スロットを取得する; 無い場合は空のスロットが作成される
-        $workSlot = $this->Workhours->getSlot($day, $slot);
+        if($value == '')
+        {
+            $this->TimekeepingSlots[$day][$slot]['wt_cd'] = '';
+            $this->TimekeepingSlots[$day][$slot]['wt_name'] = '';
+            /*
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_start'] = '';
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_end'] = '';
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = '';
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = '';
+            */
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = '';
+            return;
+        }
 
         // 作業種別を設定
         $this->TimekeepingSlots[$day][$slot]['wt_cd'] = $value;
         $this->TimekeepingSlots[$day][$slot]['wt_name'] = $this->WorkTypes[$value];
-        $workSlog->setWtCd($value);
 
-        // 作業開始・終了時刻が殻ならば、作業種別に設定されている時間を設定する
+        // 作業種別レコードを取得
+        $clientworktype = $this->PossibleWorkTypeRecords[$value];
+
+        // 作業開始・終了時刻が空ならば、作業種別に設定されている時間を設定する
         if(empty($this->TimekeepingSlots[$day][$slot]['wrk_log_start'])
         && empty($this->TimekeepingSlots[$day][$slot]['wrk_log_end']))
         {
-            $clientworktype = modelClientWorktypes::getSutable($this->client_id, $this->clientplace_id, $value);
             if($clientworktype)
             {
                 $this->TimekeepingSlots[$day][$slot]['wrk_log_start'] = $clientworktype->wt_work_start;
                 $this->TimekeepingSlots[$day][$slot]['wrk_log_end'] = $clientworktype->wt_work_end;
-                $workSlot->setLogStart($clientworktype->wt_work_start);
-                $workSlot->setLogEnd($clientworktype->wt_work_end);
-                $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $workSlot->getWorkHours();
             }
         }
+        // 時間計算用のクラスインスタンスを作成
+        $Slot = new TimeSlotType1(
+            $this->TimekeepingDays[$day]['DateTime'],
+            $slot, 
+            $this->Client, 
+            $clientworktype, 
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_end']
+        );
+
+        // 作業時間を計算
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
     }
 
     /**

@@ -137,3 +137,12 @@
         @enderror
     </td>
 </tr>
+<tr class="border-b">
+    <th><label for="empl_notes">{{ __('Notes') }}</label></th>
+    <td>
+        <input type="text" class="w-full form-control @error('empl_notes') is-invalid @enderror text-sm py-1" id="empl_notes" wire:model="empl_notes">
+        @error('empl_notes') 
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </td>
+</tr>

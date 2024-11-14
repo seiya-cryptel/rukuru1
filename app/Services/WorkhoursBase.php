@@ -156,12 +156,13 @@ abstract class WorkhoursBase
     /**
      * 指定日、指定スロットの勤怠データを取得
      * @param int $day
-     * @param int $slot
+     * @param int $slotNo >= 1
      * @return WorkSlotBase
      * @comment スロットオブジェクトがなかったら作成する
      */
-    public function getWorkSlot(int $day, int $slot) : WorkSlotBase
+    public function getWorkSlot(int $day, int $slotNo) : WorkSlotBase
     {
+        $slot = $slotNo - 1;
         $workDay = $this->getWorkDay($day);
         if(! $workDay)
         {

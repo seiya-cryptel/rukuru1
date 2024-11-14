@@ -24,10 +24,20 @@ class Clientworktypecreate extends ClientworktypeBase
         $this->wt_day_night = '1';
         $this->wt_work_start = '';
         $this->wt_work_end = '';
+
+        $this->wt_lunch_break_start = '';
+        $this->wt_lunch_break_end = '';
         $this->wt_lunch_break = '';
+        $this->wt_evening_break_start = '';
+        $this->wt_evening_break_end = '';
         $this->wt_evening_break = '';
+        $this->wt_night_break_start = '';
+        $this->wt_night_break_end = '';
         $this->wt_night_break = '';
+        $this->wt_midnight_break_start = '';
+        $this->wt_midnight_break_end = '';
         $this->wt_midnight_break = '';
+
         $this->wt_pay_std = '';
         $this->wt_pay_ovr = '';
         $this->wt_pay_ovr_midnight = '';
@@ -72,12 +82,22 @@ class Clientworktypecreate extends ClientworktypeBase
                 'wt_kana' => $this->wt_kana,
                 'wt_alpha' => $this->wt_alpha,
                 'wt_day_night' => $this->wt_day_night,
-                'wt_work_start' => $this->wt_work_start,
-                'wt_work_end' => $this->wt_work_end,
-                'wt_lunch_break' => $this->wt_lunch_break,
-                'wt_evening_break' => $this->wt_evening_break,
-                'wt_night_break' => $this->wt_night_break,
-                'wt_midnight_break' => $this->wt_midnight_break,
+                'wt_work_start' => $this->rukuruUtilEmptyToNull($this->wt_work_start),
+                'wt_work_end' => $this->rukuruUtilEmptyToNull($this->wt_work_end),
+
+                'wt_lunch_break_start' => $this->rukuruUtilEmptyToNull($this->wt_lunch_break_start),
+                'wt_lunch_break_end' => $this->rukuruUtilEmptyToNull($this->wt_lunch_break_end),
+                'wt_lunch_break' => $this->rukuruUtilEmptyToNull($this->wt_lunch_break),
+                'wt_evening_break_start' => $this->rukuruUtilEmptyToNull($this->wt_evening_break_start),
+                'wt_evening_break_end' => $this->rukuruUtilEmptyToNull($this->wt_evening_break_end),
+                'wt_evening_break' => $this->rukuruUtilEmptyToNull($this->wt_evening_break),
+                'wt_night_break_start' => $this->rukuruUtilEmptyToNull($this->wt_night_break_start),
+                'wt_night_break_end' => $this->rukuruUtilEmptyToNull($this->wt_night_break_end),
+                'wt_night_break' => $this->rukuruUtilEmptyToNull($this->wt_night_break),
+                'wt_midnight_break_start' => $this->rukuruUtilEmptyToNull($this->wt_midnight_break_start),
+                'wt_midnight_break_end' => $this->rukuruUtilEmptyToNull($this->wt_midnight_break_end),
+                'wt_midnight_break' => $this->rukuruUtilEmptyToNull($this->wt_midnight_break),
+
                 'wt_pay_std' => $this->rukuruUtilMoneyValue($this->wt_pay_std),
                 'wt_pay_ovr' => $this->rukuruUtilMoneyValue($this->wt_pay_ovr),
                 'wt_pay_ovr_midnight' => $this->rukuruUtilMoneyValue($this->wt_pay_ovr_midnight),

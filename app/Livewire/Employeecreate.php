@@ -5,8 +5,12 @@ use App\Models\employees as modelEmployees;
 
 use Livewire\Component;
 
+use App\Traits\rukuruUtilites;
+
 class Employeecreate extends Component
 {
+    use rukuruUtilites;
+
     /**
      * master allow deducts fields
      */
@@ -88,8 +92,8 @@ class Employeecreate extends Component
                 'empl_sex' => $this->empl_sex,
                 'empl_email' => $this->empl_email,
                 'empl_mobile' => $this->empl_mobile,
-                'empl_hire_date' => $this->empl_hire_date,
-                'empl_resign_date' => $this->empl_resign_date,
+                'empl_hire_date' => $this->rukuruUtilEmptyToNull($this->empl_hire_date),
+                'empl_resign_date' => $this->rukuruUtilEmptyToNull($this->empl_resign_date),
                 'empl_notes' => $this->empl_notes,
             ]);
             return redirect()->route('employee');

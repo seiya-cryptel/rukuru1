@@ -25,7 +25,10 @@ abstract class ClientworktypeBase extends component
         $wt_cd, 
         $wt_name, $wt_kana, $wt_alpha, 
         $wt_day_night, $wt_work_start, $wt_work_end,
-        $wt_lunch_break, $wt_evening_break, $wt_night_break, $wt_midnight_break,
+        $wt_lunch_break_start, $wt_lunch_break_end, $wt_lunch_break, 
+        $wt_evening_break_start, $wt_evening_break_end, $wt_evening_break, 
+        $wt_night_break_start, $wt_night_break_end, $wt_night_break, 
+        $wt_midnight_break_start, $wt_midnight_break_end, $wt_midnight_break, 
         $wt_pay_std, $wt_pay_ovr, $wt_pay_ovr_midnight, $wt_pay_holiday, $wt_pay_holiday_midnight,
         $wt_bill_std, $wt_bill_ovr, $wt_bill_ovr_midnight, $wt_bill_holiday, $wt_bill_holiday_midnight,
         $wt_notes;

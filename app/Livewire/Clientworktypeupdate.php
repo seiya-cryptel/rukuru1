@@ -40,10 +40,20 @@ class Clientworktypeupdate extends ClientworktypeBase
         $this->wt_day_night = $clientWorktype->wt_day_night;
         $this->wt_work_start = $clientWorktype->wt_work_start;
         $this->wt_work_end = $clientWorktype->wt_work_end;
+
+        $this->wt_lunch_break_start = $clientWorktype->wt_lunch_break_start;
+        $this->wt_lunch_break_end = $clientWorktype->wt_lunch_break_end;
         $this->wt_lunch_break = $clientWorktype->wt_lunch_break;
+        $this->wt_evening_break_start = $clientWorktype->wt_evening_break_start;
+        $this->wt_evening_break_end = $clientWorktype->wt_evening_break_end;
         $this->wt_evening_break = $clientWorktype->wt_evening_break;
+        $this->wt_night_break_start = $clientWorktype->wt_night_break_start;
+        $this->wt_night_break_end = $clientWorktype->wt_night_break_end;
         $this->wt_night_break = $clientWorktype->wt_night_break;
+        $this->wt_midnight_break_start = $clientWorktype->wt_midnight_break_start;
+        $this->wt_midnight_break_end = $clientWorktype->wt_midnight_break_end;
         $this->wt_midnight_break = $clientWorktype->wt_midnight_break;
+
         $this->wt_pay_std = $clientWorktype->wt_pay_std;
         $this->wt_pay_ovr = $clientWorktype->wt_pay_ovr;
         $this->wt_pay_ovr_midnight = $clientWorktype->wt_pay_ovr_midnight;
@@ -79,12 +89,22 @@ class Clientworktypeupdate extends ClientworktypeBase
                 'wt_kana' => $this->wt_kana,
                 'wt_alpha' => $this->wt_alpha,
                 'wt_day_night' => $this->wt_day_night,
-                'wt_work_start' => $this->wt_work_start,
-                'wt_work_end' => $this->wt_work_end,
-                'wt_lunch_break' => $this->wt_lunch_break,
-                'wt_evening_break' => $this->wt_evening_break,
-                'wt_night_break' => $this->wt_night_break,
-                'wt_midnight_break' => $this->wt_midnight_break,
+                'wt_work_start' => $this->rukuruUtilEmptyToNull($this->wt_work_start),
+                'wt_work_end' => $this->rukuruUtilEmptyToNull($this->wt_work_end),
+
+                'wt_lunch_break_start' => $this->rukuruUtilEmptyToNull($this->wt_lunch_break_start),
+                'wt_lunch_break_end' => $this->rukuruUtilEmptyToNull($this->wt_lunch_break_end),
+                'wt_lunch_break' => $this->rukuruUtilEmptyToNull($this->wt_lunch_break),
+                'wt_evening_break_start' => $this->rukuruUtilEmptyToNull($this->wt_evening_break_start),
+                'wt_evening_break_end' => $this->rukuruUtilEmptyToNull($this->wt_evening_break_end),
+                'wt_evening_break' => $this->rukuruUtilEmptyToNull($this->wt_evening_break),
+                'wt_night_break_start' => $this->rukuruUtilEmptyToNull($this->wt_night_break_start),
+                'wt_night_break_end' => $this->rukuruUtilEmptyToNull($this->wt_night_break_end),
+                'wt_night_break' => $this->rukuruUtilEmptyToNull($this->wt_night_break),
+                'wt_midnight_break_start' => $this->rukuruUtilEmptyToNull($this->wt_midnight_break_start),
+                'wt_midnight_break_end' => $this->rukuruUtilEmptyToNull($this->wt_midnight_break_end),
+                'wt_midnight_break' => $this->rukuruUtilEmptyToNull($this->wt_midnight_break),
+                
                 'wt_pay_std' => $this->rukuruUtilMoneyValue($this->wt_pay_std),
                 'wt_pay_ovr' => $this->rukuruUtilMoneyValue($this->wt_pay_ovr),
                 'wt_pay_ovr_midnight' => $this->rukuruUtilMoneyValue($this->wt_pay_ovr_midnight),

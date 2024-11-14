@@ -18,6 +18,8 @@
         <!-- 検索窓の追加 -->
         <div>
             <input wire:model.live="search" type="text" class="form-control text-sm py-1" id="search" placeholder="{{ __('Search Employees...') }}">
+            <input wire:model.live="retire" type="checkbox" class="form-control text-sm py-1" id="retire">
+            退職者も表示する
         </div>
         <div>
             <table class="min-w-full table-auto text-sm">
