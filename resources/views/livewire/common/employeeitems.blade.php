@@ -138,6 +138,20 @@
     </td>
 </tr>
 <tr class="border-b">
+    <th><label for="empl_main_client_name">{{ __('Client') }}</label></th>
+    <td>
+        <select class="form-control @error('empl_main_client_name') is-invalid @enderror text-sm py-1" id="empl_main_client_name" wire:model="empl_main_client_name">
+            <option value="">{{ __('Main Client') }}</option>
+            @foreach($refClients as $client)
+                <option value="{{ $client->cl_name }}">{{ $client->cl_name }}</option>
+            @endforeach
+        </select>
+        @error('empl_main_client_name') 
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </td>
+</tr>
+<tr class="border-b">
     <th><label for="empl_notes">{{ __('Notes') }}</label></th>
     <td>
         <input type="text" class="w-full form-control @error('empl_notes') is-invalid @enderror text-sm py-1" id="empl_notes" wire:model="empl_notes">

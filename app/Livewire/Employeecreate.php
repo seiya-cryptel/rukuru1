@@ -7,38 +7,9 @@ use Livewire\Component;
 
 use App\Traits\rukuruUtilites;
 
-class Employeecreate extends Component
+class Employeecreate extends EmployeeBase
 {
     use rukuruUtilites;
-
-    /**
-     * master allow deducts fields
-     */
-    public $empl_cd, 
-        $empl_name_last, $empl_name_middle, $empl_name_first,
-        $empl_kana_last, $empl_kana_middle, $empl_kana_first,
-        $empl_alpha_last, $empl_alpha_middle, $empl_alpha_first,
-        $empl_sex,
-        $empl_email, $empl_mobile,
-        $empl_hire_date, $empl_resign_date,
-        $empl_notes;
-    /**
-     * master allow deducts id and mode flags
-     */
-    public $employeeId;
-
-    /**
-     * List of add/edit form validation rules
-     */
-    protected $rules = [
-        'empl_cd' => 'required',
-        'empl_name_last' => 'required',
-        'empl_name_first' => 'required',
-        'empl_kana_last' => 'required',
-        'empl_kana_first' => 'required',
-        'empl_alpha_last' => 'required',
-        'empl_alpha_first' => 'required',
-    ];
 
     /**
      * Reseting all the input fields
@@ -61,7 +32,18 @@ class Employeecreate extends Component
         $this->empl_mobile = '';
         $this->empl_hire_date = '';
         $this->empl_resign_date = '';
+        $this->empl_main_client_name = '';
         $this->empl_notes = '';
+    }
+
+    /**
+     * mount function
+     */
+    public function mount($id = null)
+    {
+        parent::mount($id);
+
+        $this->resetFields();
     }
 
     public function render()
@@ -94,19 +76,12 @@ class Employeecreate extends Component
                 'empl_mobile' => $this->empl_mobile,
                 'empl_hire_date' => $this->rukuruUtilEmptyToNull($this->empl_hire_date),
                 'empl_resign_date' => $this->rukuruUtilEmptyToNull($this->empl_resign_date),
+                'empl_main_client_name' => $this->empl_main_client_name,
                 'empl_notes' => $this->empl_notes,
             ]);
             return redirect()->route('employee');
         } catch (\Exception $e) {
             session()->flash('error', 'Something went wrong, please try again later.');
         }
-    }
-
-    /**
-     * Cancel add/edit form and redirect to the master list
-     * @return void
-     */
-    public function cancelEmployee() {
-        return redirect()->route('employee');
     }
 }

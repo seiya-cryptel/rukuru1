@@ -66,6 +66,7 @@ class Employees extends Component
                     ->orWhere('empl_alpha_first', 'like', '%'.$this->search.'%')
                     ->orWhere('empl_email', 'like', '%'.$this->search.'%')
                     ->orWhere('empl_mobile', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_main_client_name', 'like', '%'.$this->search.'%')
                     ->orWhere('empl_notes', 'like', '%'.$this->search.'%')
                     ->orWhere('empl_cd', 'like', '%'.$this->search.'%');
             });

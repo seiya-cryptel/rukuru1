@@ -32,7 +32,7 @@ class Clientworktypes extends Component
      * delete action listener
      */
     protected $listeners = [
-        'deletClientWorktypeListener' => 'deleteClientWorktype',
+        'deleteClientWorktypeListener' => 'deleteClientWorktype',
     ];
 
     /**
@@ -104,9 +104,9 @@ class Clientworktypes extends Component
     public function deleteClientWorktype($id) {
         try {
             modelClientWorktypes::where('id', $id)->delete();
-            session()->flash('success', 'User deleted successfully.');
+            session()->flash('success', __('Client work type'). ' ' . __('deleted successfully.'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 }

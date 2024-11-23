@@ -55,6 +55,7 @@ class employees extends Model
         'empl_mobile',
         'empl_hire_date',
         'empl_resign_date',
+        'empl_main_client_name',
         'empl_notes',
     ];
 

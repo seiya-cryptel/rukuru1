@@ -106,7 +106,7 @@
     </div>    
     <script>
         function deleteClientWorktype(id){
-            if(confirm("Are you sure to delete this record?"))
+            if(confirm("削除しますか?"))
                 Livewire.dispatch('deleteClientWorktypeListener', { id: id });
         }
     </script>

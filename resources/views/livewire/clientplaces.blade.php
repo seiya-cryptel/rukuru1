@@ -69,7 +69,7 @@
     </div>    
     <script>
         function deleteClientPlace(id){
-            if(confirm("Are you sure to delete this record?"))
+            if(confirm("削除しますか?"))
                 Livewire.dispatch('deleteClientPlaceListener', { id: id });
         }
     </script>
