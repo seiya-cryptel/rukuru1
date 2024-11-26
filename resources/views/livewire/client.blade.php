@@ -58,6 +58,7 @@
                 </tbody>
             </table>
         </div>
+        {{ $Clients->links() }}
     </div>    
     <script>
         function deleteClient(id){

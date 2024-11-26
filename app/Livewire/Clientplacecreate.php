@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\client_places as modelClientPlaces;
+use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clients as modelClients;
 
 class Clientplacecreate extends Component

@@ -80,7 +80,8 @@
                 </tbody>
             </table>
         </div>
-        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" wire:click.prevent="saveEmployeepays">{{ __('Hourly Wage') . __('Settings') . __('Save') }}</button>
-        <button wire:click.prevent="cancelEmployeepay()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded">{{ __('Cancel') }}</button>
+        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" wire:click.prevent="saveEmployeepays" data-save="true">{{ __('Hourly Wage') . __('Settings') . __('Save') }}</button>
+        <button wire:click.prevent="cancelEmployeepay()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded" data-cancel="true"{{ __('Cancel') }}</button>
     </div>
 </div>
+<script src="{{ asset('js/dirtycheck.js') }}"></script>

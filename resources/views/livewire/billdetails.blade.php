@@ -14,7 +14,7 @@
     <div class="col-md-8 py-1">
         {{ $Bill->work_year }}年 {{ $Bill->work_month }}月 {{ $Client['cl_cd'] }}:{{ $Client['cl_name'] }} 様 {{ $ClientPlace['cl_pl_cd'] }}:{{ $ClientPlace['cl_pl_name'] }}
 
-        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded">{{ __('Cancel') }}</button>
+        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
     </div>
     <div class="col-md-8 py-1 text-sm">
         <table>
@@ -45,6 +45,6 @@
             @endforeach
             </tbody>
         </table>
-        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded">{{ __('Cancel') }}</button>
+        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
     </div>
 </div>
