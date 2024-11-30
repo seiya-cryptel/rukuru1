@@ -112,40 +112,29 @@ class employeepays extends Model
     }
 
     /**
-     * 時給検索
+     * 従業員時給を検索する
+     * @param int $employeeId 従業員ID
+     * @param int $clientId 顧客ID
+     * @param int $clientPlaceId 事業所ID
+     * @param string $wtCd 作業種別コード
+     * @return integer[] [標準時給, 残業時給, 深夜残業時給, 法定休日時給, 法定休日深夜残業時給] | null
+     * 顧客、事業所、作業種別が一致する時給があればそれを返す
+     * 顧客、作業種別が一致する時給があればそれを返す
+     * 作業種別が一致する時給があればそれを返す
      */
     static public function getPayhour($employeeId, $clientId, $clientPlaceId, $wtCd)
     {
         // 顧客IDと事業所IDが一致する時給を取得
-        $EmployeePay = employeepays::where('employee_id', $employeeId)
-            ->where('client_id', $clientId)
-            ->where('clientplace_id', $clientPlaceId)
-            ->where('wt_cd', $wtCd)
-            ->first();
-        if ($EmployeePay) {
-            return $EmployeePay->payhour;
-        }
-        
-        // 顧客IDが一致する時給を取得
-        $EmployeePay = employeepays::where('employee_id', $employeeId)
-            ->where('client_id', $clientId)
-            ->whereNull('clientplace_id')
-            ->where('wt_cd', $wtCd)
-            ->first();
-        if ($EmployeePay) {
-            return $EmployeePay->payhour;
-        }
-        
-        // 作業種別で時給を取得
-        $EmployeePay = employeepays::where('employee_id', $employeeId)
-            ->whereNull('client_id')
-            ->whereNull('clientplace_id')
-            ->where('wt_cd', $wtCd)
+        $EmployeePay = employeepays::with('clientworktype')
+            ->where('employee_id', $employeeId)
+            ->where('clientworktype.client_id', $clientId)
+            ->where('clientworktype.clientplace_id', $clientPlaceId)
+            ->where('clientworktype.wt_cd', $wtCd)
             ->first();
         if ($EmployeePay) {
             return $EmployeePay->payhour;
         }
     
-        throw new \Exception('時給が設定されていません');
+        return null;
     }
 }

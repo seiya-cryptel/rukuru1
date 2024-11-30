@@ -30,10 +30,10 @@
             </td>
             <td>
                 @if($enableCloseButton)
-                    @if($isClose)
-                        <button wire:click="closePayroll()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">{{ __('Close Payroll') }}</button>
+                    @if($isClosed)
+                       <button wire:click="reopenPayroll()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded">{{ __('Reopen Payroll') }}</button>
                     @else
-                        <button wire:click="reopenPayroll()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded">{{ __('Reopen Payroll') }}</button>
+                        <button wire:click="closePayroll()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">{{ __('Close Payroll') }}</button>
                     @endif
                 @else
                     <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded opacity-50 cursor-not-allowed" disabled>{{ __('Close Payroll') }}</button>

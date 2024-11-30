@@ -39,7 +39,7 @@ class Clientplaceupdate extends Component
      */
     public function mount($id)
     {
-        $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
+        $this->refClients = modelClients::orderBy('cl_cd', 'asc')->get();
         $clientPlace = modelClientPlaces::find($id);
         $this->clientPlaceId = $id;
         $this->client_id = $clientPlace->client_id;

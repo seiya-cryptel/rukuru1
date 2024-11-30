@@ -49,7 +49,7 @@ class Clientplacecreate extends Component
 
     public function render()
     {
-        $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
+        $this->refClients = modelClients::orderBy('cl_cd', 'asc')->get();
         $this->resetFields();
         return view('livewire.clientplacecreate');
     }

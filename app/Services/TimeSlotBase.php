@@ -111,6 +111,22 @@ abstract class TimeSlotBase
     }
 
     /**
+     * 作業開始時刻文字列を取得
+     */
+    public function getWorkStart()
+    {
+        return $this->work_start->format('Y-m-d H:i:0');
+    }
+
+    /**
+     * 作業終了時刻文字列を取得
+     */
+    public function getWorkEnd()
+    {
+        return $this->work_end->format('Y-m-d H:i:0');
+    }
+
+    /**
      * 作業時間文字列を取得
      */
     public function getWorkHours()

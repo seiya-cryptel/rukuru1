@@ -115,7 +115,7 @@ abstract class WorkDayBase
             ->get();
         if($EmployeeWorks->count() > 0)
         {
-            $slotNo = 0;
+            $slotNo = 1;
             foreach($EmployeeWorks as $EmployeeWork)
             {
                 // 最終スロットの終了時間を更新
@@ -127,7 +127,7 @@ abstract class WorkDayBase
                 // スロットを作成
                 $workSlot = new WorkSlotBase($this, $slotNo);
                 $workSlot->load($EmployeeWork);
-                $this->workSlots[] = $workSlot;
+                $this->workSlots[$slotNo] = $workSlot;
                 $slotNo++;
             }
         }

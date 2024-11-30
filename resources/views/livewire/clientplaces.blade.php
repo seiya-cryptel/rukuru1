@@ -66,6 +66,7 @@
                 </tbody>
             </table>
         </div>
+        {{ $ClientPlaces->links() }}
     </div>    
     <script>
         function deleteClientPlace(id){

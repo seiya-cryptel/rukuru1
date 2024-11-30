@@ -26,7 +26,7 @@ class Clientplaces extends Component
      */
     public function mount()
     {
-        $this->Clients = modelClients::orderBy('cl_name', 'asc')
+        $this->Clients = modelClients::orderBy('cl_cd', 'asc')
             ->get();
     }
 
@@ -37,7 +37,10 @@ class Clientplaces extends Component
     public function render()
     {
         $ClientPlaces = modelClientPlaces::with('client')
-            ->select('id', 'client_id', 'cl_pl_cd', 'cl_pl_name', 'cl_pl_kana', 'cl_pl_alpha', 'cl_pl_notes')
+            ->select('*')
+            ->join('clients as client', 'client.id', '=', 'clientplaces.client_id')
+            ->orderBy('client.cl_cd', 'asc')
+            ->orderBy('cl_pl_cd', 'asc')
             ->paginate(10);
         return view('livewire.clientplaces', compact('ClientPlaces'));
     }

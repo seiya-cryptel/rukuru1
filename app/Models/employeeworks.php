@@ -121,7 +121,7 @@ class employeeworks extends Model
     public function wrkLogStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_log_start'] = $value === '' ? null : $value, 
         );
     }
@@ -135,8 +135,36 @@ class employeeworks extends Model
     public function wrkLogEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_log_end'] = $value === '' ? null : $value, 
+        );
+    }
+
+    /**
+     * Accesor/Mutator for wrk_work_start
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function wrkWorkStart(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null) ? '' : date('Y-m-d H:i', strtotime($value)),
+            set: fn ($value) => $this->attributes['wrk_work_start'] = $value === '' ? null : $value, 
+        );
+    }
+
+    /**
+     * Accesor/Mutator for wrk_work_end
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function wrkWorkEnd(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null) ? '' : date('Y-m-d H:i', strtotime($value)),
+            set: fn ($value) => $this->attributes['wrk_work_end'] = $value === '' ? null : $value, 
         );
     }
 

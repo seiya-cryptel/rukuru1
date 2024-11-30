@@ -440,6 +440,8 @@ trait rukuruUtilites
         {
             $work_hours->sub($ClientWorkType->wt_midnight_break);
         }
+        // 就業時間がマイナスになった場合はゼロとする
+        return $work_hours->invert ? new DateInterval('PT0S') : $work_hours;
     }
     // 2.2. 夜勤
     public function rukuruUtilWorkHoursNight($currentDate, $start, $end, $ClientWorkType) : DateInterval
@@ -505,5 +507,50 @@ trait rukuruUtilites
         }
 
         return 0;
+    }
+
+    /**
+     * 従業員の時給・請求単価を取得する
+     * @param modelClientWorkTypes $ClientWorkType
+     * @param integer $employee_id
+     * @param integer $client_id
+     * @param integer $clientplace_id
+     * @param string $wt_cd
+     * @return integer[] [標準時給, 残業時給, 深夜残業時給, 法定休日時給, 法定休日深夜残業時給,
+     *                    標準請求, 残業請求, 深夜残業請求, 法定休日請求, 法定休日深夜残業請求]
+     * @throws Exception 単価が設定されていない場合
+     */
+    protected function rukuruUtilGetEmployeeUnitPrices($ClientWorkType, $employee_id, $client_id, $clientplace_id, $wt_cd) : array
+    {
+        // 従業員単価レコードがあるばあい
+        $EmployeePay = modelEmployeePays::getPayhour($employee_id, $client_id, $clientplace_id, $wt_cd);
+        if($EmployeePay)
+        {
+            return [
+                'wt_pay_std'                => $EmployeePay->wt_pay_std,
+                'wt_pay_ovr'                => $EmployeePay->wt_pay_ovr,
+                'wt_pay_ovr_midnight'       => $EmployeePay->wt_pay_ovr_midnight,
+                'wt_pay_holiday'            => $EmployeePay->wt_pay_holiday,
+                'wt_pay_holiday_midnight'   => $EmployeePay->wt_pay_holiday_midnight,
+                'wt_bill_std'               => $EmployeePay->wt_bill_std,
+                'wt_bill_ovr'               => $EmployeePay->wt_bill_ovr,
+                'wt_bill_ovr_midnight'      => $EmployeePay->wt_bill_ovr_midnight,
+                'wt_bill_holiday'           => $EmployeePay->wt_bill_holiday,
+                'wt_bill_holiday_midnight'  => $EmployeePay->wt_bill_holiday_midnight,
+            ];
+        }
+        // 作業種別単価レコードを探す
+        return [
+            'wt_pay_std'                => $ClientWorkType->wt_pay_std,
+            'wt_pay_ovr'                => $ClientWorkType->wt_pay_ovr,
+            'wt_pay_ovr_midnight'       => $ClientWorkType->wt_pay_ovr_midnight,
+            'wt_pay_holiday'            => $ClientWorkType->wt_pay_holiday,
+            'wt_pay_holiday_midnight'   => $ClientWorkType->wt_pay_holiday_midnight,
+            'wt_bill_std'               => $ClientWorkType->wt_bill_std,
+            'wt_bill_ovr'               => $ClientWorkType->wt_bill_ovr,
+            'wt_bill_ovr_midnight'      => $ClientWorkType->wt_bill_ovr_midnight,
+            'wt_bill_holiday'           => $ClientWorkType->wt_bill_holiday,
+            'wt_bill_holiday_midnight'  => $ClientWorkType->wt_bill_holiday_midnight,
+        ];
     }
 }

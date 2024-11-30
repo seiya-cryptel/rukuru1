@@ -68,7 +68,7 @@ class Employeeworks extends Component
      * 勤怠データ クラス変数
      * 2024/10/26 not primitive type variable makes trouble in Livewire component
      */
-    // public $Workhours;
+    public $Workhours2;
 
     /**
      * validation rules
@@ -123,6 +123,7 @@ class Employeeworks extends Component
             foreach($Slots as $Slot)
             {
                 $slotNo = $Slot->wrk_seq;
+                $clientworktype = modelClientWorktypes::getSutable($this->client_id, $this->clientplace_id, $Slot->wt_cd);
                 $this->TimekeepingSlots[$day][$slotNo] = [
                     'wrk_seq' => $slotNo,
                     'wt_cd' => $Slot->wt_cd,
@@ -235,8 +236,8 @@ class Employeeworks extends Component
             $this->WorkTypes[$wt_cd] = $Record->wt_name;
         }
 
-        // $this->fillTimekeepings();
-        $this->fillTimekeepings2();
+        $this->fillTimekeepings();
+        // $this->fillTimekeepings2();
     }
 
     /**
@@ -456,6 +457,8 @@ class Employeeworks extends Component
         );
 
         // 作業時間を計算
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $Slot->getWorkStart();
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $Slot->getWorkEnd();
         $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
     }
 
@@ -476,10 +479,29 @@ class Employeeworks extends Component
 
         $this->TimekeepingSlots[$day][$slot]['wrk_log_start'] = $value;
         $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = '';
-        if(!empty($this->TimekeepingSlots[$day][$slot]['wrk_log_end']))
-        {
-            $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $this->calcWorkHours($value, $this->TimekeepingSlots[$day][$slot]['wrk_log_end']);
+
+        // 作業種別レコードを取得
+        $wt_cd = $this->TimekeepingSlots[$day][$slot]['wt_cd'];
+        if($wt_cd == '')
+        {   // 作業種別が未設定の場合は時間計算しない
+            return;
         }
+        $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
+
+        // 時間計算用のクラスインスタンスを作成
+        $Slot = new TimeSlotType1(
+            $this->TimekeepingDays[$day]['DateTime'],
+            $slot, 
+            $this->Client, 
+            $clientworktype, 
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_end']
+        );
+
+        // 作業時間を計算
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $Slot->getWorkStart();
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $Slot->getWorkEnd();
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
     }
 
     /**
@@ -499,10 +521,29 @@ class Employeeworks extends Component
 
         $this->TimekeepingSlots[$day][$slot]['wrk_log_end'] = $value;
         $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = '';
-        if(!empty($this->TimekeepingSlots[$day][$slot]['wrk_log_start']))
-        {
-            $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $this->calcWorkHours($this->TimekeepingSlots[$day][$slot]['wrk_log_start'], $value);
+
+        // 作業種別レコードを取得
+        $wt_cd = $this->TimekeepingSlots[$day][$slot]['wt_cd'];
+        if($wt_cd == '')
+        {   // 作業種別が未設定の場合は時間計算しない
+            return;
         }
+        $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
+        
+        // 時間計算用のクラスインスタンスを作成
+        $Slot = new TimeSlotType1(
+            $this->TimekeepingDays[$day]['DateTime'],
+            $slot, 
+            $this->Client, 
+            $clientworktype, 
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
+            $this->TimekeepingSlots[$day][$slot]['wrk_log_end']
+        );
+
+        // 作業時間を計算
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $Slot->getWorkStart();
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $Slot->getWorkEnd();
+        $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
     }
 
     /**
