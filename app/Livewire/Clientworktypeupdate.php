@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 use App\Livewire\ClientworktypeBase;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
@@ -11,7 +11,7 @@ use App\Models\clientworktypes as modelClientWorktypes;
 
 class Clientworktypeupdate extends ClientworktypeBase
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
 
     /**
      * editing record id

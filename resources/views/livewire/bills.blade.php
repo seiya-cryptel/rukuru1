@@ -15,14 +15,14 @@
         <table class="py-1 text-sm">
         <tr>
             <td>
-                <input type="text" class="form-control @error('workYear') is-invalid @enderror py-1 text-sm" id="workYear" wire:model="workYear" style="width: 4rem;">
+                <input type="text" class="form-control @error('workYear') is-invalid @enderror py-1 text-sm" id="workYear" wire:model="workYear" wire:change="changeWorkYear($event.target.value)" style="width: 4rem;">
                 @error('workYear') 
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
                 年
             </td>
             <td>
-                <input type="text" class="form-control @error('workMonth') is-invalid @enderror py-1 text-sm" id="workMonth" wire:model="workMonth" style="width: 3rem;">
+                <input type="text" class="form-control @error('workMonth') is-invalid @enderror py-1 text-sm" id="workMonth" wire:model="workMonth" wire:change="changeWorkMonth($event.target.value)" style="width: 3rem;">
                 @error('workMonth') 
                     <span class="text-danger">{{ $message }}</span>
                 @enderror

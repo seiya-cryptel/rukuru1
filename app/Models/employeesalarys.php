@@ -47,6 +47,11 @@ class employeesalarys extends Model
         'payhour',
         'premium',
         'wrk_pay',
+        'wt_bill_item_cd',
+        'wt_bill_item_name',
+        'billhour',
+        'billpremium',
+        'wrk_bill',
         'notes',
     ];
 
@@ -73,7 +78,7 @@ class employeesalarys extends Model
     public function wrkDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '0000-00-00 00:00:00' || $value === null) ? '' : date('Y-m-d', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : date('Y-m-d', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_date'] = $value === '' ? null : $value, 
         );
     }
@@ -81,16 +86,16 @@ class employeesalarys extends Model
     public function wrkWorkStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
-            set: fn ($value) => $this->attributes['wrk_work_start'] = $value === '' ? null : $value, 
+            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            set: fn ($value) => $this->attributes['wt_work_start'] = $value === '' ? null : $value, 
         );
     }
 
     public function wrkWorkEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
-            set: fn ($value) => $this->attributes['wrk_work_end'] = $value === '' ? null : $value, 
+            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            set: fn ($value) => $this->attributes['wt_work_end'] = $value === '' ? null : $value, 
         );
     }
 

@@ -80,7 +80,10 @@ class Bills extends Component
      */
     public function render()
     {
-        $query = modelBills::where('work_year', $this->workYear)
+        $query = modelBills::with('client', 'clientplace')
+            ->join('clients', 'bills.client_id', '=', 'clients.id')
+            ->join('clientplaces', 'bills.clientplace_id', '=', 'clientplaces.id')
+            ->where('work_year', $this->workYear)
             ->where('work_month', $this->workMonth);
 
         if ($this->client_id) {
@@ -95,6 +98,24 @@ class Bills extends Component
         $Bills = $query->paginate(10);
 
         return view('livewire.bills', compact('Bills'));
+    }
+
+    /**
+     * 対象年が変更された場合の処理
+     */
+    public function changeWorkYear($value)
+    {
+        $this->validate();
+        session(['workYear' => $this->workYear]);
+    }
+
+    /**
+     * 対象月が変更された場合の処理
+     */
+    public function changeWorkMonth()
+    {
+        $this->validate();
+        session(['workMonth' => $this->workMonth]);
     }
 
     /**

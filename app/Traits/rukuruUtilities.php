@@ -9,13 +9,14 @@ use Illuminate\Validation\ValidationException;
 
 use App\Models\clients as modelClients;
 use App\Models\holiday as modelHoliday;
+use App\Models\employeepays as modelEmployeePays;
 
 /**
- * Trait rukuruUtilites
+ * Trait rukuruUtilities
  * @package App\Traits
  * ツール関数をまとめたTrait
  */
-trait rukuruUtilites
+trait rukuruUtilities
 {
     /**
      * 引数が empty なら null を、そうでなければそのまま返す
@@ -123,6 +124,17 @@ trait rukuruUtilites
         }
 
         return $datetime;
+    }
+
+    /**
+     * hh:mm 文字列を DateInterval に変換する
+     * @param string $time
+     * @return DateInterval
+     */
+    public function rukuruUtilTimeToDateInterval($time) : DateInterval
+    {
+        // 時刻を DateInterval に変換する
+        return new DateInterval('PT' . str_replace(':', 'H', $time) . 'M');
     }
 
     /**
@@ -520,37 +532,37 @@ trait rukuruUtilites
      *                    標準請求, 残業請求, 深夜残業請求, 法定休日請求, 法定休日深夜残業請求]
      * @throws Exception 単価が設定されていない場合
      */
-    protected function rukuruUtilGetEmployeeUnitPrices($ClientWorkType, $employee_id, $client_id, $clientplace_id, $wt_cd) : array
+    protected function rukuruUtilGetEmployeeHourlyRates($ClientWorkType, $employee_id, $client_id, $clientplace_id, $wt_cd) : array
     {
         // 従業員単価レコードがあるばあい
         $EmployeePay = modelEmployeePays::getPayhour($employee_id, $client_id, $clientplace_id, $wt_cd);
         if($EmployeePay)
         {
             return [
-                'wt_pay_std'                => $EmployeePay->wt_pay_std,
-                'wt_pay_ovr'                => $EmployeePay->wt_pay_ovr,
-                'wt_pay_ovr_midnight'       => $EmployeePay->wt_pay_ovr_midnight,
-                'wt_pay_holiday'            => $EmployeePay->wt_pay_holiday,
-                'wt_pay_holiday_midnight'   => $EmployeePay->wt_pay_holiday_midnight,
-                'wt_bill_std'               => $EmployeePay->wt_bill_std,
-                'wt_bill_ovr'               => $EmployeePay->wt_bill_ovr,
-                'wt_bill_ovr_midnight'      => $EmployeePay->wt_bill_ovr_midnight,
-                'wt_bill_holiday'           => $EmployeePay->wt_bill_holiday,
-                'wt_bill_holiday_midnight'  => $EmployeePay->wt_bill_holiday_midnight,
+                'wt_pay_std'                => str_replace(',', '', $EmployeePay->wt_pay_std),
+                'wt_pay_ovr'                => str_replace(',', '', $EmployeePay->wt_pay_ovr),
+                'wt_pay_ovr_midnight'       => str_replace(',', '', $EmployeePay->wt_pay_ovr_midnight),
+                'wt_pay_holiday'            => str_replace(',', '', $EmployeePay->wt_pay_holiday),
+                'wt_pay_holiday_midnight'   => str_replace(',', '', $EmployeePay->wt_pay_holiday_midnight),
+                'wt_bill_std'               => str_replace(',', '', $EmployeePay->wt_bill_std),
+                'wt_bill_ovr'               => str_replace(',', '', $EmployeePay->wt_bill_ovr),
+                'wt_bill_ovr_midnight'      => str_replace(',', '', $EmployeePay->wt_bill_ovr_midnight),
+                'wt_bill_holiday'           => str_replace(',', '', $EmployeePay->wt_bill_holiday),
+                'wt_bill_holiday_midnight'  => str_replace(',', '', $EmployeePay->wt_bill_holiday_midnight),
             ];
         }
         // 作業種別単価レコードを探す
         return [
-            'wt_pay_std'                => $ClientWorkType->wt_pay_std,
-            'wt_pay_ovr'                => $ClientWorkType->wt_pay_ovr,
-            'wt_pay_ovr_midnight'       => $ClientWorkType->wt_pay_ovr_midnight,
-            'wt_pay_holiday'            => $ClientWorkType->wt_pay_holiday,
-            'wt_pay_holiday_midnight'   => $ClientWorkType->wt_pay_holiday_midnight,
-            'wt_bill_std'               => $ClientWorkType->wt_bill_std,
-            'wt_bill_ovr'               => $ClientWorkType->wt_bill_ovr,
-            'wt_bill_ovr_midnight'      => $ClientWorkType->wt_bill_ovr_midnight,
-            'wt_bill_holiday'           => $ClientWorkType->wt_bill_holiday,
-            'wt_bill_holiday_midnight'  => $ClientWorkType->wt_bill_holiday_midnight,
+            'wt_pay_std'                => str_replace(',', '', $ClientWorkType->wt_pay_std),
+            'wt_pay_ovr'                => str_replace(',', '', $ClientWorkType->wt_pay_ovr),
+            'wt_pay_ovr_midnight'       => str_replace(',', '', $ClientWorkType->wt_pay_ovr_midnight),
+            'wt_pay_holiday'            => str_replace(',', '', $ClientWorkType->wt_pay_holiday),
+            'wt_pay_holiday_midnight'   => str_replace(',', '', $ClientWorkType->wt_pay_holiday_midnight),
+            'wt_bill_std'               => str_replace(',', '', $ClientWorkType->wt_bill_std),
+            'wt_bill_ovr'               => str_replace(',', '', $ClientWorkType->wt_bill_ovr),
+            'wt_bill_ovr_midnight'      => str_replace(',', '', $ClientWorkType->wt_bill_ovr_midnight),
+            'wt_bill_holiday'           => str_replace(',', '', $ClientWorkType->wt_bill_holiday),
+            'wt_bill_holiday_midnight'  => str_replace(',', '', $ClientWorkType->wt_bill_holiday_midnight),
         ];
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 
 class WorkSlotType1 extends WorkSlotBase
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
 
     /**
      * 開始打刻設定

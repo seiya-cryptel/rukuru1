@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 
 use Livewire\Component;
 use App\Models\clients as modelClients;
@@ -11,7 +11,7 @@ use App\Models\clientworktypes as modelClientWorktypes;
 
 abstract class ClientworktypeBase extends component
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
     /**
      * record set of table clients and client places
      * */

@@ -6,7 +6,7 @@ use DateTime;
 use DateInterval;
 use Exception;
 
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 
 use App\Models\clients as modelClients;
 use App\Models\clientworktypes as modelClientworktypes;
@@ -18,7 +18,7 @@ use App\Models\clientworktypes as modelClientworktypes;
  */
 class TimeSlotType1 extends TimeSlotBase
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
 
     /**
      * 開始時刻計算

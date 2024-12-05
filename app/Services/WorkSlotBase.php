@@ -8,7 +8,7 @@ use Exception;
 use App\Models\clientworktypes as modelClientworktypes;
 use App\Models\employeeworks as modelEmployeeworks;
 
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 
 /**
  * Class WorkSlotBase
@@ -17,7 +17,7 @@ use App\Traits\rukuruUtilites;
  */
 abstract class WorkSlotBase
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
 
     /**
      * 親の勤怠

@@ -5,11 +5,11 @@ use App\Models\employees as modelEmployees;
 
 use Livewire\Component;
 
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 
 class Employeeupdate extends EmployeeBase
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
 
     /**
      * mount the component

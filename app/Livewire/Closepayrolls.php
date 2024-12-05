@@ -6,23 +6,34 @@ use DateTime;
 use DateInterval;
 
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 
 use Livewire\Component;
 
-use App\Traits\rukuruUtil;
+use App\Traits\rukuruUtilities;
 
 use App\Models\closepayrolls as modelClosePayrolls;
+use App\Models\clients as modelClients;
+use App\Models\clientplaces as modelClientPlaces;
+use App\Models\clientworktypes as modelClientWorkTypes;
+
 use App\Models\employees as modelEmployees;
 use App\Models\employeepays as modelEmployeePays;
 use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeesalarys as modelEmployeeSalarys;
+
 use App\Models\bills as modelBills;
 use App\Models\billdetails as modelBillDetails;
 use App\Models\pricetables as modelPriceTables;
 
+/**
+ * 勤怠締め処理
+ * 
+ * 従業員勤怠を元に、各種マスタを参照して、給与と請求の計算を行う
+ */
 class Closepayrolls extends Component
 {
-    use rukuruUtil;
+    use rukuruUtilities;
 
     /**
      * work year, month
@@ -52,10 +63,17 @@ class Closepayrolls extends Component
 	protected $saveEmployeeId = null; // 従業員ID
 	protected $saveWrkDate = null;    // 勤務日
 	protected $wk_ttl_seq = null;     // 1日の中の勤怠連番
-	protected $saveCliendId = null;   // 顧客ID
+	protected $saveClientId = null;   // 顧客ID
 	protected $saveClientPlaceId = null;  // 事業所ID
+    protected $saveDisplayOrder = 1;  // 表示順
+    protected $saveTitle = null;      // 請求項目名
+    protected $saveUnitPrice = 0;   // 請求単価
+    protected $saveQuantity = 0;    // 請求数量
+    protected $saveAmount = 0;      // 請求金額
 	protected $saveWtCd = null;   // 作業種別コード
 	protected $cdHoliday = false; // 休日種別 rukuruUtilIsHoliday で設定
+    protected $saveBillId = null;   // 請求ID
+    protected $saveWtBillItemCd = null;   // 請求項目コード
     // 計算に必要なレコード
 	protected $curEmployee = null;
 	protected $curClient = null;
@@ -110,67 +128,57 @@ class Closepayrolls extends Component
     /**
      * 給与と請求の計算：タイプA
      * @param modelEmployeeWorks $Work 勤怠レコード
-     * @param modelClientWorkTypes $ClientWorkType 顧客作業種別レコード
-     * @param integer[] $unitPrices [標準時給, 残業時給, 深夜残業時給, 法定休日時給, 法定休日深夜残業時給]
+     * @param integer[] $hourlyRates [標準時給, 残業時給, 深夜残業時給, 法定休日時給, 法定休日深夜残業時給]
      * @return void
      * @throws \Exception
      * 
      * 就業時間以降の時間帯については、残業時給を適用する
      */
-    protected function calculateTypeA($Work, $ClientWorkType, $unitPrices)
+    protected function calculateTypeA($Work, $hourlyRates)
     {
         // 金額を計算する
         try {
-            $workHours = $Work->wrk_work_hours; // DateTime 勤務時間
-            $wtWorkStart = $this->rukuruUtilTimeToDateTime($Work->wrk_date, $ClientWorkType->wt_work_start);    // DateTime 始業時刻
-            $wtWorkEnd = $this->rukuruUtilTimeToDateTime($Work->wrk_date, $ClientWorkType->wt_work_end);    // DateTime 終業時刻
-            $workStart = $this->rukuruUtilTimeToDateTime($Work->wrk_date, $Work->wrk_work_start);    // DateTime 勤怠開始時刻
-            $workEnd = $this->rukuruUtilTimeToDateTime($Work->wrk_date, $Work->wrk_work_end);    // DateTime 勤怠終了時刻
+            $dtWrkDate = new DateTime($Work->wrk_date);    // DateTime 勤務日
+            $strWorkHours = $Work->wrk_work_hours; // DateTime 勤務時間
+            $dtWtWorkStart = $this->rukuruUtilTimeToDateTime($dtWrkDate, $this->curClientWorkType->wt_work_start);    // DateTime 始業時刻
+            $dtWtWorkEnd = $this->rukuruUtilTimeToDateTime($dtWrkDate, $this->curClientWorkType->wt_work_end);    // DateTime 終業時刻
+            $dtWorkStart = new DateTime($Work->wrk_work_start);    // DateTime 勤怠開始時刻
+            $dtWorkEnd = new DateTime($Work->wrk_work_end);    // DateTime 勤怠終了時刻
 
-            // 残業時間を計算
-            $overTime = 0;  // DateInterval 残業時間
-            if($workEnd > $wtWorkEnd) {
-                $overTime = $workEnd->diff($wtWorkEnd);
-            }
-            $normalTime = $workHours->diff($overTime);    // DateInterval 通常時間
+            // 通常時間と残業時間を計算
+            $diNormalTime = $dtWorkStart->diff(min($dtWorkEnd, $dtWtWorkEnd));    // DateInterval 通常時間
+            $diOverTime = ($dtWorkEnd > $dtWtWorkEnd) ? $dtWtWorkEnd->diff($dtWorkEnd) : new DateInterval('PT0H0M');   // DateInterval 残業時間
             
             // 通常時間の給与書込
             $EmployeeSalary = new modelEmployeeSalarys();
-            $EmployeeSalary->employee_id = $Work->employee_id;
-            $EmployeeSalary->wrk_date = $Work->wrk_date;
-            $EmployeeSalary->wrk_ttl_seq = $this->wrk_ttl_seq++;
+            $EmployeeSalary->employee_id = $Work->employee_id;      // 従業員ID
+            $EmployeeSalary->wrk_date = $Work->wrk_date;            // 勤務日
+            $EmployeeSalary->wrk_ttl_seq = $this->wrk_ttl_seq++;    // 1日の中の勤怠連番
             $EmployeeSalary->leave = 0;
-            $EmployeeSalary->client_id = $Work->client_id;
-            $EmployeeSalary->clientplace_id = $Work->clientplace_id;
-            $EmployeeSalary->wt_cd = $Work->wt_cd;
-            $EmployeeSalary->wrk_work_start = $Work->wrk_work_start;
-            $EmployeeSalary->wrk_work_end = min($curClientWorkType->wt_work_end, $Work->wrk_work_end);
-            $EmployeeSalary->wrk_work_hours = $normalTime;
-            $payhour = $unitPrices['wt_pay_std'];
+            $EmployeeSalary->client_id = $Work->client_id;          // 顧客ID
+            $EmployeeSalary->clientplace_id = $Work->clientplace_id;    // 事業所ID
+
+            $EmployeeSalary->wt_cd = $Work->wt_cd;                  // 作業種別コード
+            $EmployeeSalary->wrk_work_start = $dtWorkStart;    // 勤怠開始時刻
+            $EmployeeSalary->wrk_work_end = min($dtWorkEnd, $dtWtWorkEnd);
+            $EmployeeSalary->wrk_work_hours = $diNormalTime->format('%H:%I:0');
+
+            $payhour = $hourlyRates['wt_pay_std'];       // 標準時給
             $EmployeeSalary->payhour = $payhour;
             $EmployeeSalary->premium = 1.0;    // ToDo: プレミアムを計算
-            $EmployeeSalary->wrk_pay = floor($payhour * ($normalTime->h + ($normalTime->i / 60)));
+            $EmployeeSalary->wrk_pay = floor($payhour * ($diNormalTime->h + ($diNormalTime->i / 60)));
+
+            $billhour = $hourlyRates['wt_bill_std'];    // 標準請求時給
+            $EmployeeSalary->wt_bill_item_cd = $this->curClientWorkType->wt_cd;      // 請求項目コード = 作業種別コード
+            $EmployeeSalary->wt_bill_item_name = $this->curClientWorkType->wt_name;  // 請求項目名 = 作業種別名
+            $EmployeeSalary->billhour = $billhour ? $billhour : null;
+            $EmployeeSalary->premium = 1.0;    // ToDo: プレミアムを計算
+            $EmployeeSalary->wrk_bill = $billhour ? floor($billhour * ($diNormalTime->h + ($diNormalTime->i / 60))) : 0;
+
             $EmployeeSalary->save();
 
-            // 通常時間の請求書込
-            $BillDetail = new modelBillDetails();
-            // $BillDetail->bill_id = $Bill->id;
-            // $BillDetail->display_order = $displayOrder++;
-            $BillDetail->title = '明細';
-            $billhour = $unitPrices['wt_bill_std'];
-            $BillDetail->unit_price = $billhour;
-            $BillDetail->quantity = $normalTime->h + ($normalTime->i / 60);
-            $BillDetail->unit = '時間';
-            $amount = floor($billhour * $BillDetail->quantity);
-            $BillDetail->amount = $amount;
-            $tax = floor($amount * 0.1);
-            $BillDetail->tax = $tax;
-            $BillDetail->total = $amount + $tax;
-            $BillDetail->notes = $curClientWorkType->wt_name;
-            $billDetail->save();
-
             // 残業時間の給与・請求書込
-            if($overTime > 0)
+            if($diOverTime->h > 0 || $diOverTime->i > 0)
             {
                 $EmployeeSalary = new modelEmployeeSalarys();
                 $EmployeeSalary->employee_id = $Work->employee_id;
@@ -179,31 +187,25 @@ class Closepayrolls extends Component
                 $EmployeeSalary->leave = 0;
                 $EmployeeSalary->client_id = $Work->client_id;
                 $EmployeeSalary->clientplace_id = $Work->clientplace_id;
+
                 $EmployeeSalary->wt_cd = $Work->wt_cd;
-                $EmployeeSalary->wrk_work_start = $curClientWorkType->wrk_work_end;
-                $EmployeeSalary->wrk_work_end = $Work->wrk_work_end;
-                $EmployeeSalary->wrk_work_hours = $overTime;
-                $payhour = $unitPrices['wt_pay_ovr'];
+                $EmployeeSalary->wrk_work_start = $dtWtWorkEnd;
+                $EmployeeSalary->wrk_work_end = $dtWorkEnd;
+                $EmployeeSalary->wrk_work_hours = $diOverTime->format('%H:%I:0');
+
+                $payhour = $hourlyRates['wt_pay_ovr'];
                 $EmployeeSalary->payhour = $payhour;
                 $EmployeeSalary->premium = 1.25;    // ToDo: プレミアムを計算
-                $EmployeeSalary->wrk_pay = floor($payhour * ($overTime->h + ($overlTime->i / 60)));
-                $EmployeeSalary->save();
+                $EmployeeSalary->wrk_pay = floor($payhour * ($diOverTime->h + ($diOverTime->i / 60)));
 
-                $BillDetail = new modelBillDetails();
-                // $BillDetail->bill_id = $Bill->id;
-                // $BillDetail->display_order = $displayOrder++;
-                $BillDetail->title = '明細';
-                $billhour = $unitPrices['wt_bill_ovr'];
-                $BillDetail->unit_price = $billhour;
-                $BillDetail->quantity = $overTime->h + ($overTime->i / 60);
-                $BillDetail->unit = '時間';
-                $amount = floor($billhour * $BillDetail->quantity);
-                $BillDetail->amount = $amount;
-                $tax = floor($amount * 0.1);
-                $BillDetail->tax = $tax;
-                $BillDetail->total = $amount + $tax;
-                $BillDetail->notes = $curClientWorkType->wt_name;
-                $billDetail->save();
+                $billhour = $hourlyRates['wt_bill_ovr'];    // 残業請求時給
+                $EmployeeSalary->wt_bill_item_cd = $this->curClientWorkType->wt_cd;      // 請求項目コード = 作業種別コード
+                $EmployeeSalary->wt_bill_item_name = $this->curClientWorkType->wt_name . '残業';  // 請求項目名 = 作業種別名
+                $EmployeeSalary->billhour = $billhour ? $billhour : null;
+                $EmployeeSalary->premium = 1.25;    // ToDo: プレミアムを計算
+                $EmployeeSalary->wrk_bill = $billhour ? floor($billhour * ($diOverTime->h + ($diOverTime->i / 60))) : 0;
+
+                $EmployeeSalary->save();
             }
         }
         catch (\Exception $e) {
@@ -221,14 +223,14 @@ class Closepayrolls extends Component
         $sStartDay = $this->workYear . '-' . $this->workMonth . '-01';
         $sEndDay = $this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($sStartDay));
         $Works = modelEmployeeWorks::whereBetween('wrk_date', [$sStartDay, $sEndDay])
-            ->orderByRaw('employee_id, wrk_date, wrk_work_start')
+            ->orderByRaw('employee_id, wrk_date, wrk_work_start')   // DateTime wrk_work_start
             ->get();
 
         // 各種キーの初期化
         $this->saveEmployeeId = null; // 従業員ID
         $this->saveWrkDate = null;    // 勤務日
         $this->wk_ttl_seq = null;     // 1日の中の勤怠連番
-        $this->saveCliendId = null;   // 顧客ID
+        $this->saveClientId = null;   // 顧客ID
         $this->saveClientPlaceId = null;  // 事業所ID
         $this->saveWtCd = null;   // 作業種別コード
         $this->cdHoliday = false; // 休日種別 rukuruUtilIsHoliday で設定
@@ -241,21 +243,21 @@ class Closepayrolls extends Component
             // 従業員が変わった場合
             if ($this->saveEmployeeId != $Work->employee_id) {
                 $this->saveEmployeeId = $Work->employee_id;
-                $this->curEmployee = modelEmployees::find($this->saveEmployeeid);  // 従業員情報を取得
+                $this->curEmployee = modelEmployees::find($this->saveEmployeeId);  // 従業員情報を取得
                 $this->saveWrkDate = null;
             }
             // 日付が変わった場合
             if ($this->saveWrkDate != $Work->wrk_date) {
                 $this->saveWrkDate = $Work->wrk_date;
-                $this->cdHoliday = $this->rukuruUtilIsHoliday($this->saveClientId, $this->saveWrkDate->format('Y-m-d'));
+                $this->cdHoliday = $this->rukuruUtilIsHoliday($Work->client_id, $this->saveWrkDate);
                 $this->wrk_ttl_seq = 1;
             }
             // 顧客または事業所が変わった場合
-            if ($this->saveCliendId != $Work->client_id || $this->saveClientPlaceId != $Work->clientplace_id) {
-                $this->saveCliendId = $Work->client_id;
+            if ($this->saveClientId != $Work->client_id || $this->saveClientPlaceId != $Work->clientplace_id) {
+                $this->saveClientId = $Work->client_id;
                 $this->saveClientPlaceId = $Work->clientplace_id;
-                $this->curClient = modelClients::find($saveCliendId);
-                $this->curClientPlace = modelClientPlaces::find($saveClientPlaceId);
+                $this->curClient = modelClients::find($this->saveClientId);
+                $this->curClientPlace = modelClientPlaces::find($this->saveClientPlaceId);
                 $this->saveWtCd = null;
             }
             // 作業種別が変わった場合
@@ -263,7 +265,7 @@ class Closepayrolls extends Component
                 $this->saveWtCd = $Work->wt_cd;
                 // 給与、請求単価を取得
                 $this->curClientWorkType = modelClientWorkTypes::getSutable($this->saveClientId, $this->saveClientPlaceId, $this->saveWtCd);
-                $unitPrices = $this->rukuruUtilGetEmployeeUnitPrices(
+                $hourlyRates = $this->rukuruUtilGetEmployeeHourlyRates(
                     $this->curClientWorkType, 
                     $this->saveEmployeeId, 
                     $this->saveClientId, 
@@ -275,9 +277,9 @@ class Closepayrolls extends Component
             // 金額を計算する
             try {
                 // 金額計算の分岐
-                switch($saveWtCd) {
+                switch($this->saveWtCd) {
                     case '52':
-                        $this->calculateTypeA($Work, $unitPrices);
+                        $this->calculateTypeA($Work, $hourlyRates);
                         break;
                     default:
                         $this->calculateTypeDefault();
@@ -290,6 +292,33 @@ class Closepayrolls extends Component
             }
         }
     }
+    /**
+     * 請求明細レコード作成
+     */
+    protected function createBillDetail()
+    {
+        if($this->saveWtBillItemCd == null || $this->saveAmount == 0) {
+            return;
+        }
+        // 請求明細レコードを作成
+        $BillDetail = new modelBillDetails();
+        $BillDetail->bill_id = $this->saveBillId;
+        // $BillDetail->wt_bill_item_cd = $this->saveWtBillItemCd;
+        $BillDetail->display_order = $this->saveDisplayOrder++;
+        $BillDetail->title = $this->saveTitle;          // 請求項目名
+        $BillDetail->unit_price = $this->saveUnitPrice; // 請求単価
+        $BillDetail->quantity = $this->saveQuantity;    // 請求数量
+        $BillDetail->unit = '時間';                     // 単位
+        $BillDetail->amount = $this->saveAmount;        // 請求金額
+        $BillDetail->tax = floor($this->saveAmount * 0.1);  // 消費税
+        $BillDetail->total = floor($this->saveAmount * 1.1);     // 集計前
+        $BillDetail->save();
+
+        $this->saveWtBillItemCd = null;
+        $this->saveUnitPrice = 0;
+        $this->saveQuantity = 0;
+        $this->saveAmount = 0;
+    }
 
     /**
      * 請求の明細を集計
@@ -298,22 +327,79 @@ class Closepayrolls extends Component
      */
     protected function summaryBill()
     {
-        // work_year, work_month に該当する請求を取得
+        // 各顧客、事業所について、work_year, work_month に該当する従業員給与レコードを取得
         $sStartDay = $this->workYear . '-' . $this->workMonth . '-01';
         $sEndDay = $this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($sStartDay));
-        $BillDetails = modelBillDetails::whereBetween('bill_date', [$sStartDay, $sEndDay])
+        $EmployeeSalarys = modelEmployeeSalarys::whereBetween('wrk_date', [$sStartDay, $sEndDay])
+            ->orderByRaw('client_id, clientplace_id, wt_bill_item_cd, billhour')
+            ->get();
+
+        $this->saveClientId = null;   // 顧客ID
+        $this->saveClientPlaceId = null;  // 事業所ID
+        $this->saveWtBillItemCd = null;   // 請求項目コード
+    
+        foreach($EmployeeSalarys as $EmployeeSalary) {
+            // 顧客または事業所が変わった場合
+            if ($this->saveClientId != $EmployeeSalary->client_id || $this->saveClientPlaceId != $EmployeeSalary->clientplace_id) {
+                // 未出力の請求明細情報があるなら、請求明細レコードを作成
+                if($this->saveWtBillItemCd)
+                {
+                    $this->createBillDetail();
+                }
+                // 請求レコードを作成
+                $Bill = new modelBills();
+                $Bill->client_id = $EmployeeSalary->client_id;
+                $Bill->clientplace_id = $EmployeeSalary->clientplace_id;
+                $Bill->work_year = $this->workYear;
+                $Bill->work_month = $this->workMonth;
+                $Bill->bill_title = $this->workYear . '年' . $this->workMonth . '月分';
+                $Bill->bill_amount = 0;  // 集計前
+                $Bill->bill_tax = 0;     // 集計前
+                $Bill->bill_total = 0;   // 集計前
+                $Bill->save();
+                $this->saveBillId = $Bill->id;
+
+                $this->saveClientId = $EmployeeSalary->client_id;
+                $this->saveClientPlaceId = $EmployeeSalary->clientplace_id;
+                // $this->saveWtBillItemCd = null;
+                $this->saveDisplayOrder = 1;
+            }
+
+            // 作業種別または単価が変わった場合
+            if ($this->saveWtBillItemCd != $EmployeeSalary->wt_bill_item_cd || $this->saveUnitPrice != $EmployeeSalary->billhour) {
+                // 未出力の請求明細情報があるなら、請求明細レコードを作成
+                if($this->saveWtBillItemCd)
+                {
+                    $this->createBillDetail();
+                }
+                $this->saveWtBillItemCd = $EmployeeSalary->wt_bill_item_cd;
+                $this->saveUnitPrice = $EmployeeSalary->billhour;
+                $this->saveTitle = $EmployeeSalary->wt_bill_item_name;
+            }
+            // $this->saveUnitPrice = $EmployeeSalary->billhour;
+            $diWorkHours = $this->rukuruUtilTimeToDateInterval($EmployeeSalary->wrk_work_hours);
+            $this->saveQuantity += floor($diWorkHours->h + ($diWorkHours->i / 60));
+            $this->saveAmount += $EmployeeSalary->wrk_bill;
+        }
+
+        // 未出力の請求明細情報があるなら、請求明細レコードを作成
+        if($this->saveWtBillItemCd)
+        {
+            $this->createBillDetail();
+        }
+
+        // 請求明細の合計金額を計算
+        // work_year, work_month に該当する請求を取得
+        $Bills = modelBills::where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
             ->get();
         foreach($Bills as $Bill) {
-            $BillDetails = modelBillDetails::where('bill_id', $Bill->id)
-                ->get();
-            $Bill->amount = 0;
-            $Bill->tax = 0;
-            $Bill->total = 0;
-            foreach($BillDetails as $BillDetail) {
-                $Bill->amount += $BillDetail->amount;
-                $Bill->tax += $BillDetail->tax;
-                $Bill->total += $BillDetail->total;
-            }
+            $BillSummary = modelBillDetails::where('bill_id', $Bill->id)
+                ->selectRaw('sum(amount) as amount, sum(tax) as tax, sum(total) as total')
+                ->first();
+            $Bill->bill_amount = $BillSummary->amount;
+            $Bill->bill_tax = $BillSummary->tax;
+            $Bill->bill_total = $BillSummary->total;
             $Bill->save();
         }
     }
@@ -325,13 +411,20 @@ class Closepayrolls extends Component
     {
         // 対象年月の初期設定
         // 日にちが < 15 の場合は、前月の年月を設定
-        $this->workYear = date('Y');
-        $this->workMonth = date('m');
-        $Day = date('d');
-        if ($Day < 15) {
-            $this->workYear = date('Y', strtotime('-1 month'));
-            $this->workMonth = date('m', strtotime('-1 month'));
+        $this->workYear = session()->has('workYear') ? session('workYear') :  date('Y');
+        if(session()->has('workMonth')) {
+            $this->workMonth = session('workMonth');
         }
+        else {
+            $this->workMonth = date('m');
+            $Day = date('d');
+            if ($Day < 15) {
+                $this->workYear = date('Y', strtotime('-1 month'));
+                $this->workMonth = date('m', strtotime('-1 month'));
+            }
+        }
+        session(['workYear' => $this->workYear]);
+        session(['workMonth' => $this->workMonth]);
 
         // close or open の設定
         $this->setisClosed();
@@ -354,6 +447,7 @@ class Closepayrolls extends Component
         $this->validate();
         $this->setisClosed();
         $this->enableCloseButton = true;
+        session(['workYear' => $this->workYear]);
     }
 
     /**
@@ -365,6 +459,7 @@ class Closepayrolls extends Component
         $this->validate();
         $this->setisClosed();
         $this->enableCloseButton = true;
+        session(['workMonth' => $this->workMonth]);
     }
 
     /**
@@ -397,10 +492,10 @@ class Closepayrolls extends Component
         }
         catch (\Exception $e) {
             DB::rollBack();
-            Session::flash('error', '締め処理に失敗しました。');
+            session()->flash('error', '締め処理に失敗しました。');
             return;
         }
-        Session::flash('message', '締め処理が完了しました。');
+        session()->flash('message', '締め処理が完了しました。');
     }
 
     /**

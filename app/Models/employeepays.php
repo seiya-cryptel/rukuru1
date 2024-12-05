@@ -125,11 +125,12 @@ class employeepays extends Model
     static public function getPayhour($employeeId, $clientId, $clientPlaceId, $wtCd)
     {
         // 顧客IDと事業所IDが一致する時給を取得
-        $EmployeePay = employeepays::with('clientworktype')
+        $EmployeePay = employeepays::with('clientworktypes')
+            ->join('clientworktypes', 'clientworktypes.id', '=', 'employeepays.clientworktype_id')
             ->where('employee_id', $employeeId)
-            ->where('clientworktype.client_id', $clientId)
-            ->where('clientworktype.clientplace_id', $clientPlaceId)
-            ->where('clientworktype.wt_cd', $wtCd)
+            ->where('clientworktypes.client_id', $clientId)
+            ->where('clientworktypes.clientplace_id', $clientPlaceId)
+            ->where('clientworktypes.wt_cd', $wtCd)
             ->first();
         if ($EmployeePay) {
             return $EmployeePay->payhour;

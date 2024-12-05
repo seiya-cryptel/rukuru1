@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use DateTime;
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 use App\Services\TimeSlotType1;
 
 use Livewire\Component;
@@ -22,7 +22,7 @@ use App\Services\WorkhoursType1;
  */
 class Employeeworks extends Component
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
     
     #[Layout('layouts.app')]
 
@@ -551,8 +551,11 @@ class Employeeworks extends Component
      */
     protected function deleteEmployeeWork()
     {
+        $tmFirstDay = strtotime($this->workYear.'-'.$this->workMonth.'-01');
+        $firstDay = date('Y-m-01', $tmFirstDay);
+        $lastDay = date('Y-m-t', $tmFirstDay);
         modelEmployeeWorks::where('employee_id', $this->employee_id)
-            ->where('wrk_date', 'like', $this->workYear . '-' . $this->workMonth . '%')
+            ->whereBetween('wrk_date',[$firstDay, $lastDay])
             ->delete();
     }    
 

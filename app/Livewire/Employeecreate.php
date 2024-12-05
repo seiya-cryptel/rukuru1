@@ -5,11 +5,11 @@ use App\Models\employees as modelEmployees;
 
 use Livewire\Component;
 
-use App\Traits\rukuruUtilites;
+use App\Traits\rukuruUtilities;
 
 class Employeecreate extends EmployeeBase
 {
-    use rukuruUtilites;
+    use rukuruUtilities;
 
     /**
      * Reseting all the input fields
