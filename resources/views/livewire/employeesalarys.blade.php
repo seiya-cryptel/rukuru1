@@ -22,18 +22,18 @@
         <tr>
         @for($i = 0; $i < 10; $i++)
             @if($i == 0)
-            <th rowspan="2" style="color: blue;">手当</th>
+            <th rowspan="2" style="color: blue; width: 4rem;">手当</th>
             @endif
             <td>
-                <select class="form-control py-1 text-sm" id="Allows.{{$i}}.mad_cd" wire:model="Allows.{{$i}}.mad_cd" style="width: 6rem;">
+                <select class="form-control py-1 text-sm" id="Allows.{{$i}}.id" wire:model="Allows.{{$i}}.id" style="width: 8rem;">
                 <option value=""></option>
                 @foreach($refAllows as $refAllow)
-                    <option value="{{ $refAllow->mad_cd }}">{{ $refAllow->mad_name }}</option>
+                    <option value="{{ $refAllow->id }}">{{ $refAllow->mad_name }}</option>
                 @endforeach
                 </select>
 
-                <input type="text" class="form-control py-1 text-sm" id="Allows.{{$i}}.mad_amount" wire:model="Allows.{{$i}}.mad_amount" style="width: 5rem;" />
-                @error('Allows.'.$i.'.mad_amount')
+                <input type="text" class="form-control py-1 text-sm text-right" id="Allows.{{$i}}.amount" wire:model="Allows.{{$i}}.amount" wire:change="moneyChange($event.target.value, 'Allows', {{$i}})" style="width: 5rem;" />
+                @error('Allows.'.$i.'.amount')
                     <span class="text-red-500" style="color: red;">{{ $message }}</span>
                 @enderror
             </td>
@@ -48,15 +48,15 @@
             <th rowspan="2" style="color: darkred;">控除</th>
             @endif
             <td>
-                <select class="form-control py-1 text-sm" id="Deducts.{{$i}}.mad_cd" wire:model="Deducts.{{$i}}.mad_cd" style="width: 6rem;">
+                <select class="form-control py-1 text-sm" id="Deducts.{{$i}}.id" wire:model="Deducts.{{$i}}.id" style="width: 8rem;">
                 <option value=""></option>
                 @foreach($refDeducts as $refDeduct)
-                    <option value="{{ $refDeduct->mad_cd }}">{{ $refDeduct->mad_name }}</option>
+                    <option value="{{ $refDeduct->id }}">{{ $refDeduct->mad_name }}</option>
                 @endforeach
                 </select>
 
-                <input type="text" class="form-control py-1 text-sm" id="Deducts.{{$i}}.mad_amount" wire:model="Deducts.{{$i}}.mad_amount" style="width: 5rem;" />
-                @error('Deducts.'.$i.'.mad_amount')
+                <input type="text" class="form-control py-1 text-sm text-right" id="Deducts.{{$i}}.amount" wire:model="Deducts.{{$i}}.amount" wire:change="moneyChange($event.target.value, 'Deducts', {{$i}})" style="width: 5rem;" />
+                @error('Deducts.'.$i.'.amount')
                     <span class="text-red-500" style="color: red;">{{ $message }}</span>
                 @enderror
             </td>
@@ -68,12 +68,28 @@
         </table>
         <table>
         <tr>
+            <td style="width: 4rem; font-weight: bold; text-align: right;">+交通費</td>
             <td>
-                交通費
-                <input type="text" class="form-control py-1 text-sm" id="Transport" wire:model="Transport" style="width: 5rem;" />
+                <input type="text" class="form-control py-1 text-sm text-right" id="Transport" wire:model="Transport" wire:change="transportChange($event.target.value)" style="width: 5rem;" />
                 @error('Transport')
                     <span class="text-red-500" style="color: red;">{{ $message }}</span>
                 @enderror
+            </td>
+            <td style="width: 5rem; font-weight: bold; text-align: right;">+手当計</td>
+            <td>
+                <input type="text" class="form-control py-1 text-sm text-right" id="TotalAllow" wire:model="TotalAllow" style="width: 5rem; background-color: lightblue;" readonly="readonly" />
+            </td>
+            <td style="width: 4rem; font-weight: bold; text-align: right;">-控除計</td>
+            <td>
+                <input type="text" class="form-control py-1 text-sm text-right" id="TotalDeduct" wire:model="TotalDeduct" style="width: 5rem; background-color: orange;"  readonly="readonly" />
+            </td>
+            <td style="width: 4rem; font-weight: bold; text-align: right;">+給与計</td>
+            <td>
+                <input type="text" class="form-control py-1 text-sm text-right" id="TotalPay" wire:model="TotalPay" style="width: 5rem; background-color: lightblue;"  readonly="readonly" />
+            </td>
+            <td style="width: 4rem; font-weight: bold; text-align: right;">=支給額</td>
+            <td>
+                <input type="text" class="form-control py-1 text-sm text-right" id="PayAmount" wire:model="PayAmount" style="width: 5rem; background-color: yellow;" />
             </td>
         </tr>
         </table>
@@ -82,13 +98,12 @@
             <th>日付</th>
             <th>顧客</th>
             <th>場所</th>
-            <th>勤務</th>
-            <th>開始</th>
-            <th>終了</th>
-            <th>時間</th>
-            <th>時給</th>
-            <th>割増</th>
-            <th>支給</th>
+            <th colspan="2">作業</th>
+            <th style="width: 4rem;">開始</th>
+            <th style="width: 4rem;">終了</th>
+            <th style="width: 4rem;">時間</th>
+            <th style="width: 4rem;">時給</th>
+            <th style="width: 4rem;">支給</th>
         </tr>
         @foreach($refEmployeeSalarys as $refEmployeeSalary)
         <tr>
@@ -96,12 +111,12 @@
             <td>{{ $refEmployeeSalary->client->cl_name }}</td> 
             <td>{{ $refEmployeeSalary->clientplace->cl_pl_name }}</td> 
             <td>{{ $refEmployeeSalary->wt_cd }}</td> 
-            <td>{{ $refEmployeeSalary->wrk_work_start }}</td> 
-            <td>{{ $refEmployeeSalary->wrk_work_end }}</td> 
-            <td>{{ $refEmployeeSalary->wrk_work_hours }}</td> 
-            <td>{{ $refEmployeeSalary->payhour }}</td> 
-            <td>{{ $refEmployeeSalary->premiun }}</td> 
-            <td>{{ $refEmployeeSalary->wrk_pay }}</td> 
+            <td></td>
+            <td class="text-center">{{ $refEmployeeSalary->wrk_work_start }}</td> 
+            <td class="text-center">{{ $refEmployeeSalary->wrk_work_end }}</td> 
+            <td class="text-right">{{ $refEmployeeSalary->wrk_work_hours }}</td> 
+            <td class="text-right">{{ number_format($refEmployeeSalary->payhour) }}</td> 
+            <td class="text-right">{{ number_format($refEmployeeSalary->wrk_pay) }}</td> 
         </tr>
         @endforeach
         </table>

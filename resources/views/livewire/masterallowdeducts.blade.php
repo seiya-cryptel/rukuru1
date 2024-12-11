@@ -61,6 +61,7 @@
                 </tbody>
             </table>
         </div>
+        {{ $Mads->links() }}
     </div>    
     <script>
         function deleteMad(id){

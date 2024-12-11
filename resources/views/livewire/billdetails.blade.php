@@ -14,11 +14,13 @@
     <div class="col-md-8 py-1">
         {{ $Bill->work_year }}年 {{ $Bill->work_month }}月 {{ $Client['cl_cd'] }}:{{ $Client['cl_name'] }} 様 {{ $ClientPlace['cl_pl_cd'] }}:{{ $ClientPlace['cl_pl_name'] }}
 
-        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
+        <button wire:click.prevent="downloadBill()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Bill Export') }}</button>
+        <button wire:click.prevent="downloadBillDetails()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Bill Detail Export') }}</button>
+        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Cancel') }}</button>
     </div>
-    <div class="col-md-8 py-1 text-sm">
-        <table>
-            <thead>
+    <div>
+        <table class="min-w-full table-auto">
+            <thead class="bg-gray-200 text-sm">
             <tr>
                 <th>No.</th>
                 <th>{{ __('Title') }}</th>
@@ -27,24 +29,24 @@
                 <th>{{ __('Unit') }}</th>
                 <th>{{ __('Amount') }}</th>
                 <th>{{ __('Tax') }}</th>
-                <th>{{ __('Total') }}</th>
             </tr>
             </thead>
             <tbody>
             @foreach($BillDetails as $BillDetail)
             <tr>
-                <td>{{ $BillDetail->display_order }}</td> 
+                <td class="text-center">{{ $BillDetail->display_order }}</td> 
                 <td>{{ $BillDetail->title }}</td> 
-                <td>{{ $BillDetail->unit_price }}</td> 
-                <td>{{ $BillDetail->quantity }}</td> 
-                <td>{{ $BillDetail->unit }}</td> 
-                <td>{{ $BillDetail->amount }}</td> 
-                <td>{{ $BillDetail->tax }}</td> 
-                <td>{{ $BillDetail->total }}</td> 
+                <td class="text-right">{{ number_format($BillDetail->unit_price) }}</td> 
+                <td class="text-center">{{ number_format($BillDetail->quantity, 2) }}</td> 
+                <td class="text-center">{{ $BillDetail->unit }}</td> 
+                <td class="text-right">{{ number_format($BillDetail->amount) }}</td> 
+                <td class="text-right">{{ number_format($BillDetail->tax) }}</td> 
             </tr>
             @endforeach
             </tbody>
         </table>
-        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
+        <button wire:click.prevent="downloadBill()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Bill Export') }}</button>
+        <button wire:click.prevent="downloadBillDetails()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Bill Detail Export') }}</button>
+        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Cancel') }}</button>
     </div>
 </div>

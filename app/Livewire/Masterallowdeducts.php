@@ -2,15 +2,19 @@
 
 namespace App\Livewire;
 
+use Livewire\WithPagination;
 use Livewire\Component;
+
 use App\Models\masterallowdeducts as modelMad;
 
 class Masterallowdeducts extends Component
 {
+    use WithPagination;
+
     /**
      * record set of master allow deducts
      * */
-    public $Mads;
+    // public $Mads;
     /**
      * master allow deducts fields
      */
@@ -37,8 +41,9 @@ class Masterallowdeducts extends Component
 
     public function render()
     {
-        $this->Mads = modelMad::select('id', 'mad_cd', 'mad_allow', 'mad_deduct', 'mad_name', 'mad_notes')->get();
-        return view('livewire.masterallowdeducts');
+        $Mads = modelMad::orderBy('mad_cd')
+            ->paginate(15);
+        return view('livewire.masterallowdeducts', compact('Mads'));
     }
 
     /**
@@ -67,7 +72,7 @@ class Masterallowdeducts extends Component
     public function deleteMad($id) {
         try {
             modelMad::where('id', $id)->delete();
-            session()->flash('success', 'User deleted successfully.');
+            session()->flash('success', 'Item deleted successfully.');
         } catch (\Exception $e) {
             session()->flash('error', 'Something went wrong.');
         }

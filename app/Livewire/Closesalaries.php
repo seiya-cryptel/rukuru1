@@ -4,6 +4,11 @@ namespace App\Livewire;
 
 use Livewire\Component;
 
+use App\Models\salary as modelSalary;
+use App\Models\employeesalarys as modelEmployeeSalary;
+
+use App\Services\PhpSpreadsheetService;
+
 class Closesalaries extends Component
 {
     /**
@@ -12,56 +17,36 @@ class Closesalaries extends Component
     public $workYear, $workMonth;
 
     /**
-     * closing is enabled or not
-     * true if closing is enabled otherwise reopen is enabled
-     */
-    public $isClose = true;
-
-    /**
-     * enable close button
-     * true if enable close button
-     */
-    public $enableCloseButton = true;
-
-    /**
      * rules for validation
      */
     protected $rules = [
         'workYear' => 'required',
         'workMonth' => 'required',
     ];
-
-    /**
-     * set isClose
-     */
-    protected function setIsClose()
-    {
-        // closepayrolls テーブルに対象年月のレコードが存在するか確認
-        $closepayrolls = modelClosePayrolls::where('work_year', $this->workYear)
-            ->where('work_month', $this->workMonth)
-            ->first();
-        // 存在する場合は、closepayrolls テーブルの closed カラムの値を取得
-        // closed カラムの値が true の場合は、isClose に false を設定
-        $this->isClose = $closepayrolls ? ($closepayrolls->closed ? false : true) : true;        
-    }
     
     /**
      * mount function
      */
     public function mount()
     {
-        // 対象年月の初期設定
-        // 日にちが < 15 の場合は、前月の年月を設定
-        $this->workYear = date('Y');
-        $this->workMonth = date('m');
-        $Day = date('d');
-        if ($Day < 15) {
-            $this->workYear = date('Y', strtotime('-1 month'));
-            $this->workMonth = date('m', strtotime('-1 month'));
+        // 対象年月を設定
+        // セッション変数にキー（workYear、workMonth）が設定されている場合は、その値を取得
+        // 値を取得したあとは、セッション変数を削除
+        if (session()->has('workYear')) {
+            $this->workYear = session('workYear');
+        } else {
+            $this->workYear = date('Y');
         }
-
-        // close or open の設定
-        $this->setIsClose();
+        if(session()->has('workMonth')) {
+            $this->workMonth = session('workMonth');
+        } else {
+            $this->workMonth = date('m');
+            $Day = date('d');
+            if ($Day < 15) {
+                $this->workYear = date('Y', strtotime('-1 month'));
+                $this->workMonth = date('m', strtotime('-1 month'));
+            }
+        }
     }
 
     /**
@@ -77,10 +62,8 @@ class Closesalaries extends Component
      */
     public function changeWorkYear($value)
     {
-        $this->enableCloseButton = false;
         $this->validate();
-        $this->setIsClose();
-        $this->enableCloseButton = true;
+        session(['workYear' => $this->workYear]);
     }
 
     /**
@@ -88,25 +71,72 @@ class Closesalaries extends Component
      */
     public function changeWorkMonth()
     {
-        $this->enableCloseButton = false;
         $this->validate();
-        $this->setIsClose();
-        $this->enableCloseButton = true;
+        session(['workMonth' => $this->workMonth]);
     }
 
     /**
-     * 給与締め処理
+     * 給与出力
      */
-    public function closeSalaries()
+    public function downloaSalaries()
     {
+        $service = new PhpSpreadsheetService();
+        session()->flash('success', '給与データを作成します。');
 
+        // work_year, work_month に該当する給与レコードを取得
+        $Salaries = modelSalary::with('employee')
+            ->join('employees as employee', 'salarys.employee_id', '=', 'employee.id')
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->orderBy('employee.empl_cd')
+            ->get();
+
+        return $service->exportSalaries(
+            storage_path('data/salary_template.xlsx'),
+            [
+                'work_year' => $this->workYear,
+                'work_month' => $this->workMonth,
+            ],
+            $Salaries
+        );
     }
 
     /**
-     * 給与締め解除処理
+     * 給与明細出力
      */
-    public function reopenSalaries()
+    public function downloadSalaryDetails()
     {
+        $service = new PhpSpreadsheetService();
+        session()->flash('success', '給与明細データを作成します。');
 
+        // work_year, work_month に該当する給与レコードを取得
+        $Salaries = modelSalary::with('employee')
+            ->join('employees as employee', 'salarys.employee_id', '=', 'employee.id')
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->orderBy('employee.empl_cd')
+            ->get();
+
+        // work_year, work_month に該当する給与明細レコードを取得
+        $workYear = $this->workYear;
+        $workMonth = $this->workMonth;
+        $sStartDay = $workYear . '-' . $workMonth . '-01';
+        $sEndDay = $workYear . '-' . $workMonth . '-' . date('t', strtotime($sStartDay));
+        $SalaryDetails = modelEmployeeSalary::with('employee')
+        ->join('employees as employee', 'employeesalary.employee_id', '=', 'employee.id')
+        ->whereBetween('wrk_date', [$sStartDay, $sEndDay])
+        ->orderBy('employee.empl_cd')
+        ->orderByRaw('wrk_date, wrk_work_start')
+        ->get();
+
+        return $service->exportSalaryDetails(
+            storage_path('data/salary_template.xlsx'),
+            [
+                'work_year' => $this->workYear,
+                'work_month' => $this->workMonth,
+            ],
+            $Salaries,
+            $SalaryDetails
+        );
     }
 }

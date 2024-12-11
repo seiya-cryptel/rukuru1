@@ -51,7 +51,7 @@ class Allowdeductupdate extends Component
      * update the master data
      * @return void
      */
-    public function updateMad() {
+    public function updateMad2() {
         $this->validate();
         try {
             modelMad::where('id', $this->madId)->update([
@@ -61,7 +61,7 @@ class Allowdeductupdate extends Component
                 'mad_name' => $this->mad_name,
                 'mad_notes' => $this->mad_notes
             ]);
-            return redirect()->to('masterallowdeducts');
+            return redirect()->route('masterallowdeduct');
         } catch (\Exception $e) {
             session()->flash('error', 'Something went wrong.');
         }

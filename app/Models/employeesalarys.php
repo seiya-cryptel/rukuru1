@@ -70,6 +70,14 @@ class employeesalarys extends Model
     }
 
     /**
+     * 顧客、事業所、年月で絞り込み
+     * @param $client_id
+     * @param $clientplace_id
+     * @param $work_year
+     * @param $work_month
+     */
+
+    /**
      * Accesor/Mutator
      *
      * @param  string  $value

@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 
+use App\Traits\rukuruUtilities;
+
 use App\Models\employees as modelEmployees;
 use App\Models\masterallowdeducts as modelMasterAllowDeducts;
 use App\Models\employeesalarys as modelEmployeeSalarys;
@@ -12,6 +14,8 @@ use App\Models\salary as modelSalary;
 
 class Employeesalarys extends Component
 {
+    use rukuruUtilities;
+
     #[Layout('layouts.app')]
 
     // parameters
@@ -23,9 +27,11 @@ class Employeesalarys extends Component
      * Allow/Deduct reference
      */
     public $Employee;
+    public $Salarys;
     public $refAllows;
     public $refDeducts;
     public $refEmployeeSalarys;
+    public $refClientWorkTypes;
 
     /**
      * allow/deduct array
@@ -33,44 +39,83 @@ class Employeesalarys extends Component
     public $Allows = [];
     public $Deducts = [];
     public $Transport = 0;
+    
+    /**
+     * 合計額
+     */
+    public $TotalAllow = 0;     // 手当合計
+    public $TotalDeduct = 0;    // 控除合計
+    public $TotalPay = 0;       // 給与合計
+    public $PayAmount = 0;      // 支給額
+
+    /**
+     * 支給額 給与計 + 交通費 + 手当計 - 控除計 を計算する
+     */
+    protected function getPayAmount()
+    {
+        $this->TotalAllow = 0;
+        $this->TotalDeduct = 0;
+        for($i = 0; $i < 10; $i++)
+        {
+            $amount = $this->rukuruUtilMoneyValue($this->Allows[$i]['amount']);
+            $this->TotalAllow += $amount ? $amount : 0;
+            $amount = $this->rukuruUtilMoneyValue($this->Deducts[$i]['amount']);
+            $this->TotalDeduct += $amount ? $amount : 0;
+        }
+        $transport = $this->rukuruUtilMoneyValue($this->Transport);
+        $totalPay = $this->rukuruUtilMoneyValue($this->TotalPay);
+        $this->PayAmount = $totalPay + $transport + $this->TotalAllow - $this->TotalDeduct;
+        // 数値編集
+        $this->TotalAllow = number_format($this->TotalAllow);
+        $this->TotalDeduct = number_format($this->TotalDeduct);
+        $this->PayAmount = number_format($this->PayAmount);
+    }
 
     /**
      * mount function
      */
-    public function mount()
+    public function mount($workYear, $workMonth, $employee_id)
     {
-        // セッション変数から取得する
-        $this->employee_id = session('employee_id');
-        $this->workYear = session('workYear');
-        $this->workMonth = session('workMonth');
+        $this->employee_id = $employee_id;
+        $this->workYear = $workYear;
+        $this->workMonth = $workMonth;
         if(!$this->employee_id || !$this->workYear || !$this->workMonth) {
             return redirect()->route('salaryemployee');
         }
-        // セッション変数を削除する
-        session()->forget('employee_id');
-        session()->forget('workYear');
-        session()->forget('workMonth');
 
+        // 従業員情報を取得
         $this->Employee = modelEmployees::find($this->employee_id);
 
         $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
         $lastDate = date('Y-m-t', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
-        // $this->refEmployeeSalarys = modelEmployeeSalarys::where('employee_id', $this->employee_id)
-        $this->refEmployeeSalarys = modelEmployeeSalarys::where('employee_id', 16)
+        // 支給詳細情報を取得
+        $this->refEmployeeSalarys = modelEmployeeSalarys::where('employee_id', $employee_id)
             ->whereBetween('wrk_date', [$firstDate, $lastDate])
+            ->orderBy('wrk_date')
+            ->orderBy('wrk_work_start')
             ->get();
+        // 支給合計額を計算
+        $this->TotalPay = modelEmployeeSalarys::where('employee_id', $employee_id)
+            ->whereBetween('wrk_date', [$firstDate, $lastDate])
+            ->sum('wrk_pay');
+        $this->TotalPay = number_format($this->TotalPay);
+        // 現状の支給額を設定
+        $this->PayAmount = preg_replace('/[^0-9.]/', '', $this->TotalPay);
+        // 交通費を加算
+        $this->PayAmount += preg_replace('/[^0-9.]/', '', $this->Transport);
+
         $this->refAllows = modelMasterAllowDeducts::where('mad_allow', '1')->get();
         $this->refDeducts = modelMasterAllowDeducts::where('mad_deduct', '1')->get();
 
         for($i = 0; $i < 10; $i++)
         {
             $this->Allows[$i] = [
-                'mad_cd' => '',
-                'mad_amount' => 0,
+                'id' => null,
+                'amount' => 0,
             ];
             $this->Deducts[$i] = [
-                'mad_cd' => '',
-                'mad_amount' => 0,
+                'id' => null,
+                'amount' => 0,
             ];
         }
         $Allows = modelEmployeeAllowDeduct::where('employee_id', $this->employee_id)
@@ -87,23 +132,26 @@ class Employeesalarys extends Component
         foreach($Allows as $Allow)
         {
             $this->Allows[$i++] = [
-                'mad_cd' => $Allow->mad_cd,
-                'mad_amount' => $Allow->amount,
+                'id' => $Allow->masterallowdeduct_id,
+                'amount' => number_format($Allow->amount),
             ];
         }
         $i = 0;
         foreach($Deducts as $Deduct)
         {
             $this->Deducts[$i++] = [
-                'mad_cd' => $Deduct->mad_cd,
-                'mad_amount' => $Deduct->amount,
+                'id' => $Allow->masterallowdeduct_id,
+                'amount' => number_format($Deduct->amount),
             ];
         }   
-        $salary = modelSalary::where('employee_id', $this->employee_id)
+        $this->Salarys = modelSalary::where('employee_id', $this->employee_id)
             ->where('work_year', $this->workYear)
             ->where('work_month', $this->workMonth)
             ->first();
-        $this->Transport = $salary->transport;
+        $this->Transport = $this->Salarys ? number_format($this->Salarys->transport) : 0;
+
+        // 数値編集して表示
+        $this->getPayAmount();
     }
 
      /**
@@ -115,6 +163,34 @@ class Employeesalarys extends Component
     }
 
     /**
+     * 手当、控除金額が変更されたときに呼び出される
+     * @param string $money 金額入力
+     * @param string $field
+     * @param int $index
+     * @return void
+     * 交通費
+     */
+    public function moneyChange($money, $field, $index)
+    {
+        $money = preg_replace('/[^0-9.]/', '', $money);
+        $this->$field[$index]['amount'] = empty($money) ? '' : number_format($money);
+        $this->getPayAmount();
+    }
+
+    /**
+     * 金額項目が変更されたときに呼び出される
+     * @param string $money, string $field
+     * @return void
+     * 交通費
+     */
+    public function transportChange($money)
+    {
+        $money = preg_replace('/[^0-9.]/', '', $money);
+        $this->Transport = empty($money) ? '' : number_format($money);
+        $this->getPayAmount();
+    }
+
+    /**
      * save
      */
     public function saveEmployeeSalary()
@@ -122,14 +198,14 @@ class Employeesalarys extends Component
         // 手当を保存
         for($i = 0; $i < 10; $i++)
         {
-            if ($this->Allows[$i]['mad_cd'] != '') {
-                $this->Allows[$i]['mad_amount'] = str_replace(',', '', $this->Allows[$i]['mad_amount']);
+            if ($this->Allows[$i]['id']) {
+                $this->Allows[$i]['amount'] = $this->rukuruUtilMoneyValue($this->Allows[$i]['amount']);
             }
-            if ($this->Deducts[$i]['mad_cd'] != '') {
-                $this->Deducts[$i]['mad_amount'] = str_replace(',', '', $this->Deducts[$i]['mad_amount']);
+            if ($this->Deducts[$i]['id']) {
+                $this->Deducts[$i]['amount'] = $this->rukuruUtilMoneyValue($this->Deducts[$i]['amount']);
             }
         }
-        $this->Transport = str_replace(',', '', $this->Transport);
+        $this->Transport = $this->rukuruUtilMoneyValue($this->Transport);
 
         // 従業員ID、対象年月から給与情報を作成または再作成
         $salary = modelSalary::where('employee_id', $this->employee_id)
@@ -159,27 +235,37 @@ class Employeesalarys extends Component
             ->where('work_year', $this->workYear)
             ->where('work_month', $this->workMonth)
             ->delete();
+
         for($i = 0; $i < 10; $i++)
         {
-            if ($this->Allows[$i]['mad_cd'] != '') {
+            if ($this->Allows[$i]['id']) {
+                $master = modelMasterAllowDeducts::find($this->Allows[$i]['id']);
                 $mad = new modelEmployeeAllowDeduct();
                 $mad->employee_id = $this->employee_id;
                 $mad->work_year = $this->workYear;
                 $mad->work_month = $this->workMonth;
-                $mad->mad_cd = $this->Allows[$i]['mad_cd'];
+                $mad->masterallowdeduct_id = $this->Allows[$i]['id'];
+                $mad->mad_cd = $master->mad_cd;
                 $mad->mad_deduct = 0;
-                $mad->amount = $this->Allows[$i]['mad_amount'];
+                $mad->mad_name = $master->mad_name;
+                $mad->amount = $this->Allows[$i]['amount'];
                 $salary->allow_amount += $mad->amount;
                 $mad->save();
             }
-            if ($this->Deducts[$i]['mad_cd'] != '') {
+        }
+        for($i = 0; $i < 10; $i++)
+        {
+            if ($this->Deducts[$i]['id']) {
+                $master = modelMasterAllowDeducts::find($this->Deducts[$i]['id']);
                 $mad = new modelEmployeeAllowDeduct();
                 $mad->employee_id = $this->employee_id;
                 $mad->work_year = $this->workYear;
                 $mad->work_month = $this->workMonth;
-                $mad->mad_cd = $this->Deducts[$i]['mad_cd'];
+                $mad->masterallowdeduct_id = $this->Allows[$i]['id'];
+                $mad->mad_cd = $master->mad_cd;
                 $mad->mad_deduct = 1;
-                $mad->amount = $this->Deducts[$i]['mad_amount'];
+                $mad->mad_name = $master->mad_name;
+                $mad->amount = $this->Deducts[$i]['amount'];
                 $salary->deduct_amount += $mad->amount;
                 $mad->save();
             }

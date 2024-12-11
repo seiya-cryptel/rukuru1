@@ -44,13 +44,11 @@ class Bills extends Component
         // 値を取得したあとは、セッション変数を削除
         if (session()->has('workYear')) {
             $this->workYear = session('workYear');
-            session()->forget('workYear');
         } else {
             $this->workYear = date('Y');
         }
         if(session()->has('workMonth')) {
             $this->workMonth = session('workMonth');
-            session()->forget('workMonth');
         } else {
             $this->workMonth = date('m');
             $Day = date('d');
@@ -61,12 +59,10 @@ class Bills extends Component
         }
         if(session()->has('client_id')) {
             $this->client_id = session('client_id');
-            session()->forget('client_id');
         } else {
             $this->client_id = null;
         }if(session()->has('clientplace_id')) {
             $this->clientplace_id = session('clientplace_id');
-            session()->forget('clientplace_id');
         } else {
             $this->clientplace_id = null;
         }
@@ -81,18 +77,19 @@ class Bills extends Component
     public function render()
     {
         $query = modelBills::with('client', 'clientplace')
+            ->select('bills.*')
             ->join('clients', 'bills.client_id', '=', 'clients.id')
             ->join('clientplaces', 'bills.clientplace_id', '=', 'clientplaces.id')
             ->where('work_year', $this->workYear)
             ->where('work_month', $this->workMonth);
 
         if ($this->client_id) {
-            $query->where('client_id', $this->client_id);
+            $query->where('bills.client_id', $this->client_id);
             $this->refClientPlaces = modelClientPlaces::where('client_id', $this->client_id)->get();
         }
 
         if($this->clientplace_id) {
-            $query->where('clientplace_id', $this->clientplace_id);
+            $query->where('bills.clientplace_id', $this->clientplace_id);
         }
 
         $Bills = $query->paginate(10);
@@ -133,8 +130,7 @@ class Bills extends Component
      * */
     public function showBillDetails($billId)
     {
-        // セッション変数にキー（bill_id）を設定
-        session(['bill_id' => $billId]);
-        return redirect()->route('billdetails');
+        return redirect()->route('billdetails',
+            ['billId' => $billId]);
     }
 }

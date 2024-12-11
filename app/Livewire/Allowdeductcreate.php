@@ -62,7 +62,7 @@ class Allowdeductcreate extends Component
                 'mad_name' => $this->mad_name,
                 'mad_notes' => $this->mad_notes
             ]);
-            return redirect()->to('masterallowdeducts');
+            return redirect()->route('masterallowdeduct');
         } catch (\Exception $e) {
             session()->flash('error', 'Something went wrong, please try again later.');
         }

@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="container">
                 <div class="row justify-content-center mt-3">
-                    @livewire('billdetails')
+                    @livewire('billdetails', ['bill_id' => $billId])
                 </div>
             </div>
         </div>

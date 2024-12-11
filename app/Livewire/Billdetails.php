@@ -8,6 +8,9 @@ use App\Models\clients as modelClient;
 use App\Models\clientplaces as modelClientPlace;
 use App\Models\bills as modelBill;
 use App\Models\billdetails as modelBillDetails;
+use App\Models\employeesalarys as modelEmployeeSalarys;
+
+use App\Services\PhpSpreadsheetService;
 
 class Billdetails extends Component
 {
@@ -22,15 +25,16 @@ class Billdetails extends Component
 
     /**
      * mount function
+     * @param $workYear
+     * @param $workMonth
+     * @param $bill_id
      */
-    public function mount()
+    public function mount($bill_id)
     {
-        // セッション変数から取得する
-        $this->bill_id = session('bill_id');
-        // セッション変数を削除する
-        session()->forget('bill_id');
+        $this->bill_id = $bill_id;
         // 関連レコードを取得
-        $this->Bill = modelBill::find($this->bill_id);
+        $this->Bill = modelBill::with('client', 'clientplace')
+            ->find($this->bill_id);
         $this->Client = $this->Bill->client;
         $this->ClientPlace = $this->Bill->clientplace;
         // 請求明細情報を取得
@@ -43,6 +47,59 @@ class Billdetails extends Component
     public function render()
     {
         return view('livewire.billdetails');
+    }
+
+    /**
+     * 請求書ダウンロード
+     */
+    public function downloadBill()
+    {
+        $service = new PhpSpreadsheetService();
+        session()->flash('success', '請求書を作成します。');
+        return $service->exportBill(
+            storage_path('data/bill_template.xlsx'),
+            // 'storage/data/bill_template.xlsx',
+            [
+                'bill_date' => $this->Bill->bill_date,
+                'bill_no' => $this->Bill->bill_no,
+                'cl_name' => $this->Client->cl_name,
+            ],
+            $this->BillDetails
+        );
+    }
+
+    /**
+     * 請求明細ダウンロード
+     */
+    public function downloadBillDetails()
+    {
+        $service = new PhpSpreadsheetService();
+        session()->flash('success', '請求明細を作成します。');
+
+        // 各顧客、事業所について、work_year, work_month に該当する従業員給与レコードを取得
+        $workYear = $this->Bill->work_year;
+        $workMonth = $this->Bill->work_month;
+        $sStartDay = $workYear . '-' . $workMonth . '-01';
+        $sEndDay = $workYear . '-' . $workMonth . '-' . date('t', strtotime($sStartDay));
+        $EmployeeSalarys = modelEmployeeSalarys::with('employee')
+            ->where('client_id', $this->Bill->client_id)
+            ->where('clientplace_id', $this->Bill->clientplace_id)
+            ->whereBetween('wrk_date', [$sStartDay, $sEndDay])
+            ->orderByRaw('wrk_date, employee_id, wrk_work_start')
+            ->get();
+
+            $clientInfo = [
+                'cl_name' => $this->Client->cl_name,
+                'cl_place_name' => $this->ClientPlace->cl_place_name,
+                'work_year' => $workYear,
+                'work_month' => $workMonth,
+            ];
+
+        return $service->exportBillDetails(
+            storage_path('data/billdetails_template.xlsx'),
+            $clientInfo,
+            $EmployeeSalarys
+        );
     }
 
     /**

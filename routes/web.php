@@ -183,7 +183,7 @@ function () {
         /**
          * Routes for the 請求　請求明細表示
          */
-        Route::view('billdetails', 'billdetails')
+        Route::view('billdetails/{billId}', 'billdetails')
             ->middleware(['auth', 'verified'])
             ->name('billdetails');
 
@@ -197,7 +197,7 @@ function () {
         /**
         * Routes for the 手当控除入力 個人別  
         */
-        Route::view('employeesalary', 'employeesalary')
+        Route::view('employeesalary/{workYear}/{workMonth}/{employeeId}', 'employeesalary')
             ->middleware(['auth', 'verified'])
             ->name('employeesalary');
 
