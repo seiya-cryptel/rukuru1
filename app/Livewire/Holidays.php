@@ -4,6 +4,9 @@ namespace App\Livewire;
 
 use Livewire\WithPagination;
 use Livewire\Component;
+
+use App\Consts\AppConsts;
+
 use App\Models\holiday as modelHoliday;
 use App\Models\clients as modelClients;
 
@@ -11,7 +14,6 @@ class Holidays extends Component
 {
     use WithPagination;
 
-    const SESSION_TARGET_YEAR = __CLASS__ . '::targetYear';
     /**
      * search year
      */
@@ -34,7 +36,12 @@ class Holidays extends Component
      */
     public function mount()
     {
-        $this->targetYear = session()->has(self::SESSION_TARGET_YEAR) ? session()->get(self::SESSION_TARGET_YEAR) : date('Y');
+        if (session()->has(AppConsts::SESS_WORK_YEAR)) {
+            $this->targetYear = session()->get(AppConsts::SESS_WORK_YEAR);
+        } else {
+            $this->targetYear = date('Y');
+            session()->put(AppConsts::SESS_WORK_YEAR, $this->targetYear);
+        }
     }
 
     /**
@@ -45,8 +52,7 @@ class Holidays extends Component
         $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
         $Holidays = modelHoliday::whereYear('holiday_date', $this->targetYear)
             ->orderBy('holiday_date', 'asc')
-            ->paginate(25);
-        session()->put(self::SESSION_TARGET_YEAR, $this->targetYear);
+            ->paginate(AppConsts::PAGINATION);
         return view('livewire.holidays', compact('Holidays'));
     }
 
@@ -56,7 +62,7 @@ class Holidays extends Component
     public function changeYear($year)
     {
         $this->targetYear = $year;
-        session()->put(self::SESSION_TARGET_YEAR, $this->targetYear);
+        session()->put(AppConsts::SESS_WORK_YEAR, $this->targetYear);
     }
 
     /**

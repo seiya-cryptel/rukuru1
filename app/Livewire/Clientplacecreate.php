@@ -70,9 +70,10 @@ class Clientplacecreate extends Component
                 'cl_pl_alpha' => $this->cl_pl_alpha,
                 'cl_pl_notes' => $this->cl_pl_notes,
             ]);
+            session()->flash('success', __('Create') . ' ' . __('Done'));
             return redirect()->route('clientplace');
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong, please try again later.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 

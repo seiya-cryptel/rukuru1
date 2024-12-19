@@ -65,7 +65,7 @@ class employeesalarys extends Model
         return [
             'wrk_work_start' => 'datetime',
             'wrk_work_end' => 'datetime',
-            'wrk_work_hours' => 'datetime',
+            'wrk_work_hours' => 'datetime', // 00:15:00 が 12:15 になる?
         ];
     }
 
@@ -110,7 +110,7 @@ class employeesalarys extends Model
     public function wrkWorkHours(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('h:i', strtotime($value)),
+            get: fn ($value) => $value,
             set: fn ($value) => $this->attributes['wrk_work_hours'] = $value === '' ? null : $value, 
         );
     }

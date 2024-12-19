@@ -4,6 +4,9 @@ namespace App\Livewire;
 
 use Livewire\WithPagination;
 use Livewire\Component;
+
+use App\Consts\AppConsts;
+
 use App\Models\applogs as modelApplogs;
 
 class Applogs extends Component
@@ -22,7 +25,7 @@ class Applogs extends Component
     {
         $Applogs = modelApplogs::orderBy('logged_at', 'desc')
             ->take(100)
-            ->paginate(10);
+            ->paginate(AppConsts::PAGINATION);
         return view('livewire.applogs', compact('Applogs'));
     }
 

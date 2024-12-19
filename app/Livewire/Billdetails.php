@@ -107,12 +107,6 @@ class Billdetails extends Component
      */
     public function cancelBillDetails()
     {
-        // セッション変数にキーを設定する
-        session(['workYear' => $this->Bill->workYear]);
-        session(['workMonth' => $this->Bill->workMonth]);
-        session(['client_id' => $this->Bill->client_id]);
-        session(['clientplace_id' => $this->Bill->clientplace_id]);
-
         // redirect to workemployees
         return redirect()->route('bills');
     }

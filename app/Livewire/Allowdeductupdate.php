@@ -61,6 +61,7 @@ class Allowdeductupdate extends Component
                 'mad_name' => $this->mad_name,
                 'mad_notes' => $this->mad_notes
             ]);
+            session()->flash('success', __('Save') . __('Done'));
             return redirect()->route('masterallowdeduct');
         } catch (\Exception $e) {
             session()->flash('error', 'Something went wrong.');

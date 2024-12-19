@@ -127,14 +127,14 @@ trait rukuruUtilities
     }
 
     /**
-     * hh:mm 文字列を DateInterval に変換する
+     * hh:mm, hh:mm:ss 文字列を DateInterval に変換する
      * @param string $time
      * @return DateInterval
      */
     public function rukuruUtilTimeToDateInterval($time) : DateInterval
     {
         // 時刻を DateInterval に変換する
-        return new DateInterval('PT' . str_replace(':', 'H', $time) . 'M');
+        return new DateInterval('PT' . substr($time, 0, 2) . 'H' . substr($time, 3, 2) . 'M');
     }
 
     /**
@@ -225,6 +225,14 @@ trait rukuruUtilities
                 // 昼休み時間を差し引く
                 $work_hours = $this->rukuruUtilDateIntervalSub($work_hours, $wt_lunch_break_start->diff($wt_lunch_break_end));
             }
+            
+            // (4)終了時刻≦昼休憩開始または昼休憩終了≦開始時刻　昼休憩は無視する
+            // 昼休憩にかからない場合
+            elseif($start >= $wt_lunch_break_end
+            || $wt_lunch_break_start >= $end)
+            {
+                // 何もしない
+            }
 
             // (2) 開始時刻≧昼休憩開始かつ昼休憩終了≦終了時刻　昼休憩終了を開始時刻にする
             // 昼休憩途中から勤務する場合
@@ -242,14 +250,6 @@ trait rukuruUtilities
             {
                 $end = $wt_lunch_break_start;
                 $work_hours = $start->diff($end);
-            }
-            
-            // (4)終了時刻≦昼休憩開始または昼休憩終了≦開始時刻　昼休憩は無視する
-            // 昼休憩にかからない場合
-            elseif($start >= $wt_lunch_break_end
-            || $wt_lunch_break_start >= $end)
-            {
-                // 何もしない
             }
         }
 

@@ -70,9 +70,10 @@ class Employeeupdate extends EmployeeBase
                 'empl_main_client_name' => $this->empl_main_client_name,
                 'empl_notes' => $this->empl_notes,
             ]);
+            session()->flash('success', __('Update'). ' ' . __('Done'));
             return redirect()->route('employee');
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 }

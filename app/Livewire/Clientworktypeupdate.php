@@ -117,9 +117,10 @@ class Clientworktypeupdate extends ClientworktypeBase
                 'wt_bill_holiday_midnight' => $this->rukuruUtilMoneyValue($this->wt_bill_holiday_midnight),
                 'wt_notes' => $this->wt_notes,
             ]);
+            session()->flash('success', __('Update'). ' ' . __('Done'));
             return redirect()->route('clientworktype');
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 }

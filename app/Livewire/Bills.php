@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\WithPagination;
 use Livewire\Component;
 
+use App\Consts\AppConsts;
+
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\bills as modelBills;
@@ -38,17 +40,16 @@ class Bills extends Component
      */
     public function mount()
     {
-        // set default values
         // 対象年月を設定
         // セッション変数にキー（workYear、workMonth）が設定されている場合は、その値を取得
-        // 値を取得したあとは、セッション変数を削除
-        if (session()->has('workYear')) {
-            $this->workYear = session('workYear');
+        if (session()->has(AppConsts::SESS_WORK_YEAR)) {
+            $this->workYear = session(AppConsts::SESS_WORK_YEAR);
         } else {
             $this->workYear = date('Y');
+            session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
         }
-        if(session()->has('workMonth')) {
-            $this->workMonth = session('workMonth');
+        if(session()->has(AppConsts::SESS_WORK_MONTH)) {
+            $this->workMonth = session(AppConsts::SESS_WORK_MONTH);
         } else {
             $this->workMonth = date('m');
             $Day = date('d');
@@ -56,13 +57,15 @@ class Bills extends Component
                 $this->workYear = date('Y', strtotime('-1 month'));
                 $this->workMonth = date('m', strtotime('-1 month'));
             }
+            session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
         }
-        if(session()->has('client_id')) {
-            $this->client_id = session('client_id');
+        
+        if(session()->has(AppConsts::SESS_CLIENT_ID)) {
+            $this->client_id = session(AppConsts::SESS_CLIENT_ID);
         } else {
             $this->client_id = null;
-        }if(session()->has('clientplace_id')) {
-            $this->clientplace_id = session('clientplace_id');
+        }if(session()->has(AppConsts::SESS_CLIENT_PLACE_ID)) {
+            $this->clientplace_id = session(AppConsts::SESS_CLIENT_PLACE_ID);
         } else {
             $this->clientplace_id = null;
         }
@@ -103,7 +106,7 @@ class Bills extends Component
     public function changeWorkYear($value)
     {
         $this->validate();
-        session(['workYear' => $this->workYear]);
+        session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
     }
 
     /**
@@ -112,7 +115,7 @@ class Bills extends Component
     public function changeWorkMonth()
     {
         $this->validate();
-        session(['workMonth' => $this->workMonth]);
+        session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
     }
 
     /**

@@ -128,8 +128,9 @@ class Pricetable extends Component
             ]);
             $this->resetFields();
             $this->addPriceTable = false;
+            session()->flash('success', __('Create'). ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong, please try again later.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 
@@ -139,26 +140,22 @@ class Pricetable extends Component
      * @return void
      */
     public function editPriceTable($id) {
-        try {
-            $PriceTable = modelPriceTables::findOrFail($id);
-            if(!$PriceTable) {
-                session()->flash('error', 'Master record not found.');
-            }
-            else {
-                $this->PriceTableId = $id;
-                $this->client_id = $PriceTable->client_id;
-                $this->clientplace_id = $PriceTable->clientplace_id;
-                $this->wt_cd = $PriceTable->wt_cd;
-                $this->bill_name = $PriceTable->bill_name;
-                $this->bill_print_name = $PriceTable->bill_print_name;
-                $this->bill_unitprice = $PriceTable->bill_unitprice;
-                $this->display_order = $PriceTable->display_order;
-                
-                $this->updatePriceTable = true;
-                $this->addPriceTable = false;
-            }
-        } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+        $PriceTable = modelPriceTables::findOrFail($id);
+        if(!$PriceTable) {
+            session()->flash('error', __('Not Found'));
+        }
+        else {
+            $this->PriceTableId = $id;
+            $this->client_id = $PriceTable->client_id;
+            $this->clientplace_id = $PriceTable->clientplace_id;
+            $this->wt_cd = $PriceTable->wt_cd;
+            $this->bill_name = $PriceTable->bill_name;
+            $this->bill_print_name = $PriceTable->bill_print_name;
+            $this->bill_unitprice = $PriceTable->bill_unitprice;
+            $this->display_order = $PriceTable->display_order;
+            
+            $this->updatePriceTable = true;
+            $this->addPriceTable = false;
         }
     }
 
@@ -179,8 +176,9 @@ class Pricetable extends Component
                 'display_order' => $this->display_order,
                 'notes' => $this->notes,
             ]);
+            session()->flash('success', __('Update'). ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 
@@ -202,9 +200,9 @@ class Pricetable extends Component
     public function deletePriceTable($id) {
         try {
             modelPriceTables::where('id', $id)->delete();
-            session()->flash('success', 'User deleted successfully.');
+            session()->flash('success', __('Delete'). ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 }

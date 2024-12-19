@@ -103,9 +103,10 @@ class Clientupdate extends Component
                 'cl_round_end' => $this->cl_round_end,
                 'cl_notes' => $this->cl_notes,
             ]);
+            session()->flash('success', __('Update') . ' ' . __('Done'));
             return redirect()->route('client');
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
         $this->updateClient = false;
     }

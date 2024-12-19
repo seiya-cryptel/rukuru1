@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 
+use App\Consts\AppConsts;
+
 use App\Models\salary as modelSalary;
 use App\Models\employeesalarys as modelEmployeeSalary;
 
@@ -31,14 +33,14 @@ class Closesalaries extends Component
     {
         // 対象年月を設定
         // セッション変数にキー（workYear、workMonth）が設定されている場合は、その値を取得
-        // 値を取得したあとは、セッション変数を削除
-        if (session()->has('workYear')) {
-            $this->workYear = session('workYear');
+        if (session()->has(AppConsts::SESS_WORK_YEAR)) {
+            $this->workYear = session(AppConsts::SESS_WORK_YEAR);
         } else {
             $this->workYear = date('Y');
+            session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
         }
-        if(session()->has('workMonth')) {
-            $this->workMonth = session('workMonth');
+        if(session()->has(AppConsts::SESS_WORK_MONTH)) {
+            $this->workMonth = session(AppConsts::SESS_WORK_MONTH);
         } else {
             $this->workMonth = date('m');
             $Day = date('d');
@@ -46,6 +48,7 @@ class Closesalaries extends Component
                 $this->workYear = date('Y', strtotime('-1 month'));
                 $this->workMonth = date('m', strtotime('-1 month'));
             }
+            session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
         }
     }
 
@@ -63,7 +66,7 @@ class Closesalaries extends Component
     public function changeWorkYear($value)
     {
         $this->validate();
-        session(['workYear' => $this->workYear]);
+        session([AppConsts::WORK_YEAR => $this->workYear]);
     }
 
     /**
@@ -72,7 +75,7 @@ class Closesalaries extends Component
     public function changeWorkMonth()
     {
         $this->validate();
-        session(['workMonth' => $this->workMonth]);
+        session([AppConsts::WORK_MONTH => $this->workMonth]);
     }
 
     /**

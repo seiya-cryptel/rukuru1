@@ -104,7 +104,7 @@ class Clientworktypes extends Component
     public function deleteClientWorktype($id) {
         try {
             modelClientWorktypes::where('id', $id)->delete();
-            session()->flash('success', __('Client work type'). ' ' . __('deleted successfully.'));
+            session()->flash('success', __('Delete'). ' ' . __('Done'));
         } catch (\Exception $e) {
             session()->flash('error', __('Something went wrong.'));
         }

@@ -83,7 +83,7 @@ class applogs extends Model
     public function loggedAt(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '0000-00-00 00:00:00' || $value === null) ? '' : date('Y-m-d H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : date('Y-m-d H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['logged_at'] = $value === '' ? null : $value, 
         );
     }

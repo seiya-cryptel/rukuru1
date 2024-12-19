@@ -14,8 +14,14 @@
     <div class="col-md-8 py-1">
         {{ $workYear }}年 {{ $workMonth }}月 {{ $Employee->empl_cd }}:{{ $Employee->empl_name_last }} {{ $Employee->empl_name_first }} さん
 
-        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" wire:click.prevent="saveEmployeeSalary" data-save="true">{{ __('Save') }}</button>
-        <button wire:click.prevent="cancelEmployeeSalary()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
+        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" wire:click.prevent="saveEmployeeSalary" data-save="true">{{ __('Save') }}</button>
+        <button wire:click.prevent="cancelEmployeeSalary()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">
+            @if($boolReturnToWorkEntry)
+            {{ __('Return to Work Entry') }}
+            @else
+            {{ __('Cancel') }}
+            @endif
+        </button>
     </div>
     <div class="col-md-8 py-1 text-sm">
         <table>

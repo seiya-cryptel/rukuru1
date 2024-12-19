@@ -60,9 +60,9 @@ class Client extends Component
     public function deleteClient($id) {
         try {
             modelClients::where('id', $id)->delete();
-            session()->flash('success', 'User deleted successfully.');
+            session()->flash('success', __('Delete') . ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 }

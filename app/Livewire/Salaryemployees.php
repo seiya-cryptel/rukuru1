@@ -7,19 +7,14 @@ use Illuminate\Support\Facades\DB;
 use Livewire\WithPagination;
 use Livewire\Component;
 
+use App\Consts\AppConsts;
+
 use App\Models\employees as modelEmployees;
+use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
 
 class Salaryemployees extends Component
 {
     use WithPagination;
-
-    /**
-     * session variable key
-     */
-    public const __CLASS__ = 'Salaryemployees';
-    public const SESS_WORKYEAR = self::__CLASS__ . '_workYear';
-    public const SESS_WORKMONTH = self::__CLASS__ . '_workMonth';
-    public const SESS_SEARCH = self::__CLASS__ . '_search';
 
     /**
      * work year, month
@@ -44,25 +39,16 @@ class Salaryemployees extends Component
      */
     public function mount()
     {
-        // set default values
         // 対象年月を設定
         // セッション変数にキー（workYear、workMonth）が設定されている場合は、その値を取得
-        // 値を取得したあとは、セッション変数を削除
-        if (session()->has(self::SESS_WORKYEAR)) {
-            $this->workYear = session(self::SESS_WORKYEAR);
+        if (session()->has(AppConsts::SESS_WORK_YEAR)) {
+            $this->workYear = session(AppConsts::SESS_WORK_YEAR);
         } else {
             $this->workYear = date('Y');
-            session([self::SESS_WORKYEAR => $this->workYear]);
+            session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
         }
-        if(session()->has('workMonth')) {
-            $this->workMonth = session('workMonth');
-            session()->forget('workMonth');
-        } else {
-            $this->workMonth = date('m');
-        }
-
-        if(session()->has(self::SESS_WORKMONTH)) {
-            $this->workMonth = session(self::SESS_WORKMONTH);
+        if(session()->has(AppConsts::SESS_WORK_MONTH)) {
+            $this->workMonth = session(AppConsts::SESS_WORK_MONTH);
         } else {
             $this->workMonth = date('m');
             $Day = date('d');
@@ -70,13 +56,12 @@ class Salaryemployees extends Component
                 $this->workYear = date('Y', strtotime('-1 month'));
                 $this->workMonth = date('m', strtotime('-1 month'));
             }
-            session([self::SESS_WORKYEAR => $this->workYear]);
-            session([self::SESS_WORKMONTH => $this->workMonth]);
+            session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
         }
 
         // 従業員検索条件を取得
-        if(session()->has(self::SESS_SEARCH)) {
-            $this->search = session(self::SESS_SEARCH);
+        if(session()->has(AppConsts::SESS_SEARCH)) {
+            $this->search = session(AppConsts::SESS_SEARCH);
         } else {
             $this->search = '';
         }
@@ -87,9 +72,6 @@ class Salaryemployees extends Component
         // 勤怠対象月の初日と最終日を取得
         $firstDay = date('Y-m-01', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
         $lastDay = date('Y-m-t', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
-
-        // 従業員検索条件をセッションに保存
-        session([self::SESS_SEARCH => $this->search]);
 
         // 氏名やコードの一部で検索
         $query = modelEmployees::where(function ($query) {
@@ -114,7 +96,7 @@ class Salaryemployees extends Component
             ->orWhere('empl_resign_date', '');
         });
 
-        $Employees = $query->paginate(10);
+        $Employees = $query->paginate(AppConsts::PAGINATION);
 
         return view('livewire.salaryemployees', compact('Employees'));
     }
@@ -125,6 +107,7 @@ class Salaryemployees extends Component
     public function clearSearch()
     {
         $this->search = '';
+        session([AppConsts::SESS_SEARCH => $this->search]);
     }
 
     /**
@@ -132,7 +115,7 @@ class Salaryemployees extends Component
      */
     public function updateWorkYear($value)
     {
-        session([self::SESS_WORKYEAR => $value]);
+        session([AppConsts::SESS_WORK_YEAR => $value]);
     }
 
     /**
@@ -140,7 +123,7 @@ class Salaryemployees extends Component
      */
     public function updateWorkMonth($value)
     {
-        session([self::SESS_WORKMONTH => $value]);
+        session([AppConsts::SESS_WORK_YEAR => $value]);
     }
 
     /**
@@ -148,7 +131,31 @@ class Salaryemployees extends Component
      * */
     public function editSalary($employeeId)
     {
+        // 戻る画面を手当控除入力従業員一覧に設定
+        session()->forget(AppConsts::SESS_PREVIOUS_URL);
+
         return redirect()->route('employeesalary', 
             ['workYear' => $this->workYear, 'workMonth' => $this->workMonth, 'employeeId' => $employeeId]);
+    }
+
+    /**
+     * allow deduct record exists?
+     * */
+    public function allowDeductExists($employeeId)
+    {
+        try {
+            $this->validate();
+        } catch (\Exception $e) {
+            return 'error';
+        }
+
+        // 勤怠データが存在するかどうかを確認する
+        $firstDay = date('Y-m-01', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
+        $lastDay = date('Y-m-t', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
+
+        $Query = modelEmployeeAllowDeduct::where('employee_id', $employeeId)
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth);
+        return $Query->exists() ? 'exists' : 'notexists';
     }
 }

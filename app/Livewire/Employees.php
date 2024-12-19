@@ -4,18 +4,14 @@ namespace App\Livewire;
 
 use Livewire\WithPagination;
 use Livewire\Component;
+
+use App\Consts\AppConsts;
+
 use App\Models\employees as modelEmployees;
 
 class Employees extends Component
 {
     use WithPagination;
-
-    /**
-     * session variable key
-     */
-    public const __CLASS__ = 'Employees';
-    public const SESS_SEARCH = self::__CLASS__ . '_search';
-    public const SESS_RETIRE = self::__CLASS__ . '_retire';
 
     /**
      * search keyword
@@ -39,16 +35,12 @@ class Employees extends Component
      */
     public function mount()
     {
-        $this->search = session(self::SESS_SEARCH, '');
-        $this->retire = session(self::SESS_RETIRE, false);
+        $this->search = session(AppConsts::SESS_SEARCH, '');
+        $this->retire = session(AppConsts::SESS_RETIRE, false);
     }
 
     public function render()
     {
-        // 検索条件をセッションに保存
-        session([self::SESS_SEARCH => $this->search]);
-        session([self::SESS_RETIRE => $this->retire]);
-
         $Query = modelEmployees::query();
         // 退職者非表示
         if (! $this->retire) {
@@ -110,9 +102,34 @@ class Employees extends Component
     public function deleteEmployee($id) {
         try {
             modelEmployees::where('id', $id)->delete();
-            session()->flash('success', 'User deleted successfully.');
+            session()->flash('success', __('Delete'). ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
+    }
+
+    /**
+     * change search keyword
+     */
+    public function changeSearch()
+    {
+        session([AppConsts::SESS_SEARCH => $this->search]);
+    }
+
+    /**
+     * clear search keyword
+     */
+    public function clearSearch()
+    {
+        $this->search = '';
+        session([AppConsts::SESS_SEARCH => '']);
+    }
+
+    /**
+     * change retire flag
+     */
+    public function changeRetire()
+    {
+        session([AppConsts::SESS_RETIRE => $this->retire]);
     }
 }

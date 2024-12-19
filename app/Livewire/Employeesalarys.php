@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 
+use App\Consts\AppConsts;
+
 use App\Traits\rukuruUtilities;
 
 use App\Models\employees as modelEmployees;
@@ -39,6 +41,7 @@ class Employeesalarys extends Component
     public $Allows = [];
     public $Deducts = [];
     public $Transport = 0;
+    public $Transport_masterallowdeduct_id = 0;
     
     /**
      * 合計額
@@ -47,6 +50,11 @@ class Employeesalarys extends Component
     public $TotalDeduct = 0;    // 控除合計
     public $TotalPay = 0;       // 給与合計
     public $PayAmount = 0;      // 支給額
+
+    /**
+     * 勤怠入力に戻る
+     */
+    public $boolReturnToWorkEntry = false;
 
     /**
      * 支給額 給与計 + 交通費 + 手当計 - 控除計 を計算する
@@ -83,6 +91,10 @@ class Employeesalarys extends Component
             return redirect()->route('salaryemployee');
         }
 
+        // 戻り先を設定
+        $this->boolReturnToWorkEntry = 
+            (session()->has(AppConsts::SESS_PREVIOUS_URL) && (session(AppConsts::SESS_PREVIOUS_URL) == 'employeework')) ? true : false;
+
         // 従業員情報を取得
         $this->Employee = modelEmployees::find($this->employee_id);
 
@@ -104,9 +116,19 @@ class Employeesalarys extends Component
         // 交通費を加算
         $this->PayAmount += preg_replace('/[^0-9.]/', '', $this->Transport);
 
-        $this->refAllows = modelMasterAllowDeducts::where('mad_allow', '1')->get();
-        $this->refDeducts = modelMasterAllowDeducts::where('mad_deduct', '1')->get();
+        $AllowTransport = modelMasterAllowDeducts::where('mad_allow', '1')
+            ->where('mad_cd', '=', '31')   // 交通費
+            ->first();
+        $this->refAllows = modelMasterAllowDeducts::where('mad_allow', '1')
+            ->where('mad_cd', '<>', '31')   // 交通費を除く
+            ->orderBy('mad_cd')
+            ->get();
+        $this->refDeducts = modelMasterAllowDeducts::where('mad_deduct', '1')
+            ->orderBy('mad_cd')
+            ->get();
 
+        $this->Transport_masterallowdeduct_id = $AllowTransport->id;
+        $this->Transport = 0;
         for($i = 0; $i < 10; $i++)
         {
             $this->Allows[$i] = [
@@ -131,6 +153,11 @@ class Employeesalarys extends Component
         $i = 0;
         foreach($Allows as $Allow)
         {
+            if($Allow->mad_cd == '31') {
+                $this->Transport_masterallowdeduct_id = $Allow->id;
+                $this->Transport = number_format($Allow->amount);
+                continue;
+            }
             $this->Allows[$i++] = [
                 'id' => $Allow->masterallowdeduct_id,
                 'amount' => number_format($Allow->amount),
@@ -148,7 +175,6 @@ class Employeesalarys extends Component
             ->where('work_year', $this->workYear)
             ->where('work_month', $this->workMonth)
             ->first();
-        $this->Transport = $this->Salarys ? number_format($this->Salarys->transport) : 0;
 
         // 数値編集して表示
         $this->getPayAmount();
@@ -173,7 +199,8 @@ class Employeesalarys extends Component
     public function moneyChange($money, $field, $index)
     {
         $money = preg_replace('/[^0-9.]/', '', $money);
-        $this->$field[$index]['amount'] = empty($money) ? '' : number_format($money);
+        $money = empty($money) ? 0 : $money;
+        $this->$field[$index]['amount'] = $money=='' ? '' : number_format($money);
         $this->getPayAmount();
     }
 
@@ -195,7 +222,7 @@ class Employeesalarys extends Component
      */
     public function saveEmployeeSalary()
     {
-        // 手当を保存
+        // 手当・控除を数値化
         for($i = 0; $i < 10; $i++)
         {
             if ($this->Allows[$i]['id']) {
@@ -205,6 +232,7 @@ class Employeesalarys extends Component
                 $this->Deducts[$i]['amount'] = $this->rukuruUtilMoneyValue($this->Deducts[$i]['amount']);
             }
         }
+        // 交通費を数値化
         $this->Transport = $this->rukuruUtilMoneyValue($this->Transport);
 
         // 従業員ID、対象年月から給与情報を作成または再作成
@@ -217,12 +245,12 @@ class Employeesalarys extends Component
             $salary->employee_id = $this->employee_id;
             $salary->work_year = $this->workYear;
             $salary->work_month = $this->workMonth;
+            $salary->Transport = 0;
+            $salary->allow_amount = 0;
+            $salary->deduct_amount = 0;
         }
 
         // 給与情報を更新
-        $salary->allow_amount = 0;
-        $salary->deduct_amount = 0;
-        $salary->transport = $this->Transport;
         $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
         $lastDate = date('Y-m-t', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
         $salary->work_amount = modelEmployeeSalarys::where('employee_id', $this->employee_id)
@@ -236,6 +264,21 @@ class Employeesalarys extends Component
             ->where('work_month', $this->workMonth)
             ->delete();
 
+        // 交通費を手当として登録
+        $master = modelMasterAllowDeducts::find($this->Transport_masterallowdeduct_id);
+        $mad = new modelEmployeeAllowDeduct();
+        $mad->employee_id = $this->employee_id;
+        $mad->work_year = $this->workYear;
+        $mad->work_month = $this->workMonth;
+        $mad->masterallowdeduct_id = $this->Transport_masterallowdeduct_id;
+        $mad->mad_cd = '31';
+        $mad->mad_deduct = 0;
+        $mad->mad_name = $master->mad_name;
+        $mad->amount = $this->Transport;
+        $salary->Transport += $this->Transport;;
+        $mad->save();
+
+        // 手当登録
         for($i = 0; $i < 10; $i++)
         {
             if ($this->Allows[$i]['id']) {
@@ -272,7 +315,7 @@ class Employeesalarys extends Component
         }
 
         // 給与情報の支給額を更新
-        $salary->pay_amount = $salary->work_amount + $salary->allow_amount - $salary->deduct_amount;
+        $salary->pay_amount = $salary->work_amount + $salary->allow_amount - $salary->deduct_amount + $salary->Transport;
         $salary->save();
 
         // redirect to workemployees
@@ -284,9 +327,15 @@ class Employeesalarys extends Component
      */
     public function cancelEmployeeSalary()
     {
-        // セッション変数にキーを設定する
-        session(['workYear' => $this->workYear]);
-        session(['workMonth' => $this->workMonth]);
+        // 勤怠入力に戻る条件
+        if($this->boolReturnToWorkEntry) {
+            $client_id = session(AppConsts::SESS_CLIENT_ID);
+            $clientplace_id = session(AppConsts::SESS_CLIENT_PLACE_ID);
+
+            return redirect()->route('employeework', 
+                ['workYear' => $this->workYear, 'workMonth' => $this->workMonth, 
+                'clientId' => $client_id, 'clientPlaceId' => $clientplace_id, 'employeeId' => $this->employee_id]);
+        }
 
         // redirect to workemployees
         return redirect()->route('salaryemployee');

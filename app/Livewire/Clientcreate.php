@@ -104,9 +104,10 @@ class Clientcreate extends Component
                 'cl_round_end' => $this->cl_round_end,
                 'cl_notes' => $this->cl_notes,
             ]);
+            session()->flash('success', __('Create') . ' ' . __('Done'));
             return redirect()->route('client');
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong, please try again later.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 

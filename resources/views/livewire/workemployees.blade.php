@@ -52,7 +52,7 @@
             </td>
             <td>
                 従業員検索
-                <input wire:model.live="search" type="text" class="form-control py-1 text-sm" id="search" placeholder="{{ __('Search Employees...') }}">
+                <input wire:model.live="search" type="text" class="form-control py-1 text-sm" id="search" placeholder="{{ __('Search Employees...') }}" wire:change="changeSearch($event.target.value)">
                 <span>
                     <button wire:click="clearSearch()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">X</button>
                 </span>

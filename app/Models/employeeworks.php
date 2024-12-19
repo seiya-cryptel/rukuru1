@@ -177,7 +177,7 @@ class employeeworks extends Model
     public function wrkWorkHours(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('h:i', strtotime($value)),
+            get: fn ($value) => $value,
             set: fn ($value) => $this->attributes['wrk_work_hours'] = $value === '' ? null : $value, 
         );
     }

@@ -74,8 +74,9 @@ class User extends Component
             ]);
             $this->resetFields();
             $this->addUser = false;
+            session()->flash('success', __('Create'). ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong, please try again later.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 
@@ -85,21 +86,17 @@ class User extends Component
      * @return void
      */
     public function editUser($id) {
-        try {
-            $user = Users::findOrFail($id);
-            if(!$user) {
-                session()->flash('error', 'User not found.');
-            }
-            else {
-                $this->userId = $id;
-                $this->name = $user->name;
-                $this->email = $user->email;
-                $this->password = $user->password;
-                $this->updateUser = true;
-                $this->addUser = false;
-            }
-        } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+        $user = Users::findOrFail($id);
+        if(!$user) {
+            session()->flash('error', __('Not Found'));
+        }
+        else {
+            $this->userId = $id;
+            $this->name = $user->name;
+            $this->email = $user->email;
+            $this->password = $user->password;
+            $this->updateUser = true;
+            $this->addUser = false;
         }
     }
 
@@ -115,8 +112,9 @@ class User extends Component
                 'email' => $this->email,
                 'password' => $this->password
             ]);
+            session()->flash('success', __('Update'). ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 
@@ -138,9 +136,9 @@ class User extends Component
     public function deleteUser($id) {
         try {
             Users::where('id', $id)->delete();
-            session()->flash('success', 'User deleted successfully.');
+            session()->flash('success', __('Delete'). ' ' . __('Done'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 

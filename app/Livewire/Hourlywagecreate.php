@@ -71,9 +71,10 @@ class Hourlywagecreate extends HourlywageBase
             $EmployeePay->notes = $this->wt_notes;
             $EmployeePay->save();
 
+            session()->flash('success', __('Create'). ' ' . __('Done'));
             return redirect()->route('hourlywage', ['id' => $this->employee_id]);
         } catch (\Exception $e) {
-            session()->flash('error', 'Error: ' . $e->getMessage());
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 

@@ -71,7 +71,7 @@ class Clientplaces extends Component
     public function deleteClientPlace($id) {
         try {
             modelClientPlaces::where('id', $id)->delete();
-            session()->flash('success', __('Client work place') . ' ' . __('deleted successfully.'));
+            session()->flash('success', __('Delete') . ' ' . __('Done'));
         } catch (\Exception $e) {
             session()->flash('error', __('Something went wrong.'));
         }

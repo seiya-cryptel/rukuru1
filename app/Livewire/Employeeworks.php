@@ -3,17 +3,21 @@
 namespace App\Livewire;
 
 use DateTime;
-use App\Traits\rukuruUtilities;
-use App\Services\TimeSlotType1;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+
+use App\Consts\AppConsts;
+use App\Traits\rukuruUtilities;
+use App\Services\TimeSlotType1;
 
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
+use App\Models\employeesalarys as modelEmployeeSalarys;
+use App\Models\salary as modelSalary;
 
 use App\Services\WorkhoursType1;
 
@@ -555,6 +559,8 @@ class Employeeworks extends Component
         $firstDay = date('Y-m-01', $tmFirstDay);
         $lastDay = date('Y-m-t', $tmFirstDay);
         modelEmployeeWorks::where('employee_id', $this->employee_id)
+            ->where('client_id', $this->client_id)
+            ->where('clientplace_id', $this->clientplace_id)
             ->whereBetween('wrk_date',[$firstDay, $lastDay])
             ->delete();
     }    
@@ -591,6 +597,38 @@ class Employeeworks extends Component
     }
 
     /**
+     * 従業員支給額レコードの作成、更新
+     */
+    protected function makeSalary()
+    {
+        // 従業員ID、対象年月から給与情報を作成または再作成
+        $salary = modelSalary::where('employee_id', $this->employee_id)
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->first();
+        if(!$salary) {
+            $salary = new modelSalary();
+            $salary->employee_id = $this->employee_id;
+            $salary->work_year = $this->workYear;
+            $salary->work_month = $this->workMonth;
+            $salary->Transport = 0;
+            $salary->allow_amount = 0;
+            $salary->deduct_amount = 0;
+        }
+
+        // 給与情報を更新
+        $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
+        $lastDate = date('Y-m-t', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
+        $salary->work_amount = modelEmployeeSalarys::where('employee_id', $this->employee_id)
+            ->whereBetween('wrk_date', [$firstDate, $lastDate])
+            ->sum('wrk_pay');
+        $salary->notes = '';
+
+        $salary->pay_amount = $salary->work_amount + $salary->allow_amount - $salary->deduct_amount + $salary->Transport;
+        $salary->save();
+    }
+
+    /**
      * save work time
      */
     public function saveEmployeeWork()
@@ -599,12 +637,13 @@ class Employeeworks extends Component
         try {
             $this->deleteEmployeeWork();
             $this->insertEmployeeWork();
+            $this->makeSalary();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
-        session()->flash('success', __('Timekeeping') . 'を保存しました。');
+        session()->flash('success', __('Timekeeping') . ' ' . __('Saved.'));
         return $this->cancelEmployeepay();
     }
 
@@ -613,13 +652,22 @@ class Employeeworks extends Component
      */
     public function cancelEmployeepay()
     {
-        // セッション変数にキーを設定する
-        session(['workYear' => $this->workYear]);
-        session(['workMonth' => $this->workMonth]);
-        session(['client_id' => $this->client_id]);
-        session(['clientplace_id' => $this->clientplace_id]);
-
         // redirect to workemployees
         return redirect()->route('workemployee');
+    }
+
+    /**
+     * 手当控除入力画面に遷移する
+     */
+    public function selectAllowDeduct()
+    {
+        $this->saveEmployeeWork();
+
+        session([AppConsts::SESS_CLIENT_ID => $this->client_id]);
+        session([AppConsts::SESS_CLIENT_PLACE_ID => $this->clientplace_id]);
+        session([AppConsts::SESS_PREVIOUS_URL => 'employeework']);
+
+        return redirect()->route('employeesalary', 
+            ['workYear' => $this->workYear, 'workMonth' => $this->workMonth, 'employeeId' => $this->employee_id]);
     }
 }

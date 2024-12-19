@@ -128,7 +128,7 @@ class clientworktypes extends Model
     public function wtLunchBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value,
             set: fn ($value) => $this->attributes['wt_lunch_break'] = $value === '' ? null : $value, 
         );
     }
@@ -149,7 +149,7 @@ class clientworktypes extends Model
     public function wtEveningBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value,
             set: fn ($value) => $this->attributes['wt_evening_break'] = $value === '' ? null : $value, 
         );
     }
@@ -171,7 +171,7 @@ class clientworktypes extends Model
     public function wtNightBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value,
             set: fn ($value) => $this->attributes['wt_night_break'] = $value === '' ? null : $value, 
         );
     }
@@ -192,7 +192,7 @@ class clientworktypes extends Model
     public function wtMidnightBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '00:00:00' || $value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value,
             set: fn ($value) => $this->attributes['wt_midnight_break'] = $value === '' ? null : $value, 
         );
     }

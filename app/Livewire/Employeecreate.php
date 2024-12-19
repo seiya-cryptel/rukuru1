@@ -79,9 +79,10 @@ class Employeecreate extends EmployeeBase
                 'empl_main_client_name' => $this->empl_main_client_name,
                 'empl_notes' => $this->empl_notes,
             ]);
+            session()->flash('success', __('Create'). ' ' . __('Done'));
             return redirect()->route('employee');
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong, please try again later.');
+            session()->flash('error', 'Something went wrong.');
         }
     }
 }

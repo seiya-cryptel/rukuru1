@@ -4,6 +4,9 @@ namespace App\Livewire;
 
 use Livewire\WithPagination;
 use Livewire\Component;
+
+use App\Consts\AppConsts;
+
 use App\Models\closepayrolls as modelClosePayrolls;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
@@ -22,16 +25,6 @@ use App\Models\employeeworks as modelEmployeeWorkss;    // 勤怠データ
 class Workemployees extends Component
 {
     use WithPagination;
-
-    /**
-     * session variable key
-     */
-    public const __CLASS__ = 'Workemployees';
-    public const SESS_WORKYEAR = self::__CLASS__ . '_workYear';
-    public const SESS_WORKMONTH = self::__CLASS__ . '_workMonth';
-    public const SESS_CLIENTID = self::__CLASS__ . '_clientId';
-    public const SESS_CLIENTPLACEID = self::__CLASS__ . '_clientPlaceId';
-    public const SESS_SEARCH = self::__CLASS__ . '_search';
 
     /**
      * work year, month and client information
@@ -61,18 +54,16 @@ class Workemployees extends Component
      * */
     public function mount()
     {
-        // set default values
         // 対象年月を設定
         // セッション変数にキー（workYear、workMonth）が設定されている場合は、その値を取得
-        if (session()->has(self::SESS_WORKYEAR)) {
-            $this->workYear = session(self::SESS_WORKYEAR);
+        if (session()->has(AppConsts::SESS_WORK_YEAR)) {
+            $this->workYear = session(AppConsts::SESS_WORK_YEAR);
         } else {
             $this->workYear = date('Y');
-            session([self::SESS_WORKYEAR => $this->workYear]);
+            session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
         }
-        
-        if(session()->has(self::SESS_WORKMONTH)) {
-            $this->workMonth = session(self::SESS_WORKMONTH);
+        if(session()->has(AppConsts::SESS_WORK_MONTH)) {
+            $this->workMonth = session(AppConsts::SESS_WORK_MONTH);
         } else {
             $this->workMonth = date('m');
             $Day = date('d');
@@ -80,24 +71,22 @@ class Workemployees extends Component
                 $this->workYear = date('Y', strtotime('-1 month'));
                 $this->workMonth = date('m', strtotime('-1 month'));
             }
-            session([self::SESS_WORKYEAR => $this->workYear]);
-            session([self::SESS_WORKMONTH => $this->workMonth]);
+            session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
         }
-
-        if(session()->has(self::SESS_CLIENTID)) {
-            $this->client_id = session(self::SESS_CLIENTID);
+        
+        if(session()->has(AppConsts::SESS_CLIENT_ID)) {
+            $this->client_id = session(AppConsts::SESS_CLIENT_ID);
         } else {
             $this->client_id = null;
-        }
-        if(session()->has(self::SESS_CLIENTPLACEID)) {
-            $this->clientplace_id = session(self::SESS_CLIENTPLACEID);
+        }if(session()->has(AppConsts::SESS_CLIENT_PLACE_ID)) {
+            $this->clientplace_id = session(AppConsts::SESS_CLIENT_PLACE_ID);
         } else {
             $this->clientplace_id = null;
         }
 
         // 従業員検索条件を取得
-        if(session()->has(self::SESS_SEARCH)) {
-            $this->search = session(self::SESS_SEARCH);
+        if(session()->has(AppConsts::SESS_SEARCH)) {
+            $this->search = session(AppConsts::SESS_SEARCH);
         } else {
             $this->search = '';
         }
@@ -124,9 +113,6 @@ class Workemployees extends Component
         $firstDay = date('Y-m-01', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
         $lastDay = date('Y-m-t', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
 
-        // 従業員検索条件をセッションに保存
-        session([self::SESS_SEARCH => $this->search]);
-
         $query = modelEmployees::where(function ($query) {
             $query->where('empl_name_last', 'like', '%'.$this->search.'%')
             ->orWhere('empl_name_first', 'like', '%'.$this->search.'%')
@@ -137,6 +123,7 @@ class Workemployees extends Component
             ->orWhere('empl_email', 'like', '%'.$this->search.'%')
             ->orWhere('empl_mobile', 'like', '%'.$this->search.'%')
             ->orWhere('empl_cd', 'like', '%'.$this->search.'%')
+            ->orWhere('empl_notes', 'like', '%'.$this->search.'%')
             ;
         });
 
@@ -155,11 +142,20 @@ class Workemployees extends Component
     }
 
     /**
-     * clear search string
-     * */
+     * change search keyword
+     */
+    public function changeSearch()
+    {
+        session([AppConsts::SESS_SEARCH => $this->search]);
+    }
+
+    /**
+     * clear search keyword
+     */
     public function clearSearch()
     {
         $this->search = '';
+        session([AppConsts::SESS_SEARCH => '']);
     }
 
     /**
@@ -170,8 +166,8 @@ class Workemployees extends Component
         // client_idが更新されたときに呼び出される
         $this->refClientPlaces = modelClientPlaces::where('client_id', $value)->get(); // 新しいclient_idに基づいて場所のデータを取得
         $this->clientplace_id = null; // clientplace_idをリセット
-        session([self::SESS_CLIENTID => $value]);
-        session([self::SESS_CLIENTPLACEID => null]);
+        session([AppConsts::SESS_CLIENT_ID => $value]);
+        session([AppConsts::SESS_CLIENT_PLACE_ID => null]);
     }
 
     /**
@@ -181,7 +177,7 @@ class Workemployees extends Component
     {
         // clientplace_idが更新されたときに呼び出される
         $this->clientplace_id = $value;
-        session([self::SESS_CLIENTPLACEID => $value]);
+        session([AppConsts::SESS_CLIENT_PLACE_ID => $value]);
     }
 
     /**
@@ -189,7 +185,7 @@ class Workemployees extends Component
      */
     public function updateWorkYear($value)
     {
-        session([self::SESS_WORKYEAR => $value]);
+        session([AppConsts::SESS_WORK_YEAR => $value]);
     }
 
     /**
@@ -197,7 +193,7 @@ class Workemployees extends Component
      */
     public function updateWorkMonth($value)
     {
-        session([self::SESS_WORKMONTH => $value]);
+        session([AppConsts::SESS_WORK_MONTH => $value]);
     }
 
     /**

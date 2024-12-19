@@ -73,10 +73,10 @@ class Hourlywageupdate extends HourlywageBase
             $employeePay->wt_notes = $this->wt_notes;
             $employeePay->save();
 
-            session()->flash('message', 'Employee pay updated successfully.');
+            session()->flash('success', __('Update'). ' ' . __('Done'));
             return redirect()->route('hourlywage', ['id' => $this->employee_id]);
         } catch (\Exception $e) {
-            session()->flash('error', 'Error: ' . $e->getMessage());
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 

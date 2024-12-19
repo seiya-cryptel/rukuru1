@@ -59,9 +59,10 @@ class Holidaycreate extends Component
                 'holiday_name' => $this->holiday_name,
                 'notes' => $this->notes,
             ]);
+            session()->flash('success', __('Create'). ' ' . __('Done'));
             return redirect()->route('holiday');
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong, please try again later.');
+            session()->flash('error', __('Something went wrong.'));
         }
     }
 

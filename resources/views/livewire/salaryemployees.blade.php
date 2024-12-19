@@ -55,7 +55,14 @@
                     @foreach ($Employees as $Employee)
                         <tr class="border-b">
                             <td>
-                                <button wire:click="editSalary({{$Employee->id}})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">選択</button>
+                            @php
+                                $cond = $this->allowDeductExists($Employee->id)
+                            @endphp
+                            @if($cond == 'exists')
+                                <button wire:click="editSalary({{$Employee->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">編集</button>
+                            @elseif($cond == 'notexists')
+                                <button wire:click="editSalary({{$Employee->id}})" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">登録</button>
+                            @endif
                             </td>
                             <td>
                                 {{$Employee->empl_cd}}
