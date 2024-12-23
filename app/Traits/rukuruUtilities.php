@@ -138,6 +138,22 @@ trait rukuruUtilities
     }
 
     /**
+     * DateInterval を hh:mm 形式の文字列に変換する
+     * @param DateInterval $interval
+     * @return string
+     */
+    public function rukuruUtilDateIntervalFormat($interval) : string
+    {
+        if(!$interval)
+        {
+            return '';
+        }
+        $hours = $interval->h + ($interval->d * 24);
+        $minutes = $interval->i;
+        return sprintf('%02d:%02d', $hours, $minutes);
+    }
+
+    /**
      * 開始時刻をまるめる
      * @param DateTime $time
      * @param integer $minutes

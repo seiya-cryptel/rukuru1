@@ -115,7 +115,7 @@ abstract class TimeSlotBase
      */
     public function getWorkStart()
     {
-        return $this->work_start->format('Y-m-d H:i:0');
+        return $this->work_start ? $this->work_start->format('Y-m-d H:i:0') : '';
     }
 
     /**
@@ -123,7 +123,7 @@ abstract class TimeSlotBase
      */
     public function getWorkEnd()
     {
-        return $this->work_end->format('Y-m-d H:i:0');
+        return $this->work_end ? $this->work_end->format('Y-m-d H:i:0') : '';
     }
 
     /**
@@ -131,6 +131,6 @@ abstract class TimeSlotBase
      */
     public function getWorkHours()
     {
-        return $this->work_hours->format('%H:%I');
+        return $this->rukuruUtilDateIntervalFormat($this->work_hours);
     }
 }
