@@ -35,7 +35,7 @@ class TimeSlotType1 extends TimeSlotBase
         $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start);
         if($this->Client->cl_round_start)
         {
-            $this->work_start->rukuruUtilTimeRoundUp($this->work_start, $Client->cl_round_start);
+            $this->rukuruUtilTimeRoundUp($this->work_start, $this->Client->cl_round_start);
         }
     }
 
@@ -62,7 +62,7 @@ class TimeSlotType1 extends TimeSlotBase
         }
         if($this->Client->cl_round_end)
         {
-            $this->work_end->rukuruUtilTimeRoundDown($this->work_end, $Client->cl_round_end);
+            $this->rukuruUtilTimeRoundDown($this->work_end, $this->Client->cl_round_end);
         }
     }
 

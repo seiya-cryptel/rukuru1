@@ -136,7 +136,7 @@ class Employeeworks extends Component
                     'wrk_log_end' => $Slot->wrk_log_end,
                     'wrk_work_start' => $Slot->wrk_work_start,
                     'wrk_work_end' => $Slot->wrk_work_end,
-                    'wrk_work_hours' => $Slot->wrk_work_hours,
+                    'wrk_work_hours' => substr($Slot->wrk_work_hours, 0, 2) . ':' . substr($Slot->wrk_work_hours, 3, 2),
                     'class_bg_color' => $this->TimekeepingDays[$day]['leave'] ? 'bg-gray-100' : '',
                     'readonly' => $this->TimekeepingDays[$day]['leave'] ? 'readonly=\"readonly\"' : '',
                 ];
