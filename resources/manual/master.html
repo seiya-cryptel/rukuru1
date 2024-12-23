@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>2&period; &#x30de;&#x30b9;&#x30bf;&#x767b;&#x9332;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h3 id="2-マスタ登録">2. マスタ登録</h3>
+<h4 id="21-祝日">2.1 祝日</h4>
+<p>休日を判断するために、毎年の祝日を登録します。上部メニューでマスタ＞祝日を選んでください。</p>
+<img width="50%" src="/manual/imgs/master01shukujitsu01.png" alt="祝日一覧画面">
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>今年の祝日を元に、翌年の祝日をコピーで作成するボタンを追加予定です。
+少しお待ち下さい。</p>
+</div>
+<p>画面左上の西暦年を変更すると、その年の祝日が表示されます。［祝日追加］で新しい祝日を追加できます。［編集］で日付や名称を変更できます。［削除］で祝日を削除できます。
+下は祝日の追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master01shukujitsu02.png" alt="祝日詳細画面">
+<p>この画面で日付と祝日名前を入力、変更できます。</p>
+<div class="markdown-alert markdown-alert-important"><p class="markdown-alert-title"><svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p><p>顧客専用の祝日を登録する機能がありますが、今のシステム バージョンではサポート対象外です。</p>
+</div>
+<h4 id="2２-顧客">2.２ 顧客</h4>
+<p>上部メニューでマスタ＞顧客を選ぶと顧客の一覧が表示されます。</p>
+<img width="50%" src="/manual/imgs/master02kokyaku01.png" alt="顧客一覧画面">
+<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title"><svg class="octicon octicon-alert mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p><p>一度顧客を削除すると、同じコードや名称で登録しても別の顧客として扱われます。
+顧客に関わる勤怠や請求が不要になるまで、顧客を削除しないようにしましょう。</p>
+</div>
+<p>下は顧客の追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master02kokyaku02.png" alt="顧客詳細画面">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>コード</td>
+<td>◯</td>
+<td>顧客に割り当てるコードを8文字以内で指定します。後から変更可能です。他の顧客と重複できません。</td>
+</tr>
+<tr>
+<td>02</td>
+<td>顧客名前</td>
+<td>◯</td>
+<td>顧客に割り当てるコードを8文字以内で指定します。後から変更可能です。請求書に印字されるので正規の名称を設定します。</td>
+</tr>
+<tr>
+<td>03</td>
+<td>顧客カナ</td>
+<td>◯</td>
+<td></td>
+</tr>
+<tr>
+<td>04</td>
+<td>顧客英字</td>
+<td>◯</td>
+<td></td>
+</tr>
+<tr>
+<td>05</td>
+<td>法定休日</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>06</td>
+<td>法定外休日</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>07</td>
+<td>週40時間超</td>
+<td></td>
+<td>この顧客での作業が週40時間を超える分を残業として扱う場合”はい”を選択します。</td>
+</tr>
+<tr>
+<td>08</td>
+<td>週の始まり</td>
+<td></td>
+<td>週40時間超の計算で、集計を開始する週を設定します。</td>
+</tr>
+<tr>
+<td>09</td>
+<td>開始時間丸め</td>
+<td></td>
+<td>開始時間を丸める分数を設定します。ゼロの場合は打刻通りに計算します。</td>
+</tr>
+<tr>
+<td>10</td>
+<td>終了時間丸め</td>
+<td></td>
+<td>終了時間を丸める分数を設定します。ゼロの場合は打刻通りに計算します。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="23-事業所">2.3 事業所</h4>
+<p>上部メニューでマスタ＞事業所を選ぶと顧客事業所の一覧が表示されます。</p>
+<img width="50%" src="/manual/imgs/master03jigyousho01.png" alt="事業所一覧画面">
+<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title"><svg class="octicon octicon-alert mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p><p>一度事業所を削除すると、同じコードや名称で登録しても別の事業所として扱われます。
+事業所に関わる勤怠や請求が不要になるまで、削除しないようにしましょう。</p>
+</div>
+<p>下は事業所の追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master03jigyousho02.png" alt="事業所詳細画面">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>顧客</td>
+<td>◯</td>
+<td>この事業所の顧客を選択します。</td>
+</tr>
+<tr>
+<td>02</td>
+<td>事業所コード</td>
+<td>◯</td>
+<td>事業所に割り当てるコードを8文字以内で指定します。後から変更可能です。</td>
+</tr>
+<tr>
+<td>03</td>
+<td>事業所名前</td>
+<td>◯</td>
+<td>事業所に割り当てるコードを8文字以内で指定します。後から変更可能です。請求書に印字されます。</td>
+</tr>
+<tr>
+<td>04</td>
+<td>事業所カナ</td>
+<td>◯</td>
+<td></td>
+</tr>
+<tr>
+<td>05</td>
+<td>事業所英字</td>
+<td>◯</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4 id="24-作業種別">2.4 作業種別</h4>
+<p>上部メニューでマスタ＞作業種別を選ぶと作業種別の一覧が表示されます。</p>
+<p>作業種別の一覧は顧客や事業所を選択して絞り込みできます。</p>
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>作業種別がシステムの一番大事な設定です。</p>
+</div>
+<img width="50%" src="/manual/imgs/master04sagyo01.png" alt="作業種別一覧画面">
+<p>下は作業種別の追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master04sagyo02.png" alt="作業種別詳細画面">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>顧客</td>
+<td></td>
+<td>この作業種別を特定の顧客で使う場合に、顧客を指定します。顧客を選択しない場合、全ての顧客で使用されます。</td>
+</tr>
+<tr>
+<td>02</td>
+<td>事業所</td>
+<td></td>
+<td>この作業種別を特定の顧客事業所で使う場合に、顧客を指定します。事業所を設定するには顧客を選択しておく必要があります。事業所を選択しない場合、全ての事業所で使用されます。</td>
+</tr>
+<tr>
+<td>03</td>
+<td>作業種別コード</td>
+<td>◯</td>
+<td>作業種別に割り当てるコードを8文字以内で指定します。</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title"><svg class="octicon octicon-alert mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p><p>現バージョンでは作業種別コードを変更すると請求や給与計算に影響します。
+将来のバージョンで作業種別コードを変更できるようになります。</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11</td>
+<td>作業種別名前</td>
+<td>◯</td>
+<td>作業種別の名前です。</td>
+</tr>
+<tr>
+<td>12</td>
+<td>作業種別カナ</td>
+<td>◯</td>
+<td></td>
+</tr>
+<tr>
+<td>13</td>
+<td>作業種別英字</td>
+<td>◯</td>
+<td></td>
+</tr>
+<tr>
+<td>14</td>
+<td>日勤夜勤</td>
+<td>◯</td>
+<td>日勤か夜勤を選択してください。</td>
+</tr>
+<tr>
+<td>15</td>
+<td>開始時刻</td>
+<td>◯</td>
+<td>この作業の始業時刻です。開始打刻が始業時刻よりも早い場合、残業とみなされる場合があります。</td>
+</tr>
+<tr>
+<td>16</td>
+<td>終了時刻</td>
+<td>◯</td>
+<td>この作業の終業時刻です。終了打刻が終業時刻よりも遅い場合、残業とみなされる場合があります。</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>作業種別には昼、夕方、夜、深夜の４つの休憩を設定することができます。</p>
+</div>
+<div class="markdown-alert markdown-alert-warning"><p class="markdown-alert-title"><svg class="octicon octicon-alert mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p><p>休憩は休憩開始時刻と休憩終了時刻で指定するか、または休憩時間数で指定します。混在してはいけません。</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>21</td>
+<td>昼休憩開始時刻</td>
+<td></td>
+<td>昼休憩がある場合の開始時刻です。</td>
+</tr>
+<tr>
+<td>22</td>
+<td>昼休憩終了時刻</td>
+<td></td>
+<td>昼休憩がある場合の終了時刻です。</td>
+</tr>
+</tbody>
+</table>
+<p>夕方、夜、深夜休憩の開始、終了時刻も昼休憩と同様です。</p>
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>作業種別には時給と請求額を設定することができます。</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>31</td>
+<td>標準時給</td>
+<td>◯</td>
+<td>どの時間帯が標準時給になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>32</td>
+<td>残業時給</td>
+<td></td>
+<td>どの時間帯が残業時給になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>33</td>
+<td>深夜残業時給</td>
+<td></td>
+<td>どの時間帯が深夜残業時給になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>34</td>
+<td>法定休日時給</td>
+<td></td>
+<td>どの時間帯が法定休日時給になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>35</td>
+<td>法定休日深夜残業時給</td>
+<td></td>
+<td>どの時間帯が法定休日深夜残業時給になるかは作業種別によります。</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>31</td>
+<td>標準請求</td>
+<td>◯</td>
+<td>どの時間帯が標準請求になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>32</td>
+<td>残業請求</td>
+<td></td>
+<td>どの時間帯が残業請求になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>33</td>
+<td>深夜残業請求</td>
+<td></td>
+<td>どの時間帯が深夜残業請求になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>34</td>
+<td>法定休日請求</td>
+<td></td>
+<td>どの時間帯が法定休日請求になるかは作業種別によります。</td>
+</tr>
+<tr>
+<td>35</td>
+<td>法定休日深夜残業請求</td>
+<td></td>
+<td>どの時間帯が法定休日深夜残業請求になるかは作業種別によります。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="25-手当控除項目">2.5 手当控除項目</h4>
+<p>上部メニューでマスタ＞手当控除項目を選ぶと、手当控除項目の一覧が表示されます。</p>
+<img width="50%" src="/manual/imgs/master05teatekoujyo01.png" alt="手当控除項目一覧画面">
+<p>下は手当控除項目の追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master05teatekoujyo02.png" alt="手当控除項目詳細画面">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>コード</td>
+<td>◯</td>
+<td>手当控除項目に割り当てるコードを8文字以内で指定します。後から変更可能です。</td>
+</tr>
+<tr>
+<td>02</td>
+<td>手当</td>
+<td></td>
+<td>手当として使う場合にチェックします。</td>
+</tr>
+<tr>
+<td>03</td>
+<td>控除</td>
+<td></td>
+<td>控除として使う場合にチェックします。</td>
+</tr>
+<tr>
+<td>04</td>
+<td>項目名</td>
+<td>◯</td>
+<td>手当控除項目の名前です。後から変更可能です。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="26-従業員">2.6 従業員</h4>
+<p>上部メニューでマスタ＞従業員を選ぶと、従業員の一覧が表示されます。</p>
+<img width="50%" src="/manual/imgs/master06jyuugyouin01.png" alt="従業員一覧画面">
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>［時給］は作業種別で設定した時給や請求単価と異なる金額を設定する場合に使用します。</p>
+</div>
+<p>下は従業員の追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master06jyuugyouin02.png" alt="従業員詳細画面">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>コード</td>
+<td>◯</td>
+<td>従業員コードを8文字以内で指定します。後から変更可能です。</td>
+</tr>
+<tr>
+<td>02</td>
+<td>名前</td>
+<td>◯</td>
+<td>姓、ミドル、名を入力します。</td>
+</tr>
+<tr>
+<td>03</td>
+<td>名前カナ</td>
+<td>◯</td>
+<td>姓、ミドル、名を入力します。</td>
+</tr>
+<tr>
+<td>04</td>
+<td>名前英字</td>
+<td>◯</td>
+<td>姓、ミドル、名を入力します。</td>
+</tr>
+<tr>
+<td>05</td>
+<td>性別</td>
+<td></td>
+<td>性別を選択できます。</td>
+</tr>
+<tr>
+<td>06</td>
+<td>メール</td>
+<td></td>
+<td>メールアドレスを入力できます。</td>
+</tr>
+<tr>
+<td>07</td>
+<td>携帯番号</td>
+<td></td>
+<td>携帯番号を入力できます。</td>
+</tr>
+<tr>
+<td>08</td>
+<td>入社日</td>
+<td></td>
+<td>入社日を入力できます。</td>
+</tr>
+<tr>
+<td>09</td>
+<td>退職日</td>
+<td></td>
+<td>退職日を入力できます。</td>
+</tr>
+<tr>
+<td>10</td>
+<td>主な顧客</td>
+<td></td>
+<td>顧客を選択できます。</td>
+</tr>
+</tbody>
+</table>
+<p>下は従業員の時給で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master06jyuugyouin03.png" alt="従業員時給一覧画面">
+<p>下は従業員時給の追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master06jyuugyouin04.png" alt="従業員時給詳細画面">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>顧客</td>
+<td></td>
+<td>決まった顧客の作業種別について設定する場合は、顧客を選択します。</td>
+</tr>
+<tr>
+<td>02</td>
+<td>事業所</td>
+<td></td>
+<td>決まった顧客事業所の作業種別について設定する場合は、事業所を選択します。</td>
+</tr>
+<tr>
+<td>03</td>
+<td>作業種別</td>
+<td>◯</td>
+<td>作業種別は必ず選択してください。選択できる作業種別は顧客、事業所によって変わります。</td>
+</tr>
+<tr>
+<td>04</td>
+<td>時給</td>
+<td></td>
+<td>この従業員について、選んだ顧客、事業所、作業種別について時給を設定できます。</td>
+</tr>
+<tr>
+<td>05</td>
+<td>請求</td>
+<td></td>
+<td>この従業員について、選んだ顧客、事業所、作業種別について請求単価を設定できます。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="27-アカウント">2.7 アカウント</h4>
+<p>上部メニューでマスタ＞アカウントを選ぶとアカウントの一覧が表示されます。</p>
+<img width="50%" src="/manual/imgs/master07account01.png" alt="アカウント一覧画面">
+<p>下はアカウントの追加、編集で表示される詳細画面です。</p>
+<img width="50%" src="/manual/imgs/master07account02.png" alt="アカウント詳細画面">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>必須</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>名前</td>
+<td>◯</td>
+<td>アカウントの名前を入力します。</td>
+</tr>
+<tr>
+<td>02</td>
+<td>メール</td>
+<td>◯</td>
+<td>アカウントのメールアドレスを入力します。今後のバージョンアップでパスワードのリセットに使用します。</td>
+</tr>
+<tr>
+<td>03</td>
+<td>パスワード</td>
+<td>◯</td>
+<td>ログインに使うパスワードを入力します。</td>
+</tr>
+</tbody>
+</table>
+
+            
+            
+        </body>
+        </html>

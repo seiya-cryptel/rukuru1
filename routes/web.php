@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
 
 use App\Http\Middleware\Localization;
 
-use App\Livewire\Employeeworks;
+// use App\Livewire\Employeeworks;
 
 /**
  * Redirect to the default locale
@@ -12,6 +13,23 @@ use App\Livewire\Employeeworks;
 Route::get('/', function(){
     return redirect('/' . app()->getLocale());
  });
+
+/**
+ * resources/mannual マニュアル
+ */
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/manual/{path?}', function (Request $request,$path='') {
+        if($path==='') $path = 'index.html';
+
+        $rp = resource_path('manual/'.$path);
+        if(File::exists($rp)){
+            return response()->file($rp);
+        }else{
+            abort(404);
+        }
+    })->where('path', '.*')
+    ->name('manual');
+});
 
 /**
  * Set the locale

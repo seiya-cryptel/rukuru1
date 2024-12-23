@@ -63,7 +63,7 @@ class Employees extends Component
                     ->orWhere('empl_cd', 'like', '%'.$this->search.'%');
             });
         }
-        $Employees = $Query->paginate(10);
+        $Employees = $Query->paginate(AppConsts::PAGINATION);
         return view('livewire.employees', compact('Employees'));
     }
 

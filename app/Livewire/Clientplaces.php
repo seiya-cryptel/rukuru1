@@ -3,6 +3,9 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+
+use App\Consts\AppConsts;
+
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clients as modelClients;
 
@@ -41,7 +44,7 @@ class Clientplaces extends Component
             ->join('clients as client', 'client.id', '=', 'clientplaces.client_id')
             ->orderBy('client.cl_cd', 'asc')
             ->orderBy('cl_pl_cd', 'asc')
-            ->paginate(10);
+            ->paginate(AppConsts::PAGINATION);
         return view('livewire.clientplaces', compact('ClientPlaces'));
     }
 

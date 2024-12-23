@@ -4,6 +4,9 @@ namespace App\Livewire;
 
 use Livewire\WithPagination;
 use Livewire\Component;
+
+use App\Consts\AppConsts;
+
 use App\Models\clients as modelClients;
 
 class Client extends Component
@@ -30,7 +33,7 @@ class Client extends Component
     public function render()
     {
         $Clients = modelClients::orderBy('cl_cd', 'asc')
-                ->paginate(10);
+                ->paginate(AppConsts::PAGINATION);
         return view('livewire.client', compact('Clients'));
     }
 

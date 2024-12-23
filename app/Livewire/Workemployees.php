@@ -136,7 +136,7 @@ class Workemployees extends Component
             ->orWhere('empl_resign_date', '');
         });
 
-        $Employees = $query->paginate(10);
+        $Employees = $query->paginate(AppConsts::PAGINATION);
             
         return view('livewire.workemployees', compact('Employees'));
     }

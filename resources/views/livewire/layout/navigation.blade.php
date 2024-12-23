@@ -163,6 +163,13 @@ new class extends Component
                         </x-slot>
                     </x-dropdown>
                 </div>
+
+                {{-- マニュアル --}}
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('manual')" :active="request()->routeIs('manual')" target="manual">
+                        {{ __('Manual') }}
+                    </x-nav-link>
+                </div>
             </div>
 
             <!-- Settings Dropdown -->
