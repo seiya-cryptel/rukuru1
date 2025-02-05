@@ -32,7 +32,7 @@ class Clientworktypes extends Component
      * delete action listener
      */
     protected $listeners = [
-        'deleteClientWorktypeListener' => 'deleteClientWorktype',
+        'deleteClientWorkTypeListener' => 'deleteClientWorkType',
     ];
 
     /**
@@ -82,9 +82,9 @@ class Clientworktypes extends Component
      * Open Add ClientWorktype form
      * @return void
      */
-    public function newClientWorktype()
+    public function newClientWorkType()
     {
-        return redirect()->route('clientworktypecreate');
+        return redirect()->route('clientworktypecreate', ['locale' => app()->getLocale()]);
     }
 
     /**
@@ -92,8 +92,8 @@ class Clientworktypes extends Component
      * @param mixed $id
      * @return void
      */
-    public function editClientWorktype($id) {
-        return redirect()->route('clientworktypeupdate', ['id' => $id]);
+    public function editClientWorkType($id) {
+        return redirect()->route('clientworktypeupdate', ['id' => $id, 'locale' => app()->getLocale()]);
     }
 
     /**
@@ -101,11 +101,22 @@ class Clientworktypes extends Component
      * @param mixed $id
      * @return void
      */
-    public function deleteClientWorktype($id) {
+    public function deleteClientWorkType($id) {
         try {
+            $clientWorkType = modelClientWorktypes::find($id);
             modelClientWorktypes::where('id', $id)->delete();
+
+            $strMessage = '作業区分 削除'
+            . ($this->selectedClient ? ' ' . $this->selectedClient->cl_name : '') 
+            . ($this->selectedClientPlace ? ' ' . $this->selectedClientPlace->cl_pl_name : '') 
+            . ' ' . $clientWorkType->wt_cd . ' ' . $clientWorkType->wt_name;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTWORKTYPE, $logMessage);
             session()->flash('success', __('Delete'). ' ' . __('Done'));
         } catch (\Exception $e) {
+            $logMessage = '作業区分 削除 エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

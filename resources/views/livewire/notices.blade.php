@@ -8,11 +8,11 @@
                     <td style="width: 6rem;">
                         <span class="text-sm">{{$Notice->notice_date}}</span>
                     </td>
-                    <td>
+                    <td style="width: 20rem;">
                         <span class="text-sm" title="{{ $Notice->title }}">{{ Str::limit($Notice->title, 32) }}</span>
                     </td>
                     <td>
-                        <span class="text-sm" title="{{ $Notice->content }}">{{ Str::limit($Notice->content, 32) }}</span>
+                        <span class="text-sm" title="{{ $Notice->content }}">{{ Str::limit($Notice->content, 64) }}</span>
                     </td>
                 </tr>
             @endforeach

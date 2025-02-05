@@ -13,7 +13,7 @@
     </div>
     <div class="col-md-8">
         <div class="text-right">            
-            <button wire:click="newClientWorktype()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold text-sm py-1 px-2 rounded">{{ __('Add') }}</button>
+            <button wire:click="newClientWorkType()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold text-sm py-1 px-2 rounded">{{ __('Add') }}</button>
         </div>
         <div>
             <table class="min-w-full table-auto text-sm">
@@ -88,8 +88,8 @@
                                     {{$ClientWorktype->wt_work_start}}-{{$ClientWorktype->wt_work_end}}
                                 </td>
                                 <td>
-                                    <button wire:click="editClientWorktype({{$ClientWorktype->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
-                                    <button onclick="deleteClientWorktype({{$ClientWorktype->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
+                                    <button wire:click="editClientWorkType({{$ClientWorktype->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
+                                    <button onclick="deleteClientWorkType({{$ClientWorktype->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
                                 </td>
                             </tr>
                         @endforeach

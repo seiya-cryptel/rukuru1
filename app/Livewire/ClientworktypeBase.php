@@ -12,11 +12,17 @@ use App\Models\clientworktypes as modelClientWorktypes;
 abstract class ClientworktypeBase extends component
 {
     use rukuruUtilities;
+
     /**
      * record set of table clients and client places
      * */
     public $refClients;
     public $refClientPlaces = [];
+
+    /**
+     * selected client and client place
+     */
+    public $selectedClient, $selectedClientPlace;
 
     /**
      * master fields
@@ -54,6 +60,35 @@ abstract class ClientworktypeBase extends component
         // client_idが更新されたときに呼び出される
         $this->refClientPlaces = modelClientPlaces::where('client_id', $client_id)->get(); // 新しいclient_idに基づいて場所のデータを取得
         $this->clientplace_id = null; // clientplace_idをリセット
+
+        // 参照する顧客と事業所を設定
+        if($client_id)
+        {
+            $this->selectedClient = modelClients::find($client_id);
+        }
+        else
+        {
+            $this->selectedClient = null;
+        }
+        $this->selectedClientPlace = null;
+    }
+
+    /**
+     * 事業所IDが変更されたときに呼び出される
+     * @param int $clientplace_id
+     * @return void
+     * 参照事業所を設定する
+     */
+    public function updateClientPlaceId($clientplace_id)
+    {
+        if($clientplace_id)
+        {
+            $this->selectedClientPlace = modelClientPlaces::find($clientplace_id);
+        }
+        else
+        {
+            $this->selectedClientPlace = null;
+        }
     }
 
     /**
@@ -78,8 +113,8 @@ abstract class ClientworktypeBase extends component
      */
     public function moneyChange($money, $field)
     {
-        $money = preg_replace('/[^0-9.]/', '', $money);
-        $this->$field = empty($money) ? '' : $money;
+        $money = $this->rukuruUtilMoneyValue($money);
+        $this->$field = empty($money) ? '' : number_format($money);
     }
 
     /**
@@ -99,7 +134,7 @@ abstract class ClientworktypeBase extends component
      * Cancel add/edit form and redirect to the master list
      * @return void
      */
-    public function cancelClientWorktype() {
+    public function cancelClientWorkType() {
         return redirect()->route('clientworktype');
     }
 }

@@ -20,7 +20,7 @@ class Notices extends Component
     public function render()
     {
         $this->Notices = modelNotice::orderBy('notice_date', 'desc')
-            ->take(3)
+            ->take(5)
             ->get();
         return view('livewire.notices');
     }

@@ -17,9 +17,21 @@ class applogs extends Model
      * The log type constants.
      */
     public const LOG_TYPE_LOGIN = 1;
+    public const LOG_TYPE_MASTER_HOLIDAY = 11;
+    public const LOG_TYPE_MASTER_CLIENT = 12;
+    public const LOG_TYPE_MASTER_CLIENTPLACE = 13;
+    public const LOG_TYPE_MASTER_CLIENTWORKTYPE = 14;
+
+    public const LOG_ERROR = 255;
 
     public const LOG_MESSAGES = [
         self::LOG_TYPE_LOGIN => 'ログイン',
+        self::LOG_TYPE_MASTER_HOLIDAY => '祝日マスタ',
+        self::LOG_TYPE_MASTER_CLIENT => '顧客マスタ',
+        self::LOG_TYPE_MASTER_CLIENTPLACE => '顧客事業所マスタ',
+        self::LOG_TYPE_MASTER_CLIENTWORKTYPE => '作業種類マスタ',
+
+        self::LOG_ERROR => 'エラー',
     ];
 
     /**

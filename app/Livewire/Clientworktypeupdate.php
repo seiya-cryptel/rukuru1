@@ -117,9 +117,18 @@ class Clientworktypeupdate extends ClientworktypeBase
                 'wt_bill_holiday_midnight' => $this->rukuruUtilMoneyValue($this->wt_bill_holiday_midnight),
                 'wt_notes' => $this->wt_notes,
             ]);
+            $strMessage = '作業区分 更新'
+            . ($this->selectedClient ? ' ' . $this->selectedClient->cl_name : '') 
+            . ($this->selectedClientPlace ? ' ' . $this->selectedClientPlace->cl_pl_name : '') 
+            . ' ' . $this->wt_cd . ' ' . $this->wt_name;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTWORKTYPE, $logMessage);
             session()->flash('success', __('Update'). ' ' . __('Done'));
             return redirect()->route('clientworktype');
         } catch (\Exception $e) {
+            $logMessage = '作業区分 更新 エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

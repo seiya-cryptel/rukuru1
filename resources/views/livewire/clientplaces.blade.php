@@ -51,8 +51,8 @@
                                     {{$ClientPlace->cl_pl_alpha}}
                                 </td>
                                 <td>
-                                    <button wire:click="editClientPlace({{$ClientPlace->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
-                                    <button onclick="deleteClientPlace({{$ClientPlace->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
+                                    <button wire:click="editClientPlace({{$ClientPlace->clientplace_id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
+                                    <button onclick="deleteClientPlace({{$ClientPlace->clientplace_id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
                                 </td>
                             </tr>
                         @endforeach

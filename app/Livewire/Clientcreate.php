@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 
 class Clientcreate extends Component
@@ -104,9 +105,15 @@ class Clientcreate extends Component
                 'cl_round_end' => $this->cl_round_end,
                 'cl_notes' => $this->cl_notes,
             ]);
+            $logMessage = '顧客マスタ 作成: ' . $this->cl_cd . ' ' . $this->cl_name;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENT, $logMessage);
             session()->flash('success', __('Create') . ' ' . __('Done'));
             return redirect()->route('client');
         } catch (\Exception $e) {
+            $logMessage = '顧客マスタ 作成 エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

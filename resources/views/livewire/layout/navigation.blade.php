@@ -16,6 +16,10 @@ new class extends Component
     }
 }; ?>
 
+@php
+    $locale = app()->getLocale();
+@endphp
+
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4">
@@ -23,14 +27,14 @@ new class extends Component
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" wire:navigate>
+                    <a href="{{ route('dashboard', ['locale' => $locale]) }}" wire:navigate>
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                    <x-nav-link :href="route('dashboard', ['locale' => $locale])" :active="request()->routeIs($locale . '/dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
@@ -52,14 +56,13 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
-                        {{-- <x-dropdown-link  :href="route('importkintai')" :active="request()->routeIs('importkintai')" wire:navigate> --}}
-                            <x-dropdown-link  :href="route('/')" :active="request()->routeIs('dashboard')" wire:navigate>
+                            <x-dropdown-link  :href="route('importkintai', ['locale' => $locale])" :active="request()->routeIs($locale . '/importkintai')" wire:navigate>
                             {{ __('Import Kintai') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('workemployee')" :active="request()->routeIs('workemployee')" wire:navigate>
+                            <x-dropdown-link :href="route('workemployee', ['locale' => $locale])" :active="request()->routeIs($locale . '/workemployee')" wire:navigate>
                             {{ __('Kintai Entry') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('closepayroll')" :active="request()->routeIs('closepayroll')" wire:navigate>
+                            <x-dropdown-link :href="route('closepayroll', ['locale' => $locale])" :active="request()->routeIs($locale . '/closepayroll')" wire:navigate>
                             {{ __('Kintai Close') }}
                             </x-dropdown-link>
                         </x-slot>
@@ -83,7 +86,7 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
-                            <x-dropdown-link  :href="route('bills')" :active="request()->routeIs('bills')" wire:navigate>
+                            <x-dropdown-link  :href="route('bills', ['locale' => $locale])" :active="request()->routeIs($locale . '/bills')" wire:navigate>
                             {{ __('Bill Export') }}
                             </x-dropdown-link>
                         </x-slot>
@@ -107,10 +110,10 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('salaryemployee')" wire:navigate>
+                            <x-dropdown-link :href="route('salaryemployee', ['locale' => $locale])" wire:navigate>
                                 {{ __('Salary Deduct') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('closesalaries')" wire:navigate>
+                            <x-dropdown-link :href="route('closesalaries', ['locale' => $locale])" wire:navigate>
                             {{ __('Salary Calc') }}
                             </x-dropdown-link>
                         </x-slot>
@@ -134,30 +137,30 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
-                            <x-dropdown-link :href="route('holiday')" wire:navigate>
+                            <x-dropdown-link :href="route('holiday', ['locale' => $locale])" wire:navigate>
                                 {{ __('Holiday') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('client')" wire:navigate>
+                            <x-dropdown-link :href="route('client', ['locale' => $locale])" wire:navigate>
                                 {{ __('Client') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('clientplace')" wire:navigate>
+                            <x-dropdown-link :href="route('clientplace', ['locale' => $locale])" wire:navigate>
                                 {{ __('Work Place') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('clientworktype')" wire:navigate>
+                            <x-dropdown-link :href="route('clientworktype', ['locale' => $locale])" wire:navigate>
                                 {{ __('Work Type') }}
                             </x-dropdown-link>
                             {{--
-                            <x-dropdown-link :href="route('pricetable')" wire:navigate>
+                            <x-dropdown-link :href="route('pricetable', ['locale' => $locale])" wire:navigate>
                                 {{ __('Price Table') }}
                             </x-dropdown-link>
                             --}}
-                            <x-dropdown-link :href="route('masterallowdeduct')" wire:navigate>
+                            <x-dropdown-link :href="route('masterallowdeduct', ['locale' => $locale])" wire:navigate>
                                 {{ __('Deduct Item') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('employee')" wire:navigate>
+                            <x-dropdown-link :href="route('employee', ['locale' => $locale])" wire:navigate>
                                 {{ __('Employee') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('user')" wire:navigate>
+                            <x-dropdown-link :href="route('user', ['locale' => $locale])" wire:navigate>
                                 {{ __('Account') }}
                             </x-dropdown-link>
                         </x-slot>
@@ -166,7 +169,7 @@ new class extends Component
 
                 {{-- マニュアル --}}
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('manual')" :active="request()->routeIs('manual')" target="manual">
+                    <x-nav-link :href="route('manual', ['locale' => $locale])" :active="request()->routeIs($locale . '/manual')" target="manual">
                         {{ __('Manual') }}
                     </x-nav-link>
                 </div>
@@ -188,7 +191,7 @@ new class extends Component
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
+                        <x-dropdown-link :href="route('profile', ['locale' => $locale])" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
@@ -217,14 +220,14 @@ new class extends Component
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+            <x-responsive-nav-link :href="route('dashboard', ['locale' => $locale])" :active="request()->routeIs($locale . '/dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
         </div>
 
         {{-- 
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('importkintai')" :active="request()->routeIs('importkintai')" wire:navigate>
+            <x-responsive-nav-link :href="route('importkintai', ['locale' => $locale])" :active="request()->routeIs($locale . '/importkintai')" wire:navigate>
                 {{ __('Import Kintai') }}
             </x-responsive-nav-link>
         </div>
@@ -238,7 +241,7 @@ new class extends Component
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                <x-responsive-nav-link :href="route('profile', ['locale' => $locale])" wire:navigate>
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 

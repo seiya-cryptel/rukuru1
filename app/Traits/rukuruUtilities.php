@@ -8,7 +8,7 @@ use DateInterval;
 use Illuminate\Validation\ValidationException;
 
 use App\Models\clients as modelClients;
-use App\Models\holiday as modelHoliday;
+use App\Models\holiday;
 use App\Models\employeepays as modelEmployeePays;
 
 /**
@@ -528,15 +528,22 @@ trait rukuruUtilities
     /**
      * 金額文字列を数値化する
      * @param string $value 入力文字列
+     * @param float|null $nullValue
      * @return int|null
      */
-    protected function rukuruUtilMoneyValue($value)
+    public function rukuruUtilMoneyValue($value, $nullValue = null)
     {
         // 全角文字を半角に変換
         $value = trim(mb_convert_kana($value, 'as'));   // 英数字と記号、空白を半角に変換
+        // マイナス値の検知
+        $sign = substr($value, 0, 1) === '-' ? -1 : 1;
         // 数字とピリオド以外の文字を削除
         $value = preg_replace('/[^0-9.]/', '', $value);
-        return $value === '' ? null : $value;
+        
+        // 最初のピリオドのみ有効
+        $parts = explode('.', $value);
+        $value = empty($parts[1]) ? $parts[0] : ($parts[0] . '.' . $parts[1]);
+        return $value === '' ? $nullValue : ($value * $sign);
     }
 
     /**
@@ -544,12 +551,15 @@ trait rukuruUtilities
      * @param integer $client_id
      * @param string $date
      * @return tinyint 1: 法定休日 2: 法定外休日 3: 祝日 4: 顧客休日 0: 休日でない
+     * @throws Exception
      */
-    protected function rukuruUtilIsHoliday($client_id, string $date) : bool
+    public function rukuruUtilIsHoliday($client_id, string $date) : bool
     {
-        // $dayOfWeek = date('w', strtotime($date));
-
         $Client = modelClients::find($client_id);
+        if(!$Client)
+        {
+            return throw new \Exception('顧客が見つかりません[' . $client_id . ']');
+        }
 
         // 顧客の休日判定
         if($type = $Client->typeOfHoliday($date))
@@ -558,7 +568,7 @@ trait rukuruUtilities
         }
 
         // 休日判定
-        if($type = modelHoliday::typeOfHoliday($date))
+        if($type = holiday::typeOfHoliday($date))
         {
             return $type;
         }
@@ -577,7 +587,7 @@ trait rukuruUtilities
      *                    標準請求, 残業請求, 深夜残業請求, 法定休日請求, 法定休日深夜残業請求]
      * @throws Exception 単価が設定されていない場合
      */
-    protected function rukuruUtilGetEmployeeHourlyRates($ClientWorkType, $employee_id, $client_id, $clientplace_id, $wt_cd) : array
+    public function rukuruUtilGetEmployeeHourlyRates($ClientWorkType, $employee_id, $client_id, $clientplace_id, $wt_cd) : array
     {
         // 従業員単価レコードがあるばあい
         $EmployeePay = modelEmployeePays::getPayhour($employee_id, $client_id, $clientplace_id, $wt_cd);

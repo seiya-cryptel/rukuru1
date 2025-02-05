@@ -70,7 +70,7 @@ class Clientworktypecreate extends ClientworktypeBase
      * store the master input post data in the master table
      * @return void
      */
-    public function storeClientWorktype()
+    public function storeClientWorkType()
     {
         $this->validate();
         try {
@@ -110,9 +110,18 @@ class Clientworktypecreate extends ClientworktypeBase
                 'wt_bill_holiday_midnight' => $this->rukuruUtilMoneyValue($this->wt_bill_holiday_midnight),
                 'wt_notes' => $this->wt_notes,
             ]);
+            $strMessage = '作業区分 作成'
+            . ($this->selectedClient ? ' ' . $this->selectedClient->cl_name : '') 
+            . ($this->selectedClientPlace ? ' ' . $this->selectedClientPlace->cl_pl_name : '') 
+            . ' ' . $this->wt_cd . ' ' . $this->wt_name;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTWORKTYPE, $logMessage);
             session()->flash('success', __('Create') . ' ' . __('Done'));
             return redirect()->route('clientworktype');
         } catch (\Exception $e) {
+            $logMessage = '作業区分 作成 エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', 'Something went wrong.');
         }
     }

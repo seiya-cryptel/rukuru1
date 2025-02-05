@@ -3,8 +3,9 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\holiday as modelHoliday;
-use App\Models\clients as modelClients;
+use App\Models\applogs;
+use App\Models\holiday;
+use App\Models\clients;
 
 class Holidayupdate extends Component
 {
@@ -37,8 +38,8 @@ class Holidayupdate extends Component
      */
     public function mount($id)
     {
-        $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
-        $holiday = modelHoliday::find($id);
+        $this->refClients = clients::orderBy('cl_name', 'asc')->get();
+        $holiday = holiday::find($id);
         $this->holidayId = $id;
         $this->holiday_date = $holiday->holiday_date;
         $this->client_id = $holiday->client_id;
@@ -58,15 +59,21 @@ class Holidayupdate extends Component
     {
         $this->validate();
         try {
-            modelHoliday::find($this->holidayId)->update([
+            holiday::find($this->holidayId)->update([
                 'holiday_date' => $this->holiday_date,
                 'client_id' => $this->client_id,
                 'holiday_name' => $this->holiday_name,
                 'notes' => $this->notes,
             ]);
+            $logMessage = '祝日マスタ 更新: ' . $this->holiday_name . ' 顧客ID ' . $this->client_id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_HOLIDAY, $logMessage);
             session()->flash('success', __('Update'). ' ' . __('Done'));
             return redirect()->route('holiday');
         } catch (\Exception $e) {
+            $logMessage = '祝日マスタ 更新エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

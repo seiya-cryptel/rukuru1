@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 
 use App\Consts\AppConsts;
-
+use App\Models\applogs;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clients as modelClients;
 
@@ -42,6 +42,7 @@ class Clientplaces extends Component
         $ClientPlaces = modelClientPlaces::with('client')
             ->select('*')
             ->join('clients as client', 'client.id', '=', 'clientplaces.client_id')
+            ->select('clientplaces.id as clientplace_id', 'client.*', 'clientplaces.*')
             ->orderBy('client.cl_cd', 'asc')
             ->orderBy('cl_pl_cd', 'asc')
             ->paginate(AppConsts::PAGINATION);
@@ -54,7 +55,7 @@ class Clientplaces extends Component
      */
     public function newClientPlace()
     {
-        return redirect()->route('clientplacecreate');
+        return redirect()->route('clientplacecreate', ['locale' => app()->getLocale()]);
     }
 
     /**
@@ -63,7 +64,7 @@ class Clientplaces extends Component
      * @return void
      */
     public function editClientPlace($id) {
-        return redirect()->route('clientplaceupdate', ['id' => $id]);
+        return redirect()->route('clientplaceupdate', ['id' => $id, 'locale' => app()->getLocale()]);
     }
 
     /**
@@ -74,8 +75,14 @@ class Clientplaces extends Component
     public function deleteClientPlace($id) {
         try {
             modelClientPlaces::where('id', $id)->delete();
+            $logMessage = '顧客事業所マスタ 削除: ' . $id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTPLACE, $logMessage);
             session()->flash('success', __('Delete') . ' ' . __('Done'));
         } catch (\Exception $e) {
+            $logMessage = '顧客事業所マスタ 削除 エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

@@ -3,7 +3,8 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\holiday as modelHoliday;
+use App\Models\applogs;
+use App\Models\holiday;
 use App\Models\clients as modelClients;
 
 class Holidaycreate extends Component
@@ -53,15 +54,21 @@ class Holidaycreate extends Component
     {
         $this->validate();
         try {
-            modelHoliday::create([
+            holiday::create([
                 'holiday_date' => $this->holiday_date,
                 'client_id' => $this->client_id,
                 'holiday_name' => $this->holiday_name,
                 'notes' => $this->notes,
             ]);
+            $logMessage = '祝日マスタ 作成: ' . $this->holiday_name . ' 顧客ID ' . $this->client_id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_HOLIDAY, $logMessage);
             session()->flash('success', __('Create'). ' ' . __('Done'));
             return redirect()->route('holiday');
         } catch (\Exception $e) {
+            $logMessage = '祝日マスタ 作成 エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

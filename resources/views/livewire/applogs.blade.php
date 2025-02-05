@@ -14,6 +14,9 @@
                         @endphp
                         <span class="text-sm">{{ $logTypeString }}</span>
                     </td>
+                    <td title="{{ $Applog->log_message }}">
+                        <span class="text-sm">{{mb_substr($Applog->log_message, 0, 20)}}</span>
+                    </td>
                     <td>
                         <span class="text-sm">{{$Applog->log_user}}</span>
                     </td>

@@ -7,7 +7,7 @@ use Livewire\Component;
 
 use App\Consts\AppConsts;
 
-use App\Models\holiday as modelHoliday;
+use App\Models\holiday;
 use App\Models\clients as modelClients;
 
 class Holidays extends Component
@@ -50,7 +50,7 @@ class Holidays extends Component
     public function render()
     {
         $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
-        $Holidays = modelHoliday::whereYear('holiday_date', $this->targetYear)
+        $Holidays = holiday::whereYear('holiday_date', $this->targetYear)
             ->orderBy('holiday_date', 'asc')
             ->paginate(AppConsts::PAGINATION);
         return view('livewire.holidays', compact('Holidays'));
@@ -70,7 +70,8 @@ class Holidays extends Component
      */
     public function newHoliday()
     {
-        return redirect()->route('holidaycreate');
+        // locale is passed as a parameter to pass the test
+        return redirect()->route('holidaycreate', ['locale' => app()->getLocale()]);
     }
 
     /**
@@ -78,7 +79,7 @@ class Holidays extends Component
      */
     public function editHoliday($id)
     {
-        return redirect()->route('holidayupdate', ['id' => $id]);
+        return redirect()->route('holidayupdate', ['id' => $id, 'locale' => app()->getLocale()]);
     }
 
     /**
@@ -86,6 +87,6 @@ class Holidays extends Component
      */
     public function deleteHoliday($id)
     {
-        modelHoliday::destroy($id);
+        holiday::destroy($id);
     }
 }

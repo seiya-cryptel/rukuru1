@@ -8,7 +8,7 @@ test('profile page is displayed', function () {
 
     $this->actingAs($user);
 
-    $response = $this->get('/profile');
+    $response = $this->get('/' . app()->getLocale() . '/profile');
 
     $response
         ->assertOk()

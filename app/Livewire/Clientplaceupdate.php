@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Models\applogs;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clients as modelClients;
 
@@ -70,9 +71,15 @@ class Clientplaceupdate extends Component
                 'cl_pl_alpha' => $this->cl_pl_alpha,
                 'cl_pl_notes' => $this->cl_pl_notes,
             ]);
+            $logMessage = '顧客事業所マスタ 更新: ' . $this->cl_pl_cd . ' 顧客ID ' . $this->client_id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTPLACE, $logMessage);
             session()->flash('success', __('Update') . ' ' . __('Done'));
             return redirect()->route('clientplace');
         } catch (\Exception $e) {
+            $logMessage = '顧客事業所マスタ 更新 エラー: ' . $e->getMessage();
+            logger(logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', 'Something went wrong.');
         }
     }

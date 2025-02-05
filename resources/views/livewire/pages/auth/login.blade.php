@@ -24,7 +24,8 @@ new #[Layout('layouts.guest')] class extends Component
         Session::flash('message', __("You're logged in!"));
         // ログイン履歴をアプリケーションログに記録
         applogs::insertLog(applogs::LOG_TYPE_LOGIN, $this->form->email);
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        // add parameter locale to redirectIntended
+        $this->redirectIntended(default: route('dashboard', ['locale' => app()->getLocale()], absolute: false), navigate: true);
     }
 }; ?>
 

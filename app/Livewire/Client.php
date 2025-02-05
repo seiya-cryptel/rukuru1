@@ -43,7 +43,7 @@ class Client extends Component
      */
     public function newClient()
     {
-        return redirect()->route('clientcreate');
+        return redirect()->route('clientcreate', ['locale' => app()->getLocale()]);
     }
 
     /**
@@ -52,7 +52,7 @@ class Client extends Component
      * @return void
      */
     public function editClient($id) {
-        return redirect()->route('clientupdate', ['id' => $id]);
+        return redirect()->route('clientupdate', ['id' => $id, 'locale' => app()->getLocale()]);
     }
 
     /**

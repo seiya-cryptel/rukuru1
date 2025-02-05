@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h3 class="{{-- font-semibold text-xl --}} text-gray-800 leading-tight">
+        <h3 class="{{-- font-semibold text-xl --}} text-xs text-gray-800 leading-tight">
         {{ __('Salary') }} > {{ __('Salary Calc') }}
         </h3>
     </x-slot>
