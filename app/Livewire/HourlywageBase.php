@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorkTypes;
@@ -56,7 +57,7 @@ abstract class HourlywageBase extends Component
     public $employeepay_id, $employee_id, $clientworktype_id,
         $wt_pay_std, $wt_pay_ovr, $wt_pay_ovr_midnight, $wt_pay_holiday, $wt_pay_holiday_midnight,
         $wt_bill_std, $wt_bill_ovr, $wt_bill_ovr_midnight, $wt_bill_holiday, $wt_bill_holiday_midnight,
-        $wt_notes;
+        $notes;
 
     /**
      * 金額項目の背景色
@@ -96,7 +97,17 @@ abstract class HourlywageBase extends Component
      */
     protected $rules = [
         'employee_id' => 'required',
+        'client_id' => 'required',
         'clientworktype_id' => 'required',
+    ];
+
+    /**
+     * List of add/edit form validation error messages
+     */
+    protected $messages = [
+        'employee_id.required' => "必須",
+        'client_id.required' => "必須",
+        'clientworktype_id.required' => "必須",
     ];
 
     /**
@@ -109,11 +120,11 @@ abstract class HourlywageBase extends Component
 
     /**
      * mount function
-     * @param int $employee_id  employee id
+     * @param int $employeepay_id  employeepay id
      */
-    public function mount($employee_id)
+    public function mount($employee_id, $employeepay_id = null)
     {
-        $this->employee_id = $employee_id;
+        $this->employeepay_id = $employeepay_id;
         $this->Employee = modelEmployee::find($employee_id);
         $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
         $this->refClientPlaces = modelClientPlaces::orderBy('cl_pl_name', 'asc')->get();
@@ -249,13 +260,6 @@ abstract class HourlywageBase extends Component
         $this->clientworktype_id = '';
         $this->updateClientWorkType();
         $this->resetFields();
-    }
-
-    /**
-     * Save Employee Pay
-     */
-    public function saveEmployeePay()
-    {
     }
 
     /**

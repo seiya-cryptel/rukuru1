@@ -21,8 +21,7 @@
                     <tr>
                         <th style="width: 4rem;">{{ __('Code') }}</th>
                         <th>{{ __('Client') }}{{ __('Name') }}</th>
-                        <th>{{ __('Client') }}{{ __('Kana') }}</th>
-                        <th>{{ __('Client') }}{{ __('Alpha') }}</th>
+                        <th>{{ __('Notes') }}</th>
                         <th> </th>
                     </tr>
                 </thead>
@@ -37,10 +36,7 @@
                                     {{$Client->cl_name}}
                                 </td>
                                 <td>
-                                    {{$Client->cl_kana}}
-                                </td>
-                                <td>
-                                    {{$Client->cl_alpha}}
+                                    {{$Client->cl_notes}}
                                 </td>
                                 <td>
                                     <button wire:click="editClient({{$Client->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
@@ -62,7 +58,7 @@
     </div>    
     <script>
         function deleteClient(id){
-            if(confirm("Are you sure to delete this record?"))
+            if(confirm("削除しますか？"))
                 Livewire.dispatch('deleteClientListener', { id: id });
         }
     </script>

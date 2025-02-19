@@ -6,7 +6,7 @@ use Livewire\WithPagination;
 use Livewire\Component;
 
 use App\Consts\AppConsts;
-
+use App\Models\applogs;
 use App\Models\holiday;
 use App\Models\clients as modelClients;
 
@@ -87,6 +87,16 @@ class Holidays extends Component
      */
     public function deleteHoliday($id)
     {
-        holiday::destroy($id);
+        try {
+            holiday::destroy($id);
+            $logMessage = '祝日マスタ 削除: ' . $id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_HOLIDAY, $logMessage);
+            session()->flash('success', __('Holiday deleted successfully.'));
+        } catch (\Exception $e) {
+            $logMessage = '祝日マスタ 削除 エラー: ' . $e->getMessage();
+            logger($logMessage);
+            session()->flash('error', __('Something went wrong.'));
+        }
     }
 }

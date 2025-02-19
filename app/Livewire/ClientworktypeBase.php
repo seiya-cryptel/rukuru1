@@ -2,9 +2,12 @@
 
 namespace App\Livewire;
 
+use Livewire\Component;
+
+use App\Consts\AppConsts;
 use App\Traits\rukuruUtilities;
 
-use Livewire\Component;
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorktypes;
@@ -25,6 +28,11 @@ abstract class ClientworktypeBase extends component
     public $selectedClient, $selectedClientPlace;
 
     /**
+     * editing record id
+     */
+    public $clientWorktypeId;
+
+    /**
      * master fields
      */
     public $client_id, $clientplace_id,
@@ -43,17 +51,42 @@ abstract class ClientworktypeBase extends component
      * List of add/edit form validation rules
      */
     protected $rules = [
+        'client_id' => 'required',
         'wt_cd' => 'required',
         'wt_name' => 'required',
-        'wt_kana' => 'required',
-        'wt_alpha' => 'required',
     ];
+
+    /**
+     * Custom validation messages
+     */
+    protected function messages()
+    {
+        return [
+            'client_id.required' => __('Required'),
+            'wt_cd.required' => __('Required'),
+            'wt_name.required' => __('Required'),
+        ];
+    }
+
+    /**
+     * mount the component
+     */
+    public function mount($id = null)
+    {
+        $this->clientWorktypeId = $id;
+        $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
+    }
+
+    /**
+     * render the view
+     */
+    abstract public function render();
 
     /**
      * 顧客IDが変更されたときに呼び出される
      * @param int $client_id
      * @return void
-     * 事業所リストを更新する
+     * 部門リストを更新する
      */
     public function updateClientId($client_id)
     {
@@ -61,7 +94,7 @@ abstract class ClientworktypeBase extends component
         $this->refClientPlaces = modelClientPlaces::where('client_id', $client_id)->get(); // 新しいclient_idに基づいて場所のデータを取得
         $this->clientplace_id = null; // clientplace_idをリセット
 
-        // 参照する顧客と事業所を設定
+        // 参照する顧客と部門を設定
         if($client_id)
         {
             $this->selectedClient = modelClients::find($client_id);
@@ -74,10 +107,10 @@ abstract class ClientworktypeBase extends component
     }
 
     /**
-     * 事業所IDが変更されたときに呼び出される
+     * 部門IDが変更されたときに呼び出される
      * @param int $clientplace_id
      * @return void
-     * 参照事業所を設定する
+     * 参照部門を設定する
      */
     public function updateClientPlaceId($clientplace_id)
     {
@@ -116,19 +149,6 @@ abstract class ClientworktypeBase extends component
         $money = $this->rukuruUtilMoneyValue($money);
         $this->$field = empty($money) ? '' : number_format($money);
     }
-
-    /**
-     * mount function
-     */
-    public function mount($id = null)
-    {
-        $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
-    }
-
-    /**
-     * render function
-     */
-    abstract public function render();
 
     /**
      * Cancel add/edit form and redirect to the master list

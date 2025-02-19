@@ -42,11 +42,14 @@ abstract class EmployeeBase extends Component
     protected $rules = [
         'empl_cd' => 'required',
         'empl_name_last' => 'required',
-        'empl_name_first' => 'required',
-        'empl_kana_last' => 'required',
-        'empl_kana_first' => 'required',
-        'empl_alpha_last' => 'required',
-        'empl_alpha_first' => 'required',
+    ];
+
+    /**
+     * List of add/edit form validation messages
+     */
+    protected $messages = [
+        'empl_cd.required' => '必須です',
+        'empl_name_last.required' => '必須です',
     ];
 
     /**

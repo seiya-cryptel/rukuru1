@@ -269,7 +269,7 @@ class clientworktypes extends Model
     }
 
     /**
-     * 顧客と事業所で可能な作業種別、名称のリスト
+     * 顧客と部門で可能な作業種別、名称のリスト
      *
      * @return array<string, string>
      */
@@ -309,7 +309,7 @@ class clientworktypes extends Model
     }
 
     /**
-     * 顧客と事業所で可能な作業種別レコードのリスト
+     * 顧客と部門で可能な作業種別レコードのリスト
      *
      * @return array<string, string>
      */
@@ -349,13 +349,13 @@ class clientworktypes extends Model
     }
 
     /**
-     * 顧客と事業所と作業種別に適した作業種別レコードを取得
+     * 顧客と部門と作業種別に適した作業種別レコードを取得
      * @parametors: $client_id, $clientplace_id, $wt_cd
      * @return clientworktypes
      */
     static public function getSutable($client_id, $clientplace_id, $wt_cd) : ?clientworktypes
     {
-        // 顧客、事業所、作業種別が一致するレコードを取得
+        // 顧客、部門、作業種別が一致するレコードを取得
         $workType = modelClientworktypes::where('client_id', $client_id)
             ->where('clientplace_id', $clientplace_id)
             ->where('wt_cd', $wt_cd)

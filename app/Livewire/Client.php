@@ -6,7 +6,7 @@ use Livewire\WithPagination;
 use Livewire\Component;
 
 use App\Consts\AppConsts;
-
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 
 class Client extends Component
@@ -18,16 +18,6 @@ class Client extends Component
      */
     protected $listeners = [
         'deleteClientListener' => 'deleteClient',
-    ];
-
-    /**
-     * List of add/edit form validation rules
-     */
-    protected $rules = [
-        'cl_cd' => 'required',
-        'cl_name' => 'required',
-        'cl_kana' => 'required',
-        'cl_alpha' => 'required',
     ];
 
     public function render()
@@ -62,9 +52,15 @@ class Client extends Component
      */
     public function deleteClient($id) {
         try {
-            modelClients::where('id', $id)->delete();
-            session()->flash('success', __('Delete') . ' ' . __('Done'));
+            modelClients::destroy($id);
+            $logMessage = '顧客マスタ 削除: ' . $id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENT, $logMessage);
+            session()->flash('success', __('Client deleted successfully.'));
         } catch (\Exception $e) {
+            $logMessage = '顧客マスタ 削除 エラー: ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

@@ -32,8 +32,8 @@
                         {{ $EmployeePay->clientworktype->wt_work_start }}-{{ $EmployeePay->clientworktype->wt_work_end }}
                     </td>
                     <td>
-                        <button wire:click="editEmployeepay({{$EmployeePay->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
-                        <button onclick="deleteEmployeepay({{$EmployeePay->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
+                        <button wire:click="editEmployeePay({{$EmployeePay->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
+                        <button onclick="deleteEmployeePay({{$EmployeePay->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
                     </td>
                 </tr>
                 @endforeach
@@ -41,4 +41,10 @@
             </table>
         </div>
     </div>
+    <script>
+        function deleteEmployeePay(id){
+            if(confirm("削除しますか？"))
+                Livewire.dispatch('deleteEmployeePayListener', { id: id });
+        }
+    </script>
 </div>

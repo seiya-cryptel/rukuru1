@@ -25,8 +25,8 @@
                 <thead class="bg-gray-200">
                     <tr>
                         <th style="width: 6rem;">{{ __('Date') }}</th>
-                        <th>{{ __('Client') }}</th>
                         <th style="width: 10rem;">{{ __('Name') }}</th>
+                        <th style="width: 10rem;">{{ __('Notes') }}</th>
                         <th> </th>
                     </tr>
                 </thead>
@@ -38,14 +38,10 @@
                             {{$Holiday->holiday_date}}
                         </td>
                         <td>
-                            @if($Holiday->client_id == 0)
-                                {{ __('Common') }}
-                            @else
-                                {{$Holiday->client->cl_name}}:
-                            @endif
+                            {{$Holiday->holiday_name}} 
                         </td>
                         <td>
-                            {{$Holiday->holiday_name}} 
+                            {{$Holiday->note}} 
                         </td>
                         <td>
                             <button wire:click="editHoliday({{$Holiday->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
@@ -67,7 +63,7 @@
     </div>    
     <script>
         function deleteHoliday(id){
-            if(confirm("Are you sure to delete this record?"))
+            if(confirm('削除しますか？'))
                 Livewire.dispatch('deleteHolidayListener', { id: id });
         }
     </script>

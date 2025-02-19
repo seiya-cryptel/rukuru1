@@ -17,7 +17,7 @@
         </div>
         <!-- 検索窓の追加 -->
         <div>
-            <input wire:model.live="search" type="text" class="form-control text-sm py-1" id="search" placeholder="{{ __('Search Employees...') }}" wire:change="changeSearch($event.target.value)">
+            <input wire:model.live="search" type="text" class="form-control text-sm py-1" id="search" placeholder="{{ __('Search') }}" wire:change="changeSearch($event.target.value)">
             <span>
                 <button wire:click="clearSearch()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">X</button>
             </span>
@@ -31,7 +31,6 @@
                         <th>{{ __('Code') }}</th>
                         <th>{{ __('Name') }}</th>
                         <th>{{ __('Kana') }}</th>
-                        <th>{{ __('Alpha') }}</th>
                         <th>{{ __('Hire Date') }}</th>
                         <th>{{ __('Termination Date') }}</th>
                         <th> </th>
@@ -49,9 +48,6 @@
                                 </td>
                                 <td>
                                     {{$Employee->empl_kana_last}} {{$Employee->empl_kana_first}} 
-                                </td>
-                                <td>
-                                    {{$Employee->empl_alpha_first}} {{$Employee->empl_alpha_last}}
                                 </td>
                                 <td>
                                     {{$Employee->empl_hire_date}}
@@ -79,7 +75,7 @@
     </div>    
     <script>
         function deleteEmployee(id){
-            if(confirm("Are you sure to delete this record?"))
+            if(confirm("削除しますか？"))
                 Livewire.dispatch('deleteEmployeeListener', { id: id });
         }
     </script>

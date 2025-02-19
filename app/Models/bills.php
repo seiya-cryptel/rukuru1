@@ -53,11 +53,11 @@ class bills extends Model
     ];
 
     /**
-     * 顧客ID、事業所IDと作業年月から請求書情報を作成または再作成
+     * 顧客ID、部門IDと作業年月から請求書情報を作成または再作成
      */
     public static function createBill($clientId, $clientPlaceId, $workYear, $workMonth)
     {
-        // 顧客ID、事業所ID、作業年月に該当する請求書情報を取得
+        // 顧客ID、部門ID、作業年月に該当する請求書情報を取得
         $bill = bills::where('client_id', $clientId)
             ->where('clientplace_id', $clientPlaceId)
             ->where('work_year', $workYear)

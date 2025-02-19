@@ -68,11 +68,11 @@ class Holidayupdate extends Component
             $logMessage = '祝日マスタ 更新: ' . $this->holiday_name . ' 顧客ID ' . $this->client_id;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_HOLIDAY, $logMessage);
-            session()->flash('success', __('Update'). ' ' . __('Done'));
+            session()->flash('success', __('Holiday updated successfully.'));
             return redirect()->route('holiday');
         } catch (\Exception $e) {
             $logMessage = '祝日マスタ 更新エラー: ' . $e->getMessage();
-            logger(logMessage);
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }

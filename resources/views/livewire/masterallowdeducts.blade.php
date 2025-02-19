@@ -20,8 +20,7 @@
                 <thead class="bg-gray-200">
                     <tr>
                         <th>{{ __('Code') }}</th>
-                        <th>{{ __('Is Allow') }}</th>
-                        <th>{{ __('Is Deduct') }}</th>
+                        <th>{{ __('Is Allow') }}{{ __('Is Deduct') }}</th>
                         <th>{{ __('Item Name') }}</th>
                         <th>{{ __('Notes') }}</th>
                     </tr>
@@ -34,10 +33,8 @@
                                     {{$Mad->mad_cd}}
                                 </td>
                                 <td>
-                                    {{$Mad->mad_allow}}
-                                </td>
-                                <td>
-                                    {{$Mad->mad_deduct}}
+                                    {{$Mad->mad_allow ? '手当' : ''}}
+                                    {{$Mad->mad_deduct ? '控除' : ''}}
                                 </td>
                                 <td>
                                     {{$Mad->mad_name}}
@@ -65,7 +62,7 @@
     </div>    
     <script>
         function deleteMad(id){
-            if(confirm("Are you sure to delete this record?"))
+            if(confirm("削除しますか？"))
                 Livewire.dispatch('deleteMadListener', { id: id });
         }
     </script>

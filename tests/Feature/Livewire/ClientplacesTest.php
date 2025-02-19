@@ -7,7 +7,7 @@ use App\Livewire\Clientplaceupdate;
 use Livewire\Livewire;
 
 /**
- * 顧客事業所リスト 表示テスト
+ * 顧客部門リスト 表示テスト
  */
 it('renders successfully', function () {
     Livewire::test(Clientplaces::class)
@@ -15,7 +15,7 @@ it('renders successfully', function () {
 });
 
 /**
- * 顧客事業所 追加 Redirectテスト
+ * 顧客部門 追加 Redirectテスト
  */
 test('add client place', function () {
     Livewire::test(Clientplaces::class)
@@ -24,7 +24,7 @@ test('add client place', function () {
 });
 
 /**
- * 顧客事業所 編集 Redirectテスト
+ * 顧客部門 編集 Redirectテスト
  */
 test('edit client place', function () {
     Livewire::test(Clientplaces::class)
@@ -33,7 +33,7 @@ test('edit client place', function () {
 });
 
 /**
- * 顧客事業所 追加 表示テスト
+ * 顧客部門 追加 表示テスト
  */
 test('new client place renders successfully', function () {
     Livewire::test(Clientcreate::class)
@@ -44,13 +44,13 @@ test('new client place renders successfully', function () {
 });
 
 /**
- * 顧客事業所 追加 登録テスト
+ * 顧客部門 追加 登録テスト
  */
 test('new client place store', function () {
     Livewire::test(Clientplacecreate::class)
         ->set('client_id', '3')
         ->set('cl_pl_cd', '99')
-        ->set('cl_pl_name', 'テスト事業所')
+        ->set('cl_pl_name', 'テスト部門')
         ->set('cl_pl_kana', 'テストジギョウショ')
         ->set('cl_pl_alpha', 'test client place')
         ->set('cl_pl_notes', 'テストメモ')
@@ -60,7 +60,7 @@ test('new client place store', function () {
 });
 
 /**
- * 顧客事業所 追加 バリデーションエラー
+ * 顧客部門 追加 バリデーションエラー
  */
 test('new client place validation error', function () {
     Livewire::test(Clientplacecreate::class)

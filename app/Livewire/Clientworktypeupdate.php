@@ -3,8 +3,10 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+
 use App\Traits\rukuruUtilities;
-use App\Livewire\ClientworktypeBase;
+
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorktypes;
@@ -14,21 +16,10 @@ class Clientworktypeupdate extends ClientworktypeBase
     use rukuruUtilities;
 
     /**
-     * editing record id
+     * Load client worktype data
      */
-    public $clientWorktypeId;    
-
-    /**
-     * mount function
-     */
-    public function mount($id = null)
+    public function loadClientWorktype($id)
     {
-        parent::mount($id);
-
-        if($id == null) {
-            return redirect()->route('clientworktype');
-        }
-
         $clientWorktype = modelClientWorktypes::find($id);
         $this->clientWorktypeId = $id;
         $this->client_id = $clientWorktype->client_id;
@@ -58,15 +49,23 @@ class Clientworktypeupdate extends ClientworktypeBase
         $this->wt_pay_ovr = $clientWorktype->wt_pay_ovr;
         $this->wt_pay_ovr_midnight = $clientWorktype->wt_pay_ovr_midnight;
         $this->wt_pay_holiday = $clientWorktype->wt_pay_holiday;
-        $this->wt_pay_holiday_midnight = $clientWorktype->wt_pay_holiday_midnight;
+
         $this->wt_bill_std = $clientWorktype->wt_bill_std;
         $this->wt_bill_ovr = $clientWorktype->wt_bill_ovr;
         $this->wt_bill_ovr_midnight = $clientWorktype->wt_bill_ovr_midnight;
         $this->wt_bill_holiday = $clientWorktype->wt_bill_holiday;
         $this->wt_bill_holiday_midnight = $clientWorktype->wt_bill_holiday_midnight;
+        
         $this->wt_notes = $clientWorktype->wt_notes;
+    }
 
-        $this->refClientPlaces = modelClientPlaces::where('client_id', $this->client_id)->get(); // 新しいclient_idに基づいて場所のデータを取得
+    /**
+     * mount function
+     */
+    public function mount($id = null)
+    {
+        parent::mount($id);
+        $this->loadClientWorktype($id);
     }
     
     public function render()
@@ -117,17 +116,17 @@ class Clientworktypeupdate extends ClientworktypeBase
                 'wt_bill_holiday_midnight' => $this->rukuruUtilMoneyValue($this->wt_bill_holiday_midnight),
                 'wt_notes' => $this->wt_notes,
             ]);
-            $strMessage = '作業区分 更新'
+            $logMessage = '作業区分 更新'
             . ($this->selectedClient ? ' ' . $this->selectedClient->cl_name : '') 
             . ($this->selectedClientPlace ? ' ' . $this->selectedClientPlace->cl_pl_name : '') 
             . ' ' . $this->wt_cd . ' ' . $this->wt_name;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTWORKTYPE, $logMessage);
-            session()->flash('success', __('Update'). ' ' . __('Done'));
+            session()->flash('success', __('Client Work Type updated successfully.'));
             return redirect()->route('clientworktype');
         } catch (\Exception $e) {
             $logMessage = '作業区分 更新 エラー: ' . $e->getMessage();
-            logger(logMessage);
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }

@@ -7,40 +7,13 @@ use App\Models\applogs;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clients as modelClients;
 
-class Clientplaceupdate extends Component
+class Clientplaceupdate extends ClientplaceBase 
 {
     /**
-     * reference to client records
+     * load client place data
      */
-    public $refClients;
-    /**
-     * master fields
-     */
-    public $client_id, $cl_pl_cd, 
-        $cl_pl_name, $cl_pl_kana, $cl_pl_alpha, 
-        $cl_pl_notes;
-    /**
-     * master allow deducts id and mode flags
-     */
-    public $clientPlaceId;
-
-    /**
-     * List of add/edit form validation rules
-     */
-    protected $rules = [
-        'client_id' => 'required',
-        'cl_pl_cd' => 'required',
-        'cl_pl_name' => 'required',
-        'cl_pl_kana' => 'required',
-        'cl_pl_alpha' => 'required',
-    ];
-
-    /**
-     * mount the component
-     */
-    public function mount($id)
+    public function loadClientPlace($id)
     {
-        $this->refClients = modelClients::orderBy('cl_cd', 'asc')->get();
         $clientPlace = modelClientPlaces::find($id);
         $this->clientPlaceId = $id;
         $this->client_id = $clientPlace->client_id;
@@ -51,6 +24,18 @@ class Clientplaceupdate extends Component
         $this->cl_pl_notes = $clientPlace->cl_pl_notes;
     }
 
+    /**
+     * mount the component
+     */
+    public function mount($id = null)
+    {
+        parent::mount($id);
+        $this->loadClientPlace($id);
+    }
+
+    /**
+     * render the view
+     */
     public function render()
     {
         return view('livewire.clientplaceupdate');
@@ -71,24 +56,16 @@ class Clientplaceupdate extends Component
                 'cl_pl_alpha' => $this->cl_pl_alpha,
                 'cl_pl_notes' => $this->cl_pl_notes,
             ]);
-            $logMessage = '顧客事業所マスタ 更新: ' . $this->cl_pl_cd . ' 顧客ID ' . $this->client_id;
+            $logMessage = '顧客部門マスタ 更新: ' . $this->cl_pl_cd . ' 顧客ID ' . $this->client_id;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTPLACE, $logMessage);
-            session()->flash('success', __('Update') . ' ' . __('Done'));
+            session()->flash('success', __('Client Place updated successfully.'));
             return redirect()->route('clientplace');
         } catch (\Exception $e) {
-            $logMessage = '顧客事業所マスタ 更新 エラー: ' . $e->getMessage();
-            logger(logMessage);
+            $logMessage = '顧客部門マスタ 更新 エラー: ' . $e->getMessage();
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', 'Something went wrong.');
         }
-    }
-
-    /**
-     * cancel add/edit form
-     */
-    public function cancelClientPlace()
-    {
-        return redirect()->route('clientplace');
     }
 }

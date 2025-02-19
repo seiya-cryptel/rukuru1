@@ -12,3 +12,4 @@
     </form>
 </div>
 <script src="{{ asset('js/dirtycheck.js') }}"></script>
+<script src="{{ asset('js/enter2tab.js') }}"></script>

@@ -3,30 +3,12 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Consts\AppConsts;
+use App\Models\applogs;
 use App\Models\masterallowdeducts as modelMad;
 
-class Allowdeductupdate extends Component
+class Allowdeductupdate extends AllowdeductBase
 {
-    /**
-     * record set of master allow deducts
-     * */
-    public $Mads;
-    /**
-     * master allow deducts fields
-     */
-    public $mad_cd, $mad_allow, $mad_deduct, $mad_name, $mad_notes;
-    /**
-     * master allow deducts id and mode flags
-     */
-    public $madId, $updateMad = false, $addMad = false;
-
-    /**
-     * List of add/edit form validation rules
-     */
-    protected $rules = [
-        'mad_cd' => 'required',
-        'mad_name' => 'required',
-    ];
 
     /**
      * mount the component
@@ -61,18 +43,16 @@ class Allowdeductupdate extends Component
                 'mad_name' => $this->mad_name,
                 'mad_notes' => $this->mad_notes
             ]);
-            session()->flash('success', __('Save') . __('Done'));
+            $logMessage = '手当控除 更新: ' . $this->mad_cd . ' ' . $this->mad_name;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_ALLOWDEDUCT, $logMessage);
+            session()->flash('success', __('Allow Deduct updated successfully.'));
             return redirect()->route('masterallowdeduct');
         } catch (\Exception $e) {
+            $logMessage = '手当控除 更新 エラー: ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', 'Something went wrong.');
         }
-    }
-
-    /**
-     * Cancel add/edit form and redirect to the master list
-     * @return void
-     */
-    public function cancelMad() {
-        return redirect()->route('masterallowdeduct');
     }
 }

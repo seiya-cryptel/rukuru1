@@ -28,6 +28,16 @@ class Holidaycreate extends Component
         'client_id' => 'required',
         'holiday_name' => 'required',
     ];
+    /**
+     * Custom validation messages
+     */
+    protected function messages()
+    {
+        return [
+            'holiday_date.required' => '必須項目',
+            'holiday_name.required' => '必須項目',
+        ];
+    }
 
     /**
      * reseting all the input fields
@@ -63,11 +73,11 @@ class Holidaycreate extends Component
             $logMessage = '祝日マスタ 作成: ' . $this->holiday_name . ' 顧客ID ' . $this->client_id;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_HOLIDAY, $logMessage);
-            session()->flash('success', __('Create'). ' ' . __('Done'));
+            session()->flash('success', __('Holiday created successfully.'));
             return redirect()->route('holiday');
         } catch (\Exception $e) {
             $logMessage = '祝日マスタ 作成 エラー: ' . $e->getMessage();
-            logger(logMessage);
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }

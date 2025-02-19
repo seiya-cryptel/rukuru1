@@ -6,36 +6,8 @@ use Livewire\Component;
 use App\Models\applogs;
 use App\Models\clients as modelClients;
 
-class Clientcreate extends Component
+class Clientcreate extends ClientBase
 {
-    /**
-     * record set of master allow deducts
-     * */
-    public $Clients;
-    /**
-     * master allow deducts fields
-     */
-    public $cl_cd, 
-        $cl_name, $cl_kana, $cl_alpha, 
-        $cl_zip, $cl_addr1, $cl_addr2, 
-        $cl_psn_div, $cl_psn_title, $cl_psn_name, $cl_psn_kana, $cl_psn_mail, $cl_psn_tel, $cl_psn_fax, 
-        $cl_dow_statutory, $cl_dow_non_statutory, $cl_over_40hpw, $cl_dow_first, $cl_round_start, $cl_round_end,
-        $cl_notes;
-    /**
-     * master allow deducts id and mode flags
-     */
-    public $clientId;
-
-    /**
-     * List of add/edit form validation rules
-     */
-    protected $rules = [
-        'cl_cd' => 'required',
-        'cl_name' => 'required',
-        'cl_kana' => 'required',
-        'cl_alpha' => 'required',
-    ];
-
     /**
      * Reseting all the input fields
      * @return void
@@ -57,11 +29,12 @@ class Clientcreate extends Component
         $this->cl_psn_tel = '';
         $this->cl_psn_fax = '';
         $this->cl_dow_statutory = '0';
-        $this->cl_dow_non_statutory = '6';
-        $this->cl_over_40hpw = '1';
+        $this->cl_dow_non_statutory = '0';
+        $this->cl_over_40hpw = '0';
         $this->cl_dow_first = '0';
         $this->cl_round_start = '0';
         $this->cl_round_end = '0';
+        $this->cl_close_day = '0';
         $this->cl_notes = '';
     }
 
@@ -71,7 +44,9 @@ class Clientcreate extends Component
     public function render()
     {
         $this->resetFields();
-        return view('livewire.clientcreate');
+        return view('livewire.clientcreate', [
+            'dayOfWeek' => $this->dayOfWeek,
+        ]);
     }
 
     /**
@@ -108,21 +83,13 @@ class Clientcreate extends Component
             $logMessage = '顧客マスタ 作成: ' . $this->cl_cd . ' ' . $this->cl_name;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENT, $logMessage);
-            session()->flash('success', __('Create') . ' ' . __('Done'));
+            session()->flash('success', __('Client created successfully.'));
             return redirect()->route('client');
         } catch (\Exception $e) {
             $logMessage = '顧客マスタ 作成 エラー: ' . $e->getMessage();
-            logger(logMessage);
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
-    }
-
-    /**
-     * Cancel add/edit form and redirect to the master list
-     * @return void
-     */
-    public function cancelClient() {
-        return redirect()->route('client');
     }
 }

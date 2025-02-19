@@ -3,7 +3,8 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Livewire\HourlywageBase;
+
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorkTypes;
@@ -29,16 +30,16 @@ class Hourlywagecreate extends HourlywageBase
         $this->wt_bill_ovr_midnight = '';
         $this->wt_bill_holiday = '';
         $this->wt_bill_holiday_midnight = '';
-        $this->wt_notes = '';
+        $this->notes = '';
     }
 
     /**
      * mount function
      * @param int $employee_id   employee id
      */
-    public function mount($employee_id)
+    public function mount($employee_id, $employeepay_id = null)
     {
-        parent::mount($employee_id);
+        parent::mount($employee_id, $employeepay_id);
 
         $this->resetFields();
     }
@@ -68,21 +69,19 @@ class Hourlywagecreate extends HourlywageBase
             $EmployeePay->wt_bill_ovr_midnight = self::str2decimal($this->wt_bill_ovr_midnight);
             $EmployeePay->wt_bill_holiday = self::str2decimal($this->wt_bill_holiday);
             $EmployeePay->wt_bill_holiday_midnight = self::str2decimal($this->wt_bill_holiday_midnight);
-            $EmployeePay->notes = $this->wt_notes;
+            $EmployeePay->notes = $this->notes;
             $EmployeePay->save();
 
-            session()->flash('success', __('Create'). ' ' . __('Done'));
+            $logMessage = '従業員時給 作成: ' . $this->Employee->empl_cd . ' ' . $EmployeePay->id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_EMPLOYEEPAY, $logMessage);
+            session()->flash('success', __('Employee Pay created successfully.'));
             return redirect()->route('hourlywage', ['id' => $this->employee_id]);
         } catch (\Exception $e) {
+            $logMessage = '従業員時給 作成 エラー: ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
-    }
-
-    /**
-     * Cancel add/edit form and redirect to the master list
-     * @return void
-     */
-    public function cancelEmployeePay() {
-        return redirect()->route('hourlywage', ['id' => $this->employee_id]);
     }
 }

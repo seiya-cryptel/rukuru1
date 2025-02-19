@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="container">
                 <div class="row justify-content-center mt-3">
-                    @livewire('hourlywageupdate', ['employeepay_id' => $id])
+                    @livewire('hourlywageupdate', ['employee_id' => $employee_id, 'employeepay_id' => $employeepay_id])
                 </div>
             </div>
         </div>

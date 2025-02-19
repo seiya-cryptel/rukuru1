@@ -68,7 +68,7 @@ class Closepayrolls extends Component
 	protected $saveWrkDate = null;    // 勤務日
 	protected $wk_ttl_seq = null;     // 1日の中の勤怠連番
 	protected $saveClientId = null;   // 顧客ID
-	protected $saveClientPlaceId = null;  // 事業所ID
+	protected $saveClientPlaceId = null;  // 部門ID
     protected $saveDisplayOrder = 1;  // 表示順
     protected $saveTitle = null;      // 請求項目名
     protected $saveUnitPrice = 0;   // 請求単価
@@ -177,7 +177,7 @@ class Closepayrolls extends Component
             $EmployeeSalary->wrk_ttl_seq = $this->wrk_ttl_seq++;    // 1日の中の勤怠連番
             $EmployeeSalary->leave = 0;
             $EmployeeSalary->client_id = $Work->client_id;          // 顧客ID
-            $EmployeeSalary->clientplace_id = $Work->clientplace_id;    // 事業所ID
+            $EmployeeSalary->clientplace_id = $Work->clientplace_id;    // 部門ID
 
             $EmployeeSalary->wt_cd = $Work->wt_cd;                  // 作業種別コード
             $EmployeeSalary->wrk_work_start = $dtWorkStart;    // 勤怠開始時刻
@@ -266,7 +266,7 @@ class Closepayrolls extends Component
             $EmployeeSalary->wrk_ttl_seq = $this->wrk_ttl_seq++;    // 1日の中の勤怠連番
             $EmployeeSalary->leave = 0;
             $EmployeeSalary->client_id = $Work->client_id;          // 顧客ID
-            $EmployeeSalary->clientplace_id = $Work->clientplace_id;    // 事業所ID
+            $EmployeeSalary->clientplace_id = $Work->clientplace_id;    // 部門ID
 
             $EmployeeSalary->wt_cd = $Work->wt_cd;                  // 作業種別コード
             $EmployeeSalary->wrk_work_start = $dtWorkStart;    // 勤怠開始時刻
@@ -341,7 +341,7 @@ class Closepayrolls extends Component
         $this->saveWrkDate = null;    // 勤務日
         $this->wk_ttl_seq = null;     // 1日の中の勤怠連番
         $this->saveClientId = null;   // 顧客ID
-        $this->saveClientPlaceId = null;  // 事業所ID
+        $this->saveClientPlaceId = null;  // 部門ID
         $this->saveWtCd = null;   // 作業種別コード
         $this->cdHoliday = false; // 休日種別 rukuruUtilIsHoliday で設定
         // 計算に必要なレコード
@@ -362,7 +362,7 @@ class Closepayrolls extends Component
                 $this->cdHoliday = $this->rukuruUtilIsHoliday($Work->client_id, $this->saveWrkDate);
                 $this->wrk_ttl_seq = 1;
             }
-            // 顧客または事業所が変わった場合
+            // 顧客または部門が変わった場合
             if ($this->saveClientId != $Work->client_id || $this->saveClientPlaceId != $Work->clientplace_id) {
                 $this->saveClientId = $Work->client_id;
                 $this->saveClientPlaceId = $Work->clientplace_id;
@@ -439,7 +439,7 @@ class Closepayrolls extends Component
      */
     protected function summaryBill()
     {
-        // 各顧客、事業所について、work_year, work_month に該当する従業員給与レコードを取得
+        // 各顧客、部門について、work_year, work_month に該当する従業員給与レコードを取得
         $sStartDay = $this->workYear . '-' . $this->workMonth . '-01';
         $sEndDay = $this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($sStartDay));
         $EmployeeSalarys = modelEmployeeSalarys::whereBetween('wrk_date', [$sStartDay, $sEndDay])
@@ -447,11 +447,11 @@ class Closepayrolls extends Component
             ->get();
 
         $this->saveClientId = null;   // 顧客ID
-        $this->saveClientPlaceId = null;  // 事業所ID
+        $this->saveClientPlaceId = null;  // 部門ID
         $this->saveWtBillItemCd = null;   // 請求項目コード
     
         foreach($EmployeeSalarys as $EmployeeSalary) {
-            // 顧客または事業所が変わった場合
+            // 顧客または部門が変わった場合
             if ($this->saveClientId != $EmployeeSalary->client_id || $this->saveClientPlaceId != $EmployeeSalary->clientplace_id) {
                 // 未出力の請求明細情報があるなら、請求明細レコードを作成
                 if($this->saveWtBillItemCd)

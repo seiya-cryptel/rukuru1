@@ -3,7 +3,8 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Livewire\ClientworktypeBase;
+
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorktypes;
@@ -57,7 +58,6 @@ class Clientworktypecreate extends ClientworktypeBase
     public function mount($id = null)
     {
         parent::mount($id);
-
         $this->resetFields();
     }
 
@@ -110,17 +110,17 @@ class Clientworktypecreate extends ClientworktypeBase
                 'wt_bill_holiday_midnight' => $this->rukuruUtilMoneyValue($this->wt_bill_holiday_midnight),
                 'wt_notes' => $this->wt_notes,
             ]);
-            $strMessage = '作業区分 作成'
+            $logMessage = '作業区分 作成'
             . ($this->selectedClient ? ' ' . $this->selectedClient->cl_name : '') 
             . ($this->selectedClientPlace ? ' ' . $this->selectedClientPlace->cl_pl_name : '') 
             . ' ' . $this->wt_cd . ' ' . $this->wt_name;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTWORKTYPE, $logMessage);
-            session()->flash('success', __('Create') . ' ' . __('Done'));
+            session()->flash('success', __('Client Work Type created successfully.'));
             return redirect()->route('clientworktype');
         } catch (\Exception $e) {
             $logMessage = '作業区分 作成 エラー: ' . $e->getMessage();
-            logger(logMessage);
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', 'Something went wrong.');
         }

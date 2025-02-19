@@ -3,38 +3,13 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+
 use App\Models\applogs;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clients as modelClients;
 
-class Clientplacecreate extends Component
+class Clientplacecreate extends ClientplaceBase
 {
-    /**
-     * reference to client records
-     */
-    public $refClients;
-    /**
-     * master fields
-     */
-    public $client_id, $cl_pl_cd, 
-        $cl_pl_name, $cl_pl_kana, $cl_pl_alpha, 
-        $cl_pl_notes;
-    /**
-     * master allow deducts id and mode flags
-     */
-    public $clientPlaceId;
-
-    /**
-     * List of add/edit form validation rules
-     */
-    protected $rules = [
-        'client_id' => 'required',
-        'cl_pl_cd' => 'required',
-        'cl_pl_name' => 'required',
-        'cl_pl_kana' => 'required',
-        'cl_pl_alpha' => 'required',
-    ];
-
     /**
      * Reseting all the input fields
      * @return void
@@ -48,10 +23,20 @@ class Clientplacecreate extends Component
         $this->cl_pl_notes = '';
     }
 
+    /**
+     * mount the component
+     */
+    public function mount($id = null)
+    {
+        parent::mount($id);
+        $this->resetFields();
+    }
+
+    /**
+     * render the view
+     */
     public function render()
     {
-        $this->refClients = modelClients::orderBy('cl_cd', 'asc')->get();
-        $this->resetFields();
         return view('livewire.clientplacecreate');
     }
 
@@ -71,24 +56,16 @@ class Clientplacecreate extends Component
                 'cl_pl_alpha' => $this->cl_pl_alpha,
                 'cl_pl_notes' => $this->cl_pl_notes,
             ]);
-            $logMessage = '顧客事業所マスタ 作成: ' . $this->cl_pl_cd . ' 顧客ID ' . $this->client_id;
+            $logMessage = '顧客部門マスタ 作成: ' . $this->cl_pl_cd . ' 顧客ID ' . $this->client_id;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTPLACE, $logMessage);
-            session()->flash('success', __('Create') . ' ' . __('Done'));
+            session()->flash('success', __('Client Place created successfully.'));
             return redirect()->route('clientplace');
         } catch (\Exception $e) {
-            $logMessage = '顧客事業所マスタ 作成 エラー: ' . $e->getMessage();
-            logger(logMessage);
+            $logMessage = '顧客部門マスタ 作成 エラー: ' . $e->getMessage();
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
-    }
-
-    /**
-     * cancel add/edit form
-     */
-    public function cancelClientPlace()
-    {
-        return redirect()->route('clientplace');
     }
 }

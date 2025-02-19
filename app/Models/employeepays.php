@@ -115,16 +115,16 @@ class employeepays extends Model
      * 従業員時給を検索する
      * @param int $employeeId 従業員ID
      * @param int $clientId 顧客ID
-     * @param int $clientPlaceId 事業所ID
+     * @param int $clientPlaceId 部門ID
      * @param string $wtCd 作業種別コード
      * @return integer[] [標準時給, 残業時給, 深夜残業時給, 法定休日時給, 法定休日深夜残業時給] | null
-     * 顧客、事業所、作業種別が一致する時給があればそれを返す
+     * 顧客、部門、作業種別が一致する時給があればそれを返す
      * 顧客、作業種別が一致する時給があればそれを返す
      * 作業種別が一致する時給があればそれを返す
      */
     static public function getPayhour($employeeId, $clientId, $clientPlaceId, $wtCd)
     {
-        // 顧客IDと事業所IDが一致する時給を取得
+        // 顧客IDと部門IDが一致する時給を取得
         $EmployeePay = employeepays::with('clientworktypes')
             ->join('clientworktypes', 'clientworktypes.id', '=', 'employeepays.clientworktype_id')
             ->where('employee_id', $employeeId)

@@ -84,7 +84,7 @@ function () {
             ->name('clientupdate');
 
         /**
-         * Route for the 顧客事業所マスタ
+         * Route for the 顧客部門マスタ
          */
         Route::view('clientplace', 'clientplace')
             ->middleware(['auth', 'verified'])
@@ -148,10 +148,10 @@ function () {
         Route::view('hourlywage/{id}', 'hourlywage')
             ->middleware(['auth', 'verified'])
             ->name('hourlywage');
-        Route::view('hourlywagecreate/{id}', 'hourlywagecreate')
+        Route::view('hourlywagecreate/{employee_id}', 'hourlywagecreate')
             ->middleware(['auth', 'verified'])
             ->name('hourlywagecreate');
-        Route::view('hourlywageupdate/{id}', 'hourlywageupdate')
+        Route::view('hourlywageupdate/{employee_id}/{employeepay_id}', 'hourlywageupdate')
             ->middleware(['auth', 'verified'])
             ->name('hourlywageupdate');
 
@@ -183,6 +183,12 @@ function () {
         Route::view('employeework/{workYear}/{workMonth}/{clientId}/{clientPlaceId}/{employeeId}', 'employeework')
             ->middleware(['auth', 'verified'])
             ->name('employeework');
+        Route::view('employeeworksone/{workYear}/{workMonth}/{clientId}/{clientPlaceId}/{employeeId}', 'employeeworksone')
+            ->middleware(['auth', 'verified'])
+            ->name('employeeworksone');
+        Route::view('employeeworksslot/{workYear}/{workMonth}/{clientId}/{clientPlaceId}/{employeeId}', 'employeeworksslot')
+            ->middleware(['auth', 'verified'])
+            ->name('employeeworksslot');
 
         /**
          * Routes for the 勤怠エントリー 勤怠締め

@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+
+use App\Models\applogs;
 use App\Models\Employees as modelEmployees;
 use App\Models\employeepays as modelEmployeePays;
 
@@ -52,22 +54,32 @@ class Hourlywage extends Component
      */
     public function newEmployeepay()
     {
-        return redirect()->route('hourlywagecreate', ['id' => $this->employee_id]);
+        return redirect()->route('hourlywagecreate', ['employee_id' => $this->employee_id]);
     }
 
     /**
      * Open Edit Employee Pay form
      */
-    public function editEmployeepay($id)
+    public function editEmployeePay($id)
     {
-        return redirect()->route('hourlywageupdate', ['id' => $id]);
+        return redirect()->route('hourlywageupdate', ['employee_id' => $this->employee_id, 'employeepay_id' => $id]);
     }
 
     /**
      * delete Employee Pay
      */
-    public function deleteEmployeepay($id)
+    public function deleteEmployeePay($id)
     {
-        modelEmployeePay::find($id)->delete();
+        try {modelEmployeePays::destroy($id);
+            $logMessage = '従業員時給 削除: ' . $id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_EMPLOYEEPAY, $logMessage);
+            session()->flash('success', __('Employee Pay deleted successfully.'));
+        } catch (\Exception $e) {
+            $logMessage = '従業員時給 削除 エラー: ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
+            session()->flash('error', __('Something went wrong.'));
+        }
     }
 }

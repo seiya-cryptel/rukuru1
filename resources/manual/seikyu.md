@@ -4,7 +4,7 @@
 
 <img width="50%" src="imgs/seikyu01export01.png" alt="請求出力一覧画面">
 
-請求書を出力する顧客、事業所の［詳細］をクリックします。
+請求書を出力する顧客、部門の［詳細］をクリックします。
 
 <img width="50%" src="imgs/seikyu01export02.png" alt="請求詳細画面">
 

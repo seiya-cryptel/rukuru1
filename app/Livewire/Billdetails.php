@@ -76,7 +76,7 @@ class Billdetails extends Component
         $service = new PhpSpreadsheetService();
         session()->flash('success', '請求明細を作成します。');
 
-        // 各顧客、事業所について、work_year, work_month に該当する従業員給与レコードを取得
+        // 各顧客、部門について、work_year, work_month に該当する従業員給与レコードを取得
         $workYear = $this->Bill->work_year;
         $workMonth = $this->Bill->work_month;
         $sStartDay = $workYear . '-' . $workMonth . '-01';

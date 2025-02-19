@@ -42,7 +42,7 @@
                                 <select name="workplace" id="workplace" class="form-control py-1 text-sm">
                                 <option></option>
                                     <option value="1">A工場</option>
-                                    <option value="2">B事業所</option>
+                                    <option value="2">B部門</option>
                                 </select>
                             </td>
                             <td width="60">

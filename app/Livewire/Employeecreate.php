@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Livewire;
-use App\Models\employees as modelEmployees;
 
 use Livewire\Component;
 
 use App\Traits\rukuruUtilities;
+
+use App\Models\applogs;
+use App\Models\employees as modelEmployees;
 
 class Employeecreate extends EmployeeBase
 {
@@ -42,13 +44,11 @@ class Employeecreate extends EmployeeBase
     public function mount($id = null)
     {
         parent::mount($id);
-
         $this->resetFields();
     }
 
     public function render()
     {
-        $this->resetFields();
         return view('livewire.employeecreate');
     }
 
@@ -79,9 +79,15 @@ class Employeecreate extends EmployeeBase
                 'empl_main_client_name' => $this->empl_main_client_name,
                 'empl_notes' => $this->empl_notes,
             ]);
-            session()->flash('success', __('Create'). ' ' . __('Done'));
+            $logMessage = '従業員 作成: ' . $this->empl_cd . ' ' . $this->empl_name_last . ' ' . $this->empl_name_first;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_EMPLOYEE, $logMessage);
+            session()->flash('success', __('Employee created successfully.'));
             return redirect()->route('employee');
         } catch (\Exception $e) {
+            $logMessage = '従業員 作成 エラー: ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', 'Something went wrong.');
         }
     }

@@ -40,6 +40,9 @@
                         @error('clientplace_id') 
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
+                        <span>
+                            <button wire:click="clearSearch()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded">X</button>
+                        </span>
                     </td>
                 </tr>
             </table>
@@ -52,9 +55,7 @@
                         <th>{{ __('Work Place') }}</th>
                         <th>{{ __('Code') }}</th>
                         <th>{{ __('Name') }}</th>
-                        <th>{{ __('Kana') }}</th>
-                        <th>{{ __('Alpha') }}</th>
-                        <th>{{ __('Start') }}-{{ __('End') }}</th>
+                        <th>{{ __('Begin') }}-{{ __('End') }}</th>
                         <th> </th>
                     </tr>
                 </thead>
@@ -79,12 +80,6 @@
                                     {{$ClientWorktype->wt_name}}
                                 </td>
                                 <td>
-                                    {{$ClientWorktype->wt_kana}}
-                                </td>
-                                <td>
-                                    {{$ClientWorktype->wt_alpha}}
-                                </td>
-                                <td>
                                     {{$ClientWorktype->wt_work_start}}-{{$ClientWorktype->wt_work_end}}
                                 </td>
                                 <td>
@@ -105,9 +100,9 @@
         </div>
     </div>    
     <script>
-        function deleteClientWorktype(id){
+        function deleteClientWorkType(id){
             if(confirm("削除しますか?"))
-                Livewire.dispatch('deleteClientWorktypeListener', { id: id });
+                Livewire.dispatch('deleteClientWorkTypeListener', { id: id });
         }
     </script>
 </div>

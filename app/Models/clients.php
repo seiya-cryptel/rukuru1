@@ -55,6 +55,7 @@ class clients extends Model
         'cl_dow_first',
         'cl_round_start',
         'cl_round_end',
+        'cl_close_day',
         'cl_notes',
     ];
 

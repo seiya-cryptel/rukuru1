@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\WithPagination;
 use Livewire\Component;
 
+use App\Models\applogs;
 use App\Models\masterallowdeducts as modelMad;
 
 class Masterallowdeducts extends Component
@@ -71,9 +72,14 @@ class Masterallowdeducts extends Component
      */
     public function deleteMad($id) {
         try {
-            modelMad::where('id', $id)->delete();
-            session()->flash('success', __('Delete'). ' ' . __('Done'));
+            modelMad::destroy($id);
+            $logMessage = '手当控除 削除: ' . $id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_ALLOWDEDUCT, $logMessage);
+            session()->flash('success', __('Allow Deduct deleted successfully.'));
         } catch (\Exception $e) {
+            $logMessage = '手当控除 削除 エラー: ' . $e->getMessage();
+            logger($logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

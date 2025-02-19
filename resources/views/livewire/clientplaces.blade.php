@@ -23,8 +23,10 @@
                         <th>{{ __('Client') . __('Name') }}</th>
                         <th>{{ __('Work Place') . __('Code') }}</th>
                         <th>{{ __('Work Place') }}{{ __('Name') }}</th>
+                        {{--
                         <th>{{ __('Work Place') }}{{ __('Kana') }}</th>
                         <th>{{ __('Work Place') }}{{ __('Alpha') }}</th>
+                        --}}
                         <th> </th>
                     </tr>
                 </thead>
@@ -44,12 +46,14 @@
                                 <td>
                                     {{$ClientPlace->cl_pl_name}}
                                 </td>
+                                {{--
                                 <td>
                                     {{$ClientPlace->cl_pl_kana}}
                                 </td>
                                 <td>
                                     {{$ClientPlace->cl_pl_alpha}}
                                 </td>
+                                --}}
                                 <td>
                                     <button wire:click="editClientPlace({{$ClientPlace->clientplace_id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
                                     <button onclick="deleteClientPlace({{$ClientPlace->clientplace_id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>

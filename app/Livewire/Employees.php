@@ -6,7 +6,7 @@ use Livewire\WithPagination;
 use Livewire\Component;
 
 use App\Consts\AppConsts;
-
+use App\Models\applogs;
 use App\Models\employees as modelEmployees;
 
 class Employees extends Component
@@ -101,9 +101,15 @@ class Employees extends Component
      */
     public function deleteEmployee($id) {
         try {
-            modelEmployees::where('id', $id)->delete();
-            session()->flash('success', __('Delete'). ' ' . __('Done'));
+            modelEmployees::destroy($id);
+            $logMessage = '従業員 削除: ' . $id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_MASTER_EMPLOYEE, $logMessage);
+            session()->flash('success', __('Employee deleted successfully.'));
         } catch (\Exception $e) {
+            $logMessage = '従業員 削除 エラー: ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
     }

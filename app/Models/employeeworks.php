@@ -72,7 +72,7 @@ class employeeworks extends Model
     }
 
     /**
-     * 顧客、事業所、従業員の指定年月データを削除する
+     * 顧客、部門、従業員の指定年月データを削除する
      * @param int $client_id
      * @param int $clientplace_id
      * @param int $employee_id
@@ -90,7 +90,7 @@ class employeeworks extends Model
     }
 
     /**
-     * 顧客、事業所、従業員の指定年月以前の最後の勤怠データを取得
+     * 顧客、部門、従業員の指定年月以前の最後の勤怠データを取得
      * @param int $client_id
      * @param int $clientplace_id
      * @param int $employee_id

@@ -70,7 +70,7 @@ class employeesalarys extends Model
     }
 
     /**
-     * 顧客、事業所、年月で絞り込み
+     * 顧客、部門、年月で絞り込み
      * @param $client_id
      * @param $clientplace_id
      * @param $work_year

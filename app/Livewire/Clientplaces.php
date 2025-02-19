@@ -74,14 +74,14 @@ class Clientplaces extends Component
      */
     public function deleteClientPlace($id) {
         try {
-            modelClientPlaces::where('id', $id)->delete();
-            $logMessage = '顧客事業所マスタ 削除: ' . $id;
+            modelClientPlaces::destroy($id);
+            $logMessage = '顧客部門マスタ 削除: ' . $id;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_MASTER_CLIENTPLACE, $logMessage);
-            session()->flash('success', __('Delete') . ' ' . __('Done'));
+            session()->flash('success', __('Client Place deleted successfully.'));
         } catch (\Exception $e) {
-            $logMessage = '顧客事業所マスタ 削除 エラー: ' . $e->getMessage();
-            logger(logMessage);
+            $logMessage = '顧客部門マスタ 削除 エラー: ' . $e->getMessage();
+            logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
             session()->flash('error', __('Something went wrong.'));
         }
