@@ -78,6 +78,7 @@ class Clientcreate extends ClientBase
                 'cl_dow_first' => $this->cl_dow_first,
                 'cl_round_start' => $this->cl_round_start,
                 'cl_round_end' => $this->cl_round_end,
+                'cl_close_day' => $this->cl_close_day,
                 'cl_notes' => $this->cl_notes,
             ]);
             $logMessage = '顧客マスタ 作成: ' . $this->cl_cd . ' ' . $this->cl_name;

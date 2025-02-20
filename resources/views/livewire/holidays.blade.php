@@ -41,7 +41,7 @@
                             {{$Holiday->holiday_name}} 
                         </td>
                         <td>
-                            {{$Holiday->note}} 
+                            {{$Holiday->notes}} 
                         </td>
                         <td>
                             <button wire:click="editHoliday({{$Holiday->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>

@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 
 use App\Models\applogs;
-use App\Models\Employees as modelEmployees;
+use App\Models\employees as modelEmployees;
 use App\Models\employeepays as modelEmployeePays;
 
 /**

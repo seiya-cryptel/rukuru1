@@ -23,7 +23,10 @@
                 @foreach($EmployeePays as $EmployeePay)
                 <tr class="border-b">
                     <td>{{ $EmployeePay->clientworktype->client->cl_cd }}:{{ $EmployeePay->clientworktype->client->cl_name }}</td>
-                    <td>{{ $EmployeePay->clientworktype->clientplace->cl_pl_cd }}:{{ $EmployeePay->clientworktype->clientplace->cl_pl_name }}</td>
+                    <td>
+                        @if(!empty($EmployeePay->clientworktype->clientplace_id))
+                            {{ $EmployeePay->clientworktype->clientplace->cl_pl_cd }}:{{ $EmployeePay->clientworktype->clientplace->cl_pl_name }}</td>
+                        @endif
                     <td>
                         {{ $EmployeePay->clientworktype->wt_cd }}:{{ $EmployeePay->clientworktype->wt_name }}
                     </td>

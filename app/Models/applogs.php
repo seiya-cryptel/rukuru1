@@ -34,6 +34,8 @@ class applogs extends Model
         self::LOG_TYPE_MASTER_CLIENTPLACE => '顧客部門マスタ',
         self::LOG_TYPE_MASTER_CLIENTWORKTYPE => '作業種類マスタ',
         self::LOG_TYPE_MASTER_ALLOWDEDUCT => '手当控除マスタ',
+        self::LOG_TYPE_MASTER_EMPLOYEE => '従業員マスタ',
+        self::LOG_TYPE_MASTER_EMPLOYEEPAY => '従業員時給マスタ',
 
         self::LOG_ERROR => 'エラー',
     ];

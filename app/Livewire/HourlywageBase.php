@@ -111,14 +111,6 @@ abstract class HourlywageBase extends Component
     ];
 
     /**
-     * Reseting all the input fields
-     * @return void
-     */
-    public function resetFields()
-    {
-    }
-
-    /**
      * mount function
      * @param int $employeepay_id  employeepay id
      */
@@ -161,7 +153,7 @@ abstract class HourlywageBase extends Component
         $this->refClientPlaces = modelClientPlaces::where('client_id', $this->client_id)
             ->orderBy('cl_pl_cd', 'asc')
             ->get();
-            $this->updateClientWorkTypeList();
+        $this->updateClientWorkTypeList();
     }
 
     /**
