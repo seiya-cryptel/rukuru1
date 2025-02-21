@@ -66,10 +66,10 @@ class Clientworktypes extends Component
             ->select('clientworktypes.id as clientworktype_id', 'client.*', 'clientplace.*', 'clientworktypes.*');
             ;
         if ($this->client_id) {
-            $Query->where('client_id', $this->client_id);
+            $Query->where('clientworktypes.client_id', $this->client_id);
         }
         if ($this->clientplace_id) {
-            $Query->where('clientplace_id', $this->clientplace_id);
+            $Query->where('clientworktypes.clientplace_id', $this->clientplace_id);
         }
         $Query->orderBy('client.cl_cd', 'asc');
         $Query->orderBy('clientplace.cl_pl_cd', 'asc');

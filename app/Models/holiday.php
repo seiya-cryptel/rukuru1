@@ -44,7 +44,7 @@ class holiday extends Model
     public function holidayDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '0000-00-00 00:00:00' || $value === null) ? '' : date('Y-m-d', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : date('Y-m-d', strtotime($value)),
             set: fn ($value) => $this->attributes['holiday_date'] = $value === '' ? null : $value, 
         );
     }

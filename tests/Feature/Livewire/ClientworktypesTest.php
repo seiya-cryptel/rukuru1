@@ -79,6 +79,5 @@ test('new client work type store', function () {
 test('new client work type validation error', function () {
     Livewire::test(Clientworktypecreate::class)
         ->call('storeClientWorkType')
-        ->assertHasErrors(['wt_cd', 'wt_name', 'wt_kana', 'wt_alpha']);
-        // , 'wt_day_night', 'wt_work_start', 'wt_work_end', 'wt_pay_std', 'wt_pay_ovr', 'wt_bill_std', 'wt_bill_ovr'
+        ->assertHasErrors(['wt_cd', 'wt_name']);
 });

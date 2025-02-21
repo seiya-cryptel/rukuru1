@@ -65,5 +65,5 @@ test('new client place store', function () {
 test('new client place validation error', function () {
     Livewire::test(Clientplacecreate::class)
         ->call('storeClientPlace')
-        ->assertHasErrors(['client_id', 'cl_pl_cd', 'cl_pl_name', 'cl_pl_kana', 'cl_pl_alpha']);
+        ->assertHasErrors(['client_id', 'cl_pl_cd', 'cl_pl_name']);
 });

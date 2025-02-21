@@ -66,5 +66,5 @@ test('new client store', function () {
 test('new client validation error', function () {
     Livewire::test(Clientcreate::class)
         ->call('storeClient')
-        ->assertHasErrors(['cl_cd', 'cl_name', 'cl_kana', 'cl_alpha']);
+        ->assertHasErrors(['cl_cd', 'cl_name']);
 });

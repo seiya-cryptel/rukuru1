@@ -81,7 +81,7 @@ class employees extends Model
     public function emplHireDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '0000-00-00 00:00:00' || $value === null) ? '' : date('Y-m-d', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : date('Y-m-d', strtotime($value)),
             set: fn ($value) => $this->attributes['empl_hire_date'] = $value === '' ? null : $value, 
         );
     }
@@ -95,7 +95,7 @@ class employees extends Model
     public function emplResignDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '0000-00-00 00:00:00' || $value === null) ? '' : date('Y-m-d', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : date('Y-m-d', strtotime($value)),
             set: fn ($value) => $this->attributes['empl_resign_date'] = $value === '' ? null : $value, 
         );
     }

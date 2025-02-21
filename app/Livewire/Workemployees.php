@@ -132,7 +132,6 @@ class Workemployees extends Component
         $query = $query->where(function ($query) use ($firstDay) {
             $query->where('empl_resign_date', '>=', $firstDay)
             ->orWhere('empl_resign_date', null)
-            ->orWhere('empl_resign_date', '0000-00-00 00:00:00')
             ->orWhere('empl_resign_date', '');
         });
 

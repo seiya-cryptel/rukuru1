@@ -31,7 +31,7 @@ class notice extends Model
     public function noticeDate(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === '0000-00-00 00:00:00' || $value === null) ? '' : date('Y-m-d', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : date('Y-m-d', strtotime($value)),
             set: fn ($value) => $this->attributes['notice_date'] = $value === '' ? null : $value, 
         );
     }
