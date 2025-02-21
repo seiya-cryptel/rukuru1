@@ -53,7 +53,7 @@ class Masterallowdeducts extends Component
      */
     public function newMad()
     {
-        return redirect()->route('allowdeductcreate');
+        return redirect()->route('allowdeductcreate', ['locale' => app()->getLocale()]);
     }
 
     /**
@@ -62,7 +62,7 @@ class Masterallowdeducts extends Component
      */
     public function editMad($id)
     {
-        return redirect()->route('allowdeductupdate', ['id' => $id]);
+        return redirect()->route('allowdeductupdate', ['locale' => app()->getLocale(), 'id' => $id]);
     }
 
     /**

@@ -1,6 +1,9 @@
 <?php
 
 use App\Livewire\Clientworktypes;
+use App\Livewire\Clientworktypecreate;
+use App\Livewire\Clientworktypeupdate;
+
 use Livewire\Livewire;
 
 /**
@@ -8,6 +11,15 @@ use Livewire\Livewire;
  */
 it('renders successfully', function () {
     Livewire::test(Clientworktypes::class)
+        ->assertStatus(200);
+});
+
+/**
+ * 作業種別リスト 検索 表示テスト
+ */
+it('renders query by client successfully', function () {
+    Livewire::test(Clientworktypes::class)
+        ->call('updateClientId', 3)
         ->assertStatus(200);
 });
 
@@ -25,18 +37,18 @@ test('add client work type', function () {
  */
 test('edit client work type', function () {
     Livewire::test(Clientworktypes::class)
-        ->call('editClientWorkType', 1)
-        ->assertRedirect(route('clientworktypeupdate', ['locale' => app()->getLocale(), 'id' => 1], absolute: false));
+        ->call('editClientWorkType', 6)
+        ->assertRedirect(route('clientworktypeupdate', ['locale' => app()->getLocale(), 'id' => 6], absolute: false));
 });
 
 /**
  * 作業種別 追加 表示テスト
  */
 test('new client work type renders successfully', function () {
-    Livewire::test(Clientcreate::class)
+    Livewire::test(Clientworktypecreate::class)
         ->assertStatus(200)
         // ->assertSeeLivewire(Clientcreate::class)
-        ->assertSee('顧客名前')
+        ->assertSee('顧客')
         ;
 });
 

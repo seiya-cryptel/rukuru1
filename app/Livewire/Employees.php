@@ -44,8 +44,7 @@ class Employees extends Component
         $Query = modelEmployees::query();
         // 退職者非表示
         if (! $this->retire) {
-            $Query->whereNull('empl_resign_date')
-            ->orWhere('empl_resign_date', '=', '0000-00-00');
+            $Query->whereNull('empl_resign_date');
         }
         // 文字列検索
         if(! empty($this->search)) {
@@ -73,7 +72,7 @@ class Employees extends Component
      */
     public function newEmployee()
     {
-        return redirect()->route('employeecreate');
+        return redirect()->route('employeecreate', ['locale' => app()->getLocale()]);
     }
 
     /**
@@ -82,7 +81,7 @@ class Employees extends Component
      */
     public function editEmployee($id)
     {
-        return redirect()->route('employeeupdate', ['id' => $id]);
+        return redirect()->route('employeeupdate', ['locale' => app()->getLocale(), 'id' => $id]);
     }
 
     /**
@@ -91,7 +90,7 @@ class Employees extends Component
      */
     public function hourlywageEmployee($id)
     {
-        return redirect()->route('hourlywage', ['id' => $id]);
+        return redirect()->route('hourlywage', ['locale' => app()->getLocale(), 'id' => $id]);
     }
 
     /**
