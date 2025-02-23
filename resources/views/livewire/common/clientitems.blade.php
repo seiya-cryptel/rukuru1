@@ -16,6 +16,15 @@
         @enderror
     </td>
 </tr>
+<tr class="border-b">
+    <th><label for="cl_full_name">{{ __('Client Full Name') }}</label><span class="text-lg" style="color: red;">*</span></th>
+    <td>
+        <input type="text" tabindex="1" class="form-control @error('cl_full_name') is-invalid @enderror text-sm py-1" id="cl_full_name" placeholder="{{ __('Client Full Name') }}" wire:model="cl_full_name">
+        @error('cl_full_name') 
+            <span class="text-danger" style="color: red;">{{ $message }}</span>
+        @enderror
+    </td>
+</tr>
 {{--
 <tr class="border-b">
     <th><label for="cl_kana">{{ __('Client') . __('Kana') }}</label></th>
@@ -119,9 +128,21 @@
     </td>
 </tr>
 <tr class="border-b">
+    <th><label for="cl_kintai_style">{{ __('Kintai Entry') }}{{ __('Style') }}</label></th>
+    <td>
+        <select tabindex="4" class="form-control @error('cl_kintai_style') is-invalid @enderror text-sm py-1" id="cl_kintai_style" wire:model="cl_kintai_style">
+        <option value="0">{{ __('Normal') }}</option>
+        <option value="1">{{ __('Shift') }}</option>
+        </select>
+        @error('cl_kintai_style') 
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </td>
+</tr>
+<tr class="border-b">
     <th><label for="cl_notes">{{ __('Notes') }}</label></th>
     <td>
-        <textarea tabindex="10" class="form-control @error('cl_notes') is-invalid @enderror py-1" id="cl_notes" placeholder="{{ __('Notes') }}" wire:model="cl_notes" style="width: 50%;"></textarea>
+        <textarea tabindex="10" class="form-control @error('cl_notes') is-invalid @enderror py-1" id="cl_notes" placeholder="{{ __('Notes') }}" wire:model="cl_notes"></textarea>
         @error('cl_notes') 
             <span class="text-danger">{{ $message }}</span>
         @enderror

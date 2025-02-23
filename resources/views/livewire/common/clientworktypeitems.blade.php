@@ -427,3 +427,16 @@
     </tr>
     </table>
 </tr>
+<tr class="border-b">
+    <table class="text-sm">
+    <tr class="border-b">
+        <td style="width: 8rem;"><label for="wt_notes">{{ __('Notes') }}</label></td>
+        <td>
+            <textarea tabindex="81" class="form-control @error('wt_notes') is-invalid @enderror py-1" id="wt_notes" placeholder="{{ __('Notes') }}" wire:model="wt_notes"></textarea>
+            @error('wt_notes') 
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </td>
+    </tr>
+    </table>
+</tr>

@@ -144,6 +144,54 @@
     </td>
 </tr>
 <tr class="border-b">
+    <th><label for="empl_paid_leave_pay">{{ __('Paid Leave Payout') }}</label></th>
+    <td>
+        <input type="text" tabindex="61" 
+            class="form-control @error('empl_paid_leave_pay') is-invalid @enderror text-sm py-1 text-right" 
+            id="empl_paid_leave_pay" 
+            wire:model="empl_paid_leave_pay" 
+            wire:change="moneyChange($event.target.value, 'empl_paid_leave_pay')" 
+            style="width: 6rem;">
+        @error('empl_paid_leave_pay') 
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </td>
+</tr>
+<tr class="border-b">
+    <th><label for="empl_main_client_id">{{ __('Main Client') }}</label></th>
+    <td>
+        <select tabindex="61" 
+            class="form-control @error('empl_main_client_id') is-invalid @enderror text-sm py-1" 
+            id="empl_main_client_id" 
+            wire:model="empl_main_client_id"
+            wire:change="emplMainClientIdChange($event.target.value)">
+
+            <option value="">{{ __('Main Client') }}</option>
+            @foreach($refClients as $client)
+                <option value="{{ $client->id }}">{{ $client->cl_cd }} {{ $client->cl_name }}</option>
+            @endforeach
+        </select>
+        @error('empl_main_client_id') 
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </td>
+</tr>
+<tr class="border-b">
+    <th><label for="empl_main_clientplace_id">{{ __('Main Client Place') }}</label></th>
+    <td>
+        <select tabindex="62" class="form-control @error('empl_main_clientplace_id') is-invalid @enderror text-sm py-1" id="empl_main_clientplace_id" wire:model="empl_main_clientplace_id">
+            <option value="">{{ __('Main Client Place') }}</option>
+            @foreach($refClientPlaces as $clientPlace)
+                <option value="{{ $clientPlace->id }}">{{ $clientPlace->cl_pl_cd }} {{ $clientPlace->cl_pl_name }}</option>
+            @endforeach
+        </select>
+        @error('empl_main_clientplace_id') 
+            <span class="text-danger">{{ $message }}</span>
+        @enderror
+    </td>
+</tr>
+{{--
+<tr class="border-b">
     <th><label for="empl_main_client_name">{{ __('Client') }}</label></th>
     <td>
         <select tabindex="61" class="form-control @error('empl_main_client_name') is-invalid @enderror text-sm py-1" id="empl_main_client_name" wire:model="empl_main_client_name">
@@ -157,10 +205,11 @@
         @enderror
     </td>
 </tr>
+--}}
 <tr class="border-b">
     <th><label for="empl_notes">{{ __('Notes') }}</label></th>
     <td>
-        <textarea tabindex="62" class="w-full form-control @error('empl_notes') is-invalid @enderror text-sm py-1" id="empl_notes" wire:model="empl_notes"></textarea>
+        <textarea tabindex="81" class="w-full form-control @error('empl_notes') is-invalid @enderror text-sm py-1" id="empl_notes" wire:model="empl_notes"></textarea>
         @error('empl_notes') 
             <span class="text-danger">{{ $message }}</span>
         @enderror

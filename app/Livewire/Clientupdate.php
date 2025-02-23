@@ -15,6 +15,7 @@ class Clientupdate extends ClientBase
     {
         $client = modelClients::find($id);
         $this->cl_cd = $client->cl_cd;
+        $this->cl_full_name = $client->cl_full_name;
         $this->cl_name = $client->cl_name;
         $this->cl_kana = $client->cl_kana;
         $this->cl_alpha = $client->cl_alpha;
@@ -35,6 +36,7 @@ class Clientupdate extends ClientBase
         $this->cl_round_start = $client->cl_round_start;
         $this->cl_round_end = $client->cl_round_end;
         $this->cl_close_day = $client->cl_close_day;
+        $this->cl_kintai_style = $client->cl_kintai_style;
         $this->cl_notes = $client->cl_notes;
     }
 
@@ -64,6 +66,7 @@ class Clientupdate extends ClientBase
         try {
             modelClients::where('id', $this->clientId)->update([
                 'cl_cd' => $this->cl_cd,
+                'cl_full_name' => $this->cl_full_name,
                 'cl_name' => $this->cl_name,
                 'cl_kana' => $this->cl_kana,
                 'cl_alpha' => $this->cl_alpha,
@@ -84,6 +87,7 @@ class Clientupdate extends ClientBase
                 'cl_round_start' => $this->cl_round_start,
                 'cl_round_end' => $this->cl_round_end,
                 'cl_close_day' => $this->cl_close_day,
+                'cl_kintai_style' => $this->cl_kintai_style,
                 'cl_notes' => $this->cl_notes,
             ]);
             $logMessage = '顧客マスタ 更新: ' . $this->cl_cd . ' ' . $this->cl_name;

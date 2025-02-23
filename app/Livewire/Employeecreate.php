@@ -34,7 +34,9 @@ class Employeecreate extends EmployeeBase
         $this->empl_mobile = '';
         $this->empl_hire_date = '';
         $this->empl_resign_date = '';
-        $this->empl_main_client_name = '';
+        $this->empl_paid_leave_pay = '';
+        $this->empl_main_client_id = '';
+        $this->empl_main_clientplace_id = '';
         $this->empl_notes = '';
     }
 
@@ -45,6 +47,7 @@ class Employeecreate extends EmployeeBase
     {
         parent::mount($id);
         $this->resetFields();
+        $this->updateMainClientPlaceList();
     }
 
     public function render()
@@ -76,7 +79,9 @@ class Employeecreate extends EmployeeBase
                 'empl_mobile' => $this->empl_mobile,
                 'empl_hire_date' => $this->rukuruUtilEmptyToNull($this->empl_hire_date),
                 'empl_resign_date' => $this->rukuruUtilEmptyToNull($this->empl_resign_date),
-                'empl_main_client_name' => $this->empl_main_client_name,
+                'empl_paid_leave_pay' => $this->rukuruUtilMoneyValue($this->empl_paid_leave_pay),
+                'empl_main_client_id' => $this->empl_main_client_id,
+                'empl_main_clientplace_id' => $this->empl_main_clientplace_id,
                 'empl_notes' => $this->empl_notes,
             ]);
             $logMessage = '従業員 作成: ' . $this->empl_cd . ' ' . $this->empl_name_last . ' ' . $this->empl_name_first;

@@ -6,17 +6,19 @@ use App\Models\employees as modelEmployees;
 use Livewire\Component;
 
 use App\Models\clients as modelClients;
+use App\Models\clientplaces as modelClientPlaces;
 
-// use App\Traits\rukuruUtilities;
+use App\Traits\rukuruUtilities;
 
 abstract class EmployeeBase extends Component
 {
-    // use rukuruUtilities;
+    use rukuruUtilities;
 
     /**
      * record set of table clients and client places
      * */
     public $refClients;
+    public $refClientPlaces;
 
     /**
      * fields
@@ -28,7 +30,7 @@ abstract class EmployeeBase extends Component
         $empl_sex,
         $empl_email, $empl_mobile,
         $empl_hire_date, $empl_resign_date,
-        $empl_main_client_name,
+        $empl_paid_leave_pay, $empl_main_client_id, $empl_main_clientplace_id,
         $empl_notes;
 
     /**
@@ -53,14 +55,45 @@ abstract class EmployeeBase extends Component
     ];
 
     /**
+     * 主な顧客部門リストを更新する
+     */
+    public function updateMainClientPlaceList()
+    {
+        if($this->empl_main_client_id) {
+            $this->refClientPlaces = modelClientPlaces::where('client_id', $this->empl_main_client_id)->orderBy('cl_pl_cd', 'asc')->get();
+        } else {
+            $this->refClientPlaces = [];
+        }
+    }
+
+    /**
      * mount function
      */
     public function mount($id = null)
     {
-        $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
+        $this->refClients = modelClients::orderBy('cl_cd', 'asc')->get();
     }
 
     abstract public function render();
+
+    /**
+     * 金額項目が変更されたときに呼び出される
+     * @param string $money, string $field
+     * @return void
+     */
+    public function moneyChange($money, $field)
+    {
+        $money = $this->rukuruUtilMoneyValue($money);
+        $this->$field = empty($money) ? '' : number_format($money);
+    }
+
+    /**
+     * 主な顧客が変更されたときの処理
+     */
+    public function emplMainClientIdChange($value)
+    {
+        $this->updateMainClientPlaceList();
+    }
 
     /**
      * Cancel add/edit form and redirect to the master list

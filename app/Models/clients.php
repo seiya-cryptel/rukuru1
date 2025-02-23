@@ -24,6 +24,10 @@ class clients extends Model
     {
         return $this->hasMany(bills::class);
     }
+    public function employees()
+    {
+        return $this->hasMany(employees::class);
+    }
     public function employeeallowdeducts()
     {
         return $this->hasMany(employeeallowdeduct::class);

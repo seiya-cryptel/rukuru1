@@ -30,6 +30,13 @@ class clientplaces extends Model
     {
         return $this->hasMany(bills::class);
     }
+    /**
+     * Relationship with employees
+     */
+    public function employees()
+    {
+        return $this->hasMany(employees::class);
+    }
 
     /**
      * The attributes that are mass assignable.

@@ -15,6 +15,7 @@ class Clientcreate extends ClientBase
     public function resetFields()
     {
         $this->cl_cd = '';
+        $this->cl_full_name = '';
         $this->cl_name = '';
         $this->cl_kana = '';
         $this->cl_alpha = '';
@@ -35,6 +36,7 @@ class Clientcreate extends ClientBase
         $this->cl_round_start = '0';
         $this->cl_round_end = '0';
         $this->cl_close_day = '0';
+        $this->cl_kintai_style = '0';
         $this->cl_notes = '';
     }
 
@@ -59,6 +61,7 @@ class Clientcreate extends ClientBase
         try {
             modelClients::create([
                 'cl_cd' => $this->cl_cd,
+                'cl_full_name' => $this->cl_full_name,
                 'cl_name' => $this->cl_name,
                 'cl_kana' => $this->cl_kana,
                 'cl_alpha' => $this->cl_alpha,
@@ -79,6 +82,7 @@ class Clientcreate extends ClientBase
                 'cl_round_start' => $this->cl_round_start,
                 'cl_round_end' => $this->cl_round_end,
                 'cl_close_day' => $this->cl_close_day,
+                'cl_kintai_style' => $this->cl_kintai_style,
                 'cl_notes' => $this->cl_notes,
             ]);
             $logMessage = '顧客マスタ 作成: ' . $this->cl_cd . ' ' . $this->cl_name;

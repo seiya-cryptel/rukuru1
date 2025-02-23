@@ -8,6 +8,8 @@ use Livewire\Component;
 use App\Consts\AppConsts;
 use App\Models\applogs;
 use App\Models\employees as modelEmployees;
+use App\Models\clients as modelClients;
+use App\Models\clientplaces as modelClientPlaces;
 
 class Employees extends Component
 {
@@ -41,7 +43,11 @@ class Employees extends Component
 
     public function render()
     {
-        $Query = modelEmployees::query();
+        $Query = modelEmployees::with('client')->with('clientplace')
+        // ->select('*')
+        ->leftJoin('clients as client', 'client.id', '=', 'empl_main_client_id')
+        ->leftJoin('clientplaces as clientplace', 'clientplace.id', '=', 'empl_main_clientplace_id')
+        ->select('employees.id as employee_id', 'client.*', 'clientplace.*', 'employees.*');
         // 退職者非表示
         if (! $this->retire) {
             $Query->whereNull('empl_resign_date');
@@ -57,11 +63,13 @@ class Employees extends Component
                     ->orWhere('empl_alpha_first', 'like', '%'.$this->search.'%')
                     ->orWhere('empl_email', 'like', '%'.$this->search.'%')
                     ->orWhere('empl_mobile', 'like', '%'.$this->search.'%')
-                    ->orWhere('empl_main_client_name', 'like', '%'.$this->search.'%')
                     ->orWhere('empl_notes', 'like', '%'.$this->search.'%')
-                    ->orWhere('empl_cd', 'like', '%'.$this->search.'%');
+                    ->orWhere('empl_cd', 'like', '%'.$this->search.'%')
+                    ->orWhere('client.cl_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('clientplace.cl_pl_name', 'like', '%'.$this->search.'%');
             });
         }
+        $Query->orderBy('empl_cd', 'asc');
         $Employees = $Query->paginate(AppConsts::PAGINATION);
         return view('livewire.employees', compact('Employees'));
     }

@@ -31,11 +31,12 @@ abstract class ClientBase extends Component
      * master allow deducts fields
      */
     public $cl_cd, 
+        $cl_full_name,
         $cl_name, $cl_kana, $cl_alpha, 
         $cl_zip, $cl_addr1, $cl_addr2, 
         $cl_psn_div, $cl_psn_title, $cl_psn_name, $cl_psn_kana, $cl_psn_mail, $cl_psn_tel, $cl_psn_fax, 
         $cl_dow_statutory, $cl_dow_non_statutory, $cl_over_40hpw, $cl_dow_first, $cl_round_start, $cl_round_end,
-        $cl_close_day,
+        $cl_close_day, $cl_kintai_style,
         $cl_notes;
         
     /**

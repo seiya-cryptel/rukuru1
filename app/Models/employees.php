@@ -6,9 +6,28 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
+// use App\Models\clients;
+// use App\Models\clientplaces;
+
 class employees extends Model
 {
     use HasFactory;
+
+    /**
+     * relationship with client
+     */
+    public function client()
+    {
+        return $this->belongsTo(clients::class, 'empl_main_client_id', 'id');
+    }
+
+    /**
+     * relationship with client place
+     */
+    public function clientplace()
+    {
+        return $this->belongsTo(clientplaces::class, 'empl_main_client_place_id', 'id');
+    }
 
     /**
      * Relationship with employee hourly wages
@@ -97,6 +116,15 @@ class employees extends Model
         return Attribute::make(
             get: fn ($value) => $value === null ? '' : date('Y-m-d', strtotime($value)),
             set: fn ($value) => $this->attributes['empl_resign_date'] = $value === '' ? null : $value, 
+        );
+    }
+
+    // 金額のアクセサとミューテータ
+    public function emplPaidLeavePay(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === '0' || $value === null) ? '' : number_format($value),
+            set: fn ($value) => $this->attributes['empl_paid_leave_pay'] = $value === '' ? null : $value, 
         );
     }
 }
