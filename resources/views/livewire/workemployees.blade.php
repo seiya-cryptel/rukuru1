@@ -68,7 +68,6 @@
                     <th>{{ __('Code') }}</th>
                     <th>{{ __('Name') }}</th>
                     <th>{{ __('Kana') }}</th>
-                    <th>{{ __('Alpha') }}</th>
                     <th>{{ __('Hire Date') . '〜' . __('Termination Date') }}</th>
                 </tr>
             </thead>
@@ -95,9 +94,6 @@
                             </td>
                             <td>
                                 {{$Employee->empl_kana_last}} {{$Employee->empl_kana_first}} 
-                            </td>
-                            <td>
-                                {{$Employee->empl_alpha_first}} {{$Employee->empl_alpha_last}}
                             </td>
                             <td>
                                 {{$Employee->empl_hire_date}} 〜 {{$Employee->empl_resign_date}}

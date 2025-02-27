@@ -27,6 +27,20 @@ trait rukuruUtilities
     }
 
     /**
+     * DateInterval 型同士の足し算
+     * @param DateInterval $a
+     * @param DateInterval $b
+     * @return DateInterval $a に $b を足した結果
+     */
+    public function rukuruUtilDateIntervalAdd($a, $b) : DateInterval
+    {
+        $date = new DateTime('00:00');
+        $date->add($a);
+        $date->add($b);
+        return (new DateTime('00:00'))->diff($date);
+    }
+
+    /**
      * DateInterval 型同士の引き算
      * @param DateInterval $a
      * @param DateInterval $b
@@ -38,6 +52,19 @@ trait rukuruUtilities
         $date->add($a);
         $date->sub($b);
         return (new DateTime('00:00'))->diff($date);
+    }
+
+    /**
+     * DateInterval に単価をかけて金額を計算する
+     * @param DateInterval $interval
+     * @param float $unit_price
+     * @return integer 金額
+     */
+    public function rukuruUtilDateIntervalToMoney($interval, $unit_price) : int
+    {
+        $hours = $interval->h + ($interval->d * 24);
+        $minutes = $interval->i;
+        return $hours * $unit_price + round($minutes * $unit_price / 60, 0);
     }
 
     /**

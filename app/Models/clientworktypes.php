@@ -277,25 +277,30 @@ class clientworktypes extends Model
     {
         $workTypesArray = [];
 
-        // specific work types for the client and client place
-        $workTypes = modelClientworktypes::where('client_id', $client_id)
+        // 顧客と部門が両方指定されている
+        if($client_id && $clientplace_id)
+        {
+            $workTypes = modelClientworktypes::where('client_id', $client_id)
             ->where('clientplace_id', $clientplace_id)
             ->get();
-        foreach ($workTypes as $workType) {
-            $workTypesArray[$workType->wt_cd] = $workType->wt_name;
-        }
-
-        // specific work types for the client
-        $workTypes = modelClientworktypes::where('client_id', $client_id)
-            ->whereNull('clientplace_id')
-            ->get();
-        foreach ($workTypes as $workType) {
-            if(! array_key_exists($workType->wt_cd, $workTypesArray)) {
+            foreach ($workTypes as $workType) {
                 $workTypesArray[$workType->wt_cd] = $workType->wt_name;
             }
         }
-
+        // 顧客のみ指定sれている
+        elseif($client_id)
+        {
+            $workTypes = modelClientworktypes::where('client_id', $client_id)
+            ->whereNull('clientplace_id')
+            ->get();
+            foreach ($workTypes as $workType) {
+                if(! array_key_exists($workType->wt_cd, $workTypesArray)) {
+                    $workTypesArray[$workType->wt_cd] = $workType->wt_name;
+                }
+            }
+        }
         // specific work types for general
+        /* 全顧客共通はなし
         $workTypes = modelClientworktypes::whereNull('client_id')
             ->whereNull('clientplace_id')
             ->get();
@@ -304,6 +309,7 @@ class clientworktypes extends Model
                 $workTypesArray[$workType->wt_cd] = $workType->wt_name;
             }
         }
+        */
     
         return $workTypesArray;
     }
@@ -317,25 +323,31 @@ class clientworktypes extends Model
     {
         $workTypeRecords = [];
 
-        // specific work types for the client and client place
-        $workTypes = modelClientworktypes::where('client_id', $client_id)
-            ->where('clientplace_id', $clientplace_id)
-            ->get();
-        foreach ($workTypes as $workType) {
-            $workTypeRecords[$workType->wt_cd] = $workType;
-        }
-
-        // specific work types for the client
-        $workTypes = modelClientworktypes::where('client_id', $client_id)
-            ->whereNull('clientplace_id')
-            ->get();
-        foreach ($workTypes as $workType) {
-            if(! array_key_exists($workType->wt_cd, $workTypeRecords)) {
+        // 顧客と部門が両方指定されている
+        if($client_id && $clientplace_id)
+        {
+            $workTypes = modelClientworktypes::where('client_id', $client_id)
+                ->where('clientplace_id', $clientplace_id)
+                ->get();
+            foreach ($workTypes as $workType) {
                 $workTypeRecords[$workType->wt_cd] = $workType;
+            }
+        }
+        // 顧客のみ指定sれている
+        elseif($client_id)
+        {
+            $workTypes = modelClientworktypes::where('client_id', $client_id)
+                ->whereNull('clientplace_id')
+                ->get();
+            foreach ($workTypes as $workType) {
+                if(! array_key_exists($workType->wt_cd, $workTypeRecords)) {
+                    $workTypeRecords[$workType->wt_cd] = $workType;
+                }
             }
         }
 
         // specific work types for general
+        /* 全顧客共通はなし
         $workTypes = modelClientworktypes::whereNull('client_id')
             ->whereNull('clientplace_id')
             ->get();
@@ -344,6 +356,7 @@ class clientworktypes extends Model
                 $workTypeRecords[$workType->wt_cd] = $workType;
             }
         }
+        */
     
         return $workTypeRecords;
     }
@@ -356,10 +369,24 @@ class clientworktypes extends Model
     static public function getSutable($client_id, $clientplace_id, $wt_cd) : ?clientworktypes
     {
         // 顧客、部門、作業種別が一致するレコードを取得
-        $workType = modelClientworktypes::where('client_id', $client_id)
+        if($client_id && $clientplace_id)
+        {
+            $workType = modelClientworktypes::where('client_id', $client_id)
             ->where('clientplace_id', $clientplace_id)
             ->where('wt_cd', $wt_cd)
             ->first();
+            return $workType;
+        }
+        // 顧客と作業種別が一致するレコードを取得
+        if($client_id)
+        {
+            $workType = modelClientworktypes::where('client_id', $client_id)
+            ->whereNull('clientplace_id')
+            ->where('wt_cd', $wt_cd)
+            ->first();
+            return $workType;
+        }
+        /* 顧客共通の作業種別はなし
         // 顧客、作業種別が一致するレコードを取得
         if($workType === null) {
             $workType = modelClientworktypes::where('client_id', $client_id)
@@ -374,6 +401,7 @@ class clientworktypes extends Model
                 ->where('wt_cd', $wt_cd)
                 ->first();
         }
-        return $workType;
+        */
+        return null;
     }
 }

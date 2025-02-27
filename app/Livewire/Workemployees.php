@@ -32,6 +32,11 @@ class Workemployees extends Component
     public $workYear, $workMonth, $client_id, $clientplace_id;
 
     /**
+     * 顧客が部門を持つか？
+     */
+    public $clientHasClientPlace = false;
+
+    /**
      * search string for employees
      */
     public $search = '';
@@ -46,8 +51,38 @@ class Workemployees extends Component
         'workYear' => 'required',
         'workMonth' => 'required',
         'client_id' => 'required',
-        'clientplace_id' => 'required',
     ];
+
+    /**
+     * 顧客が部門を持つかどうかの判定と、部門がある場合は部門を選択させる
+     */
+    protected function doesClientHaveClientPlace()
+    {
+        // 顧客が選択されている場合、部門があるかどうかを判定する
+        if($this->client_id != null)
+        {
+            $this->clientHasClientPlace = modelClientPlaces::where('client_id', $this->client_id)->exists();
+        }
+        else
+        {
+            $this->clientHasClientPlace = false;
+        }
+        // 選択メッセージ
+        if($this->clientHasClientPlace)
+        {
+            if($this->client_id == null || $this->clientplace_id == null)
+            {
+                session()->flash('success', __('Client') . 'と' . __('Work Place') . 'を選択してください。');
+            }
+        }
+        else
+        {
+            if($this->client_id == null)
+            {
+                session()->flash('success', __('Client') . 'を選択してください。');
+            }
+        }
+    }
 
     /**
      * mount function
@@ -91,12 +126,6 @@ class Workemployees extends Component
             $this->search = '';
         }
 
-        // if client_id or clientplace_id is null then show guide message
-        if($this->client_id == null || $this->clientplace_id == null)
-        {
-            session()->flash('success', __('Client') . 'と' . __('Work Place') . 'を選択してください。');
-        }
-
         $this->refClients = modelClients::all();
         if($this->client_id != null)
         {
@@ -113,29 +142,41 @@ class Workemployees extends Component
         $firstDay = date('Y-m-01', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
         $lastDay = date('Y-m-t', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
 
-        $query = modelEmployees::where(function ($query) {
-            $query->where('empl_name_last', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_name_first', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_kana_last', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_kana_first', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_alpha_last', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_alpha_first', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_email', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_mobile', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_cd', 'like', '%'.$this->search.'%')
-            ->orWhere('empl_notes', 'like', '%'.$this->search.'%')
-            ;
-        });
-
-        $query = $query->where('empl_hire_date', '<=', $lastDay);
-
-        $query = $query->where(function ($query) use ($firstDay) {
+        $Query = modelEmployees::with('client')->with('clientplace')
+        ->leftJoin('clients as client', 'client.id', '=', 'empl_main_client_id')
+        ->leftJoin('clientplaces as clientplace', 'clientplace.id', '=', 'empl_main_clientplace_id')
+        ->select('employees.id as employee_id', 'client.*', 'clientplace.*', 'employees.*');
+        // 文字列検索
+        if(! empty($this->search)) {
+            $Query->where(function($query) {
+                $query->where('empl_name_last', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_name_first', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_kana_last', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_kana_first', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_alpha_last', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_alpha_first', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_email', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_mobile', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_notes', 'like', '%'.$this->search.'%')
+                    ->orWhere('empl_cd', 'like', '%'.$this->search.'%')
+                    ->orWhere('client.cl_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('clientplace.cl_pl_name', 'like', '%'.$this->search.'%');
+            });
+        }
+        // 入社日チェック
+        $Query->where('empl_hire_date', '<=', $lastDay);
+        // 退職日チェック
+        $Query->where(function ($query) use ($firstDay) {
             $query->where('empl_resign_date', '>=', $firstDay)
             ->orWhere('empl_resign_date', null)
             ->orWhere('empl_resign_date', '');
         });
+        $Query->orderBy('empl_cd', 'asc');
 
-        $Employees = $query->paginate(AppConsts::PAGINATION);
+        $Employees = $Query->paginate(AppConsts::PAGINATION);
+
+        // 顧客や部門を選択するメッセージ
+        $this->doesClientHaveClientPlace();
             
         return view('livewire.workemployees', compact('Employees'));
     }
@@ -167,6 +208,15 @@ class Workemployees extends Component
         $this->clientplace_id = null; // clientplace_idをリセット
         session([AppConsts::SESS_CLIENT_ID => $value]);
         session([AppConsts::SESS_CLIENT_PLACE_ID => null]);
+        // 顧客名で従業員を絞り込む
+        if($value == null)
+        {
+            $this->search = '';
+        }
+        else
+        {
+            $this->search = modelClients::find($value)->cl_name;
+        }
     }
 
     /**
@@ -222,8 +272,14 @@ class Workemployees extends Component
      * */
     public function editTimekeeping($employeeId)
     {
-        return redirect()->route('employeework', 
+        if(!$this->client_id)
+        {
+            return;
+        }
+        $Client = modelClients::find($this->client_id);
+        $route = $Client->cl_kintai_style == 0 ? 'employeeworksone' : 'employeeworksslot';
+        return redirect()->route($route, 
             ['workYear' => $this->workYear, 'workMonth' => $this->workMonth, 
-            'clientId' => $this->client_id, 'clientPlaceId' => $this->clientplace_id, 'employeeId' => $employeeId]);
+            'clientId' => $this->client_id, 'clientPlaceId' => ($this->clientplace_id ? $this->clientplace_id : 0), 'employeeId' => $employeeId]);
     }
 }
