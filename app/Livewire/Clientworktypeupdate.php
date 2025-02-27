@@ -128,7 +128,7 @@ class Clientworktypeupdate extends ClientworktypeBase
             $logMessage = '作業区分 更新 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', __('Something went wrong.'));
+            session()->flash('error', $logMessage);
         }
     }
 }

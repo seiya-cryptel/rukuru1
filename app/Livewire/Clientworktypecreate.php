@@ -122,7 +122,7 @@ class Clientworktypecreate extends ClientworktypeBase
             $logMessage = '作業区分 作成 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', $logMessage);
         }
     }
 }

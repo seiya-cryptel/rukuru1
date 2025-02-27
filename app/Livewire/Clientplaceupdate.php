@@ -65,7 +65,7 @@ class Clientplaceupdate extends ClientplaceBase
             $logMessage = '顧客部門マスタ 更新 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', $logMessage);
         }
     }
 }

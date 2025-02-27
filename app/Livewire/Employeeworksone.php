@@ -90,14 +90,21 @@ class Employeeworksone extends Component
     /**
      * 集計表示用
      */
-    public $SumDays;            // 日数
+    public $SumDaysShukkin;            // 日数 出勤
+    public $SumDaysKyujitsu;           // 日数 法定外休日
+    public $SumDaysHoutei;             // 日数 法定休日
+    public $SumDaysYukyu;              // 日数 有給
+    public $SumDaysTokkyu;            // 日数 特休
 
-    public $SumWorkHours = [];       // 作業時間計算用 スロットごとの作業時間の合計
-    public $SumWorkHoursAll = '0:00';  // 作業時間計算用 1ヶ月の作業時間の合計
-    public $SumWorkPays = [];        // 作業時間計算用 スロットごとの支給額の合計
-    public $SumWorkPaysAll = 0;   // 作業時間計算用 1ヶ月の支給額の合計
-    public $SumWorkBills = [];       // 作業時間計算用 スロットごとの請求額の合計
-    public $SumWorkBillsAll = 0;   // 作業時間計算用 1ヶ月の請求額の合計
+    public $SumWorkHours = [];       // スロットごとの作業時間の合計
+    public $SumWorkHoursAll = '0:00';  // 1ヶ月の就業時間の合計
+    public $SumWorkHoursYukyu = '0:00';  // 1ヶ月の有給時間の合計
+    public $SumWorkHoursYukyuYakan = '0:00';  // 1ヶ月の夜間有給時間の合計
+    public $SumWorkPays = [];        // スロットごとの支給額の合計
+    public $SumWorksPayYukyu = 0;   //  1ヶ月の有給支給額の合計
+    public $SumWorkPaysAll = 0;   //  1ヶ月の支給額の合計
+    public $SumWorkBills = [];       // スロットごとの請求額の合計
+    public $SumWorkBillsAll = 0;   // 1ヶ月の請求額の合計
 
     public $SumWorkTypes = [];      // wt_name: 作業種別名, wt_pay: 時給, wt_bill: 請求額
 
@@ -112,23 +119,35 @@ class Employeeworksone extends Component
      */
     protected function clearSummary()
     {
-        $this->SumDayWeekdays = 0;            // 平日出勤日数
-        $this->SumDayHolidays = 0;            // 休日出勤日数
-        $this->SumDayHolidaysLegal = 0;       // 法定休日出勤日数
+        $this->SumDaysShukkin = 0;            // 平日出勤日数
+        $this->SumDaysKyujitsu = 0;            // 休日出勤日数
+        $this->SumDaysHoutei = 0;       // 法定休日出勤日数
+        $this->SumDaysYukyu = 0;            // 有給休暇日数
+        $this->SumDaysTokkyu = 0;            // 特別休暇日数
         
-        $this->SumWorkHours = array_fill(1, self::MAX_SLOTS, null);  // 作業時間合計
-        $this->SumWorkHoursAll = '0:00';  // 1ヶ月の作業時間合計
-        $this->SumWorkPays = array_fill(1, self::MAX_SLOTS, 0);  // 支給額合計
+        $this->SumWorkHours = array_fill(1, 8, '00:00');  // 作業時間合計
+        $this->SumWorkHoursAll = '00:00';  // 1ヶ月の作業時間合計
+        $this->SumWorkHoursYukyu = '00:00';  // 1ヶ月の有給時間合計
+        $this->SumWorkHoursYukyuYakan = '00:00';  // 1ヶ月の夜間有給時間合計
+
+        $this->SumWorkPays = array_fill(1, 8, 0);  // 支給額合計
+        $this->SumWorksPayYukyu = 0;   // 1ヶ月の有給支給額合計
         $this->SumWorkPaysAll = 0;   // 1ヶ月の支給額合計
+
         $this->SumWorkBills = array_fill(1, self::MAX_SLOTS, 0);  // 請求額合計
         $this->SumWorkBillsAll = 0;   // 1ヶ月の請求額合計
 
         // 作業種別名、時給、請求額をクリア
-        $this->SumWorkTypes=[];
-        for($i = 1; $i <= self::MAX_SLOTS; $i++)
-        {
-            $this->clearWorkType($i);
-        }
+        $this->SumWorkTypes=[
+            1 => ['wt_name' => '基本', 'wt_pay' => 0, 'wt_bill' => 0],
+            2 => ['wt_name' => '普通残業', 'wt_pay' => 0, 'wt_bill' => 0],
+            3 => ['wt_name' => '深夜時間', 'wt_pay' => 0, 'wt_bill' => 0],
+            4 => ['wt_name' => '深夜残業', 'wt_pay' => 0, 'wt_bill' => 0],
+            5 => ['wt_name' => '法外休出', 'wt_pay' => 0, 'wt_bill' => 0],
+            6 => ['wt_name' => '法外深夜', 'wt_pay' => 0, 'wt_bill' => 0],
+            7 => ['wt_name' => '法定休出', 'wt_pay' => 0, 'wt_bill' => 0],
+            8 => ['wt_name' => '法定深夜', 'wt_pay' => 0, 'wt_bill' => 0],
+        ];
     }
 
     /**

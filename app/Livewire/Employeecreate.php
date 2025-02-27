@@ -93,7 +93,7 @@ class Employeecreate extends EmployeeBase
             $logMessage = '従業員 作成 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', $logMessage);
         }
     }
 }

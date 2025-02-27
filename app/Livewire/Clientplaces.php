@@ -83,7 +83,7 @@ class Clientplaces extends Component
             $logMessage = '顧客部門マスタ 削除 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', __('Something went wrong.'));
+            session()->flash('error', $logMessage);
         }
     }
 }

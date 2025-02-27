@@ -74,7 +74,7 @@ class Holidayupdate extends Component
             $logMessage = '祝日マスタ 更新エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', __('Something went wrong.'));
+            session()->flash('error', $logMessage);
         }
     }
 

@@ -294,27 +294,22 @@
                             <td class="form-control py-1" style="width: 4rem; text-align: center; background-color: #aa8800; color: white;">有給<br>金額</td>
                         </tr>
                         <tr> {{-- 勤怠日数、時間数 --}}
-                            <td style="text-align: center;">10</td>
-                            <td style="text-align: center;">10</td>
-                            <td style="text-align: center;">10</td>
+                            <td style="text-align: center;">{{ $SumDaysShukkin }}</td>
+                            <td style="text-align: center;">{{ $SumDaysKyujitsu }}</td>
+                            <td style="text-align: center;">{{ $SumDaysHoutei }}</td>
                             <td> </td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
+                            @for($slotNo = 1; $slotNo <= 8; $slotNo++)
+                                <td style="text-align: center;">{{ $SumWorkHours[$slotNo] }}</td>
+                            @endfor
                             <td> </td>
-                            <td style="text-align: center;">100:00</td>
+                            <td style="text-align: center;">{{ $SumWorkHoursAll }}</td>
                             <td> </td>
-                            <td style="text-align: center;">10</td>
-                            <td style="text-align: center;">10</td>
-                            <td style="text-align: center;">100:00</td>
-                            <td style="text-align: center;">100:00</td>
+                            <td style="text-align: center;">{{ $SumDaysYukyu }}</td>
+                            <td style="text-align: center;">{{ $SumDaysTokkyu }}</td>
+                            <td style="text-align: center;">{{ $SumWorkHoursYukyu }}</td>
+                            <td style="text-align: center;">{{ $SumWorkHoursYukyuYakan }}</td>
                             <td> </td>
-                            <td style="text-align: right;">50,000</td>
+                            <td style="text-align: right;">{{ $SumWorksPayYukyu }}</td>
                         </tr>
                     </table>
                     <table class="border border-gray-300">
@@ -333,17 +328,12 @@
                             <td class="form-control py-1" style="width: 5rem; text-align: center; background-color:#aa8800; color: white;">支給合計</td>
                         </tr>
                         <tr>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
-                            <td style="text-align: center;">50,000</td>
+                            @for($slotNo = 1; $slotNo <= 8; $slotNo++)
+                                <td style="text-align: right;">{{ $SumWorksPay[$slotNo] }}</td>
+                            @endfor
+                            <td style="text-align: right;">50,000</td>
                             <td></td>
-                            <td style="text-align: center;">200,000</td>
+                            <td style="text-align: right;">{{ $SumWorkPaysAll }}</td>
                         </tr>
 
                         <tr> {{-- 請求 項目名 --}}
@@ -361,62 +351,43 @@
                             <td class="form-control py-1" style="width: 3.5rem; padding: 0px; text-align: center; background-color: #0000aa; color: white;">請求合計</td>
                         </tr>
                         <tr>
-                            <td style="text-align: right;">60,000</td>
-                            <td style="text-align: right;">60,000</td>
-                            <td style="text-align: right;">60,000</td>
-                            <td style="text-align: right;">60,000</td>
-                            <td style="text-align: right;">60,000</td>
-                            <td style="text-align: right;">60,000</td>
-                            <td style="text-align: right;">60,000</td>
-                            <td style="text-align: right;">60,000</td>
+                            @for($slotNo = 1; $slotNo <= 8; $slotNo++)
+                                <td style="text-align: right;">{{ $SumWorksBill[$slotNo] }}</td>
+                            @endfor
                             <td></td>
                             <td></td>
-                            <td style="text-align: right;">300,000</td>
+                            <td style="text-align: right;">{{ $SumWorkBillsAll }}</td>
                         </tr>
                     </table>
                 </td>
                 <td> {{-- 単価表示 --}}
                 <table>
+                    @for($slotNo = 1; $slotNo <= 8; $slotNo++)
                     <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">基本</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
+                        <td>{{ $slotNo }}</td>
+                        <td style="padding: 0px;">
+                            <input type="text" 
+                                readonly="readonly"
+                                class="form-control text-sm"
+                                wire:model="SumWorkTypes.{{ $slotNo }}.wt_name" 
+                                style="width: 8rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;" />
+                        </td>
+                        <td style="padding: 0px;">
+                            <input type="text" 
+                                readonly="readonly"
+                                class="form-control text-sm"
+                                wire:model="SumWorkTypes.{{ $slotNo }}.wt_pay" 
+                                style="width: 3rem; padding: 0px; text-align: right;" />
+                        </td>
+                        <td style="padding: 0px;">
+                            <input type="text" 
+                                readonly="readonly"
+                                class="form-control text-sm"
+                                wire:model="SumWorkTypes.{{ $slotNo }}.wt_bill" 
+                                style="width: 3rem; padding: 0px; text-align: right;" />
+                        </td>
                     </tr>
-                    <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">普通残業</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                    </tr>
-                    <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">深夜時間</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                    </tr>
-                    <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">深夜残業</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                    </tr>
-                    <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">法外休出</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                    </tr>
-                    <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">法外深夜</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                    </tr>
-                    <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">法定休出</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                    </tr>
-                    <tr>
-                        <td class="form-control" style="width: 5rem; padding: 0px; text-align: left; background-color:rgb(2, 66, 30); color: white;">法定深夜</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                        <td style="width: 2.5rem; padding: 0px; text-align: right;">1,999</td>
-                    </tr>
+                    @endfor
                 </table>
             </tr>
         </table>

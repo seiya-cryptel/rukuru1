@@ -83,7 +83,7 @@ class Hourlywageupdate extends HourlywageBase
             $logMessage = '従業員時給 更新 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', __('Something went wrong.'));
+            session()->flash('error', $logMessage);
         }
     }
 

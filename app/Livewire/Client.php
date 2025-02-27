@@ -61,7 +61,7 @@ class Client extends Component
             $logMessage = '顧客マスタ 削除 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', __('Something went wrong.'));
+            session()->flash('error', $logMessage);
         }
     }
 }

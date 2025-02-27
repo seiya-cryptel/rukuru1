@@ -52,7 +52,7 @@ class Allowdeductupdate extends AllowdeductBase
             $logMessage = '手当控除 更新 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', 'Something went wrong.');
+            session()->flash('error', $logMessage);
         }
     }
 }

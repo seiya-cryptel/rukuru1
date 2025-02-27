@@ -80,7 +80,7 @@ class Masterallowdeducts extends Component
         } catch (\Exception $e) {
             $logMessage = '手当控除 削除 エラー: ' . $e->getMessage();
             logger($logMessage);
-            session()->flash('error', __('Something went wrong.'));
+            session()->flash('error', $logMessage);
         }
     }
 }

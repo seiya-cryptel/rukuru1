@@ -94,7 +94,7 @@ class Clientcreate extends ClientBase
             $logMessage = '顧客マスタ 作成 エラー: ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_ERROR, $logMessage);
-            session()->flash('error', __('Something went wrong.'));
+            session()->flash('error', $logMessage);
         }
     }
 }
