@@ -362,6 +362,32 @@ class clientworktypes extends Model
     }
 
     /**
+     * 顧客と部門で可能な作業種別レコードの最初のレコード
+     *
+     * @return array<string, string>
+     */
+    static public function possibleWorkTypeRecordFirst($client_id, $clientplace_id)
+    {
+        // 顧客と部門が両方指定されている
+        if($client_id && $clientplace_id)
+        {
+            $workType = modelClientworktypes::where('client_id', $client_id)
+                ->where('clientplace_id', $clientplace_id)
+                ->orderBy('wt_cd')
+                ->first();
+        }
+        // 顧客のみ指定sれている
+        elseif($client_id)
+        {
+            $workType = modelClientworktypes::where('client_id', $client_id)
+                ->whereNull('clientplace_id')
+                ->orderBy('wt_cd')
+                ->first();
+        }    
+        return $workType;
+    }
+
+    /**
      * 顧客と部門と作業種別に適した作業種別レコードを取得
      * @parametors: $client_id, $clientplace_id, $wt_cd
      * @return clientworktypes

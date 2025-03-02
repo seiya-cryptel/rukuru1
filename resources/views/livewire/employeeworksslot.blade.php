@@ -212,7 +212,7 @@
                             <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkPays[$slotNo]) }}</td>
                         @endfor
                         <td> </td>
-                        <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkPaysAll) }}</td>
+                        <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkPayAll) }}</td>
                     </tr>
 
                     <tr> {{-- 請求 項目名 --}}
@@ -232,7 +232,7 @@
                             <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkBills[$slotNo]) }}</td>
                         @endfor
                         <td> </td>
-                        <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkBillsAll) }}</td>
+                        <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkBillAll) }}</td>
                     </tr>
                 </table>
             </td>

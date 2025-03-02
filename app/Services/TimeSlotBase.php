@@ -8,7 +8,6 @@ use Exception;
 
 use App\Models\clients as modelClients;
 use App\Models\clientworktypes as modelClientworktypes;
-// use App\Models\employeeworks as modelEmployeeworks;
 
 use App\Traits\rukuruUtilities;
 
@@ -34,6 +33,11 @@ abstract class TimeSlotBase
     public ?DateInterval $work_hours;
 
     /**
+     * １日の開始時
+     * @var int
+     */
+    public int $beginHourOfDay = 5;
+    /**
      * 開始時刻計算
      */
     protected abstract function setStartTime() : void;
@@ -50,12 +54,17 @@ abstract class TimeSlotBase
 
     /**
      * TimeSlotBase constructor
-     * @param protected int $slotNo >= 1 スロット番号
-     * @param protected modelClientworktypes $ClientWorkType 作業種別レコード
+     * @param DateTime $currentDate             // 対象日
+     * @param string $hhmmWorktypeTimeStart     // hhmmWorktypeTimeStart
+     * @param modelClients $Client              // 顧客レコード
+     * @param modelClientworktypes $ClientWorkType  // 作業種別レコード
+     * @param string|null $log_start        // 開始打刻
+     * @param string|null $log_end        // 終了打刻
+     * @throws Exception
      */
     public function __construct(
         protected DateTime $currentDate,
-        protected int $slotNo,
+        protected string $hhmmWorktypeTimeStart,
         protected modelClients $Client,
         protected modelClientworktypes $ClientWorkType,
         protected ?string $log_start = null,
@@ -66,6 +75,8 @@ abstract class TimeSlotBase
         $this->work_end = null;
         $this->log_start = $this->rukuruUtilTimeNormalize($this->log_start);
         $this->log_end = $this->rukuruUtilTimeNormalize($this->log_end);
+        $parts = explode(':', $this->hhmmWorktypeTimeStart);
+        $this->beginHourOfDay = $parts[0];
         $this->setStartTime();
         $this->setEndTime();
         $this->setWorkTime();

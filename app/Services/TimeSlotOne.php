@@ -32,7 +32,7 @@ class TimeSlotOne extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start);
+        $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start, $this->beginHourOfDay);
         if($this->Client->cl_round_start)
         {
             $this->rukuruUtilTimeRoundUp($this->work_start, $this->Client->cl_round_start);
@@ -51,7 +51,7 @@ class TimeSlotOne extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end);
+        $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end, $this->beginHourOfDay);
         // work_start よりも後の日時となるよう日にちを加算
         if($this->work_start)
         {
@@ -88,19 +88,17 @@ class TimeSlotOne extends TimeSlotBase
 
     /**
      * TimeSlotType1 constructor
-     * @param protected int $slotNo >= 1 スロット番号
-     * @param protected modelClientworktypes $ClientWorkType 作業種別レコード
      */
     public function __construct(
         protected DateTime $currentDate,
-        protected int $slotNo,
+        protected string $hhmmWorktypeTimeStart,
         protected modelClients $Client,
         protected modelClientworktypes $ClientWorkType,
         protected ?string $log_start = null,
         protected ?string $log_end = null
         )
     {
-        parent::__construct($currentDate, $slotNo, $Client, $ClientWorkType, $log_start, $log_end);
+        parent::__construct($currentDate, $hhmmWorktypeTimeStart, $Client, $ClientWorkType, $log_start, $log_end);
     }
 
     /**

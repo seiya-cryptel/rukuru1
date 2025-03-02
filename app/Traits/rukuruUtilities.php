@@ -135,17 +135,18 @@ trait rukuruUtilities
      * 文字列の時刻をDateTimeオブジェクトに変換する
      * @param DateTime $date 日付
      * @param string $time 時刻
+     * @param $beginHourOfDay 1日の開始時
      * @return DateTime
-     * 5 時より前の場合は翌日として扱う
+     * 開始時より前の場合は翌日として扱う
      * 時刻は正規化されているものとする
      */
-    public function rukuruUtilTimeToDateTime($date, $time) : DateTime
+    public function rukuruUtilTimeToDateTime($date, $time, $beginHourOfDay = 5) : DateTime
     {
         // 時刻を DateTime オブジェクトに変換する
         $datetime = new DateTime($date->format('Y-m-d') . ' ' . $time);
 
         // 5 時より前の場合は翌日として扱う
-        if($datetime->format('H') < 5)
+        if($datetime->format('H') < $beginHourOfDay)
         {
             $datetime->add(new DateInterval('P1D'));
         }
