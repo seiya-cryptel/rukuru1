@@ -491,6 +491,9 @@ class Employeeworksslot extends EmployeeworksBase
                 {
                     continue;
                 }
+
+                $clientworktype = $this->PossibleWorkTypeRecords[$Slot['wt_cd']];
+        
                 $Work = new modelEmployeeWorks();
                 $Work->employee_id = $this->employee_id;
                 $Work->wrk_date = $this->TimekeepingDays[$day]['date'];
@@ -501,46 +504,22 @@ class Employeeworksslot extends EmployeeworksBase
                 $Work->holiday_type = $this->TimekeepingDays[$day]['holiday_type'];
                 $Work->work_type = $this->TimekeepingDays[$day]['work_type'];
                 $Work->wt_cd = $this->TimekeepingTypes[$slotNo];
+
                 $Work->wrk_log_start = empty($Slot['wrk_log_start']) ? null : $Slot['wrk_log_start'];
                 $Work->wrk_log_end = empty($Slot['wrk_log_end']) ? null : $Slot['wrk_log_end'];
                 $Work->wrk_work_start = empty($Slot['wrk_work_start']) ? null : $Slot['wrk_work_start'];
                 $Work->wrk_work_end = empty($Slot['wrk_work_end']) ? null : $Slot['wrk_work_end'];
                 $Work->wrk_work_hours = empty($Slot['wrk_work_hours']) ? null : $Slot['wrk_work_hours'];
+                
+                $diSlotWorkHours = $this->rukuruUtilTimeToDateInterval(empty($Slot['wrk_work_hours']) ? '00:00' : $Slot['wrk_work_hours']);
+                $Work->payhour = $this->rukuruUtilMoneyValue($clientworktype->wt_pay_std, 0);
+                $Work->wrk_pay = $this->rukuruUtilDateIntervalToMoney($diSlotWorkHours, $Work->payhour);
+                $Work->billhour = $this->rukuruUtilMoneyValue($clientworktype->wt_bill_std, 0);
+                $Work->wrk_bill = $this->rukuruUtilDateIntervalToMoney($diSlotWorkHours, $Work->billhour);
+
                 $Work->notes = $this->TimekeepingDays[$day]['notes'];
                 $Work->save();
             }
         }
-    }
-
-    /**
-     * 従業員支給額レコードの作成、更新
-     */
-    protected function makeSalary()
-    {
-        // 従業員ID、対象年月から給与情報を作成または再作成
-        $salary = modelSalary::where('employee_id', $this->employee_id)
-            ->where('work_year', $this->workYear)
-            ->where('work_month', $this->workMonth)
-            ->first();
-        if(!$salary) {
-            $salary = new modelSalary();
-            $salary->employee_id = $this->employee_id;
-            $salary->work_year = $this->workYear;
-            $salary->work_month = $this->workMonth;
-            $salary->Transport = 0;
-            $salary->allow_amount = 0;
-            $salary->deduct_amount = 0;
-        }
-
-        // 給与情報を更新
-        $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
-        $lastDate = date('Y-m-t', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
-        $salary->work_amount = modelEmployeeSalarys::where('employee_id', $this->employee_id)
-            ->whereBetween('wrk_date', [$firstDate, $lastDate])
-            ->sum('wrk_pay');
-        $salary->notes = '';
-
-        $salary->pay_amount = $salary->work_amount + $salary->allow_amount - $salary->deduct_amount + $salary->Transport;
-        $salary->save();
     }
 }

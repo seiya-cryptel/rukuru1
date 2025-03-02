@@ -669,41 +669,16 @@ class Employeeworksone extends EmployeeworksBase
                 $Work->wrk_work_start = empty($Slot['wrk_work_start']) ? null : $Slot['wrk_work_start'];
                 $Work->wrk_work_end = empty($Slot['wrk_work_end']) ? null : $Slot['wrk_work_end'];
                 $Work->wrk_work_hours = empty($SlotWorkHour['wrk_work_hours']) ? null : $SlotWorkHour['wrk_work_hours'];
+
+                $diSlotWorkHours = $this->rukuruUtilTimeToDateInterval(empty($SlotWorkHour['wrk_work_hours']) ? '00:00' : $SlotWorkHour['wrk_work_hours']);
+                $Work->payhour = $this->rukuruUtilMoneyValue($this->SumWorkTypes[$slotNo]['wt_pay']);
+                $Work->wrk_pay = $this->rukuruUtilDateIntervalToMoney($diSlotWorkHours, $Work->payhour);
+                $Work->payhour = $this->rukuruUtilMoneyValue($this->SumWorkTypes[$slotNo]['wt_bill']);
+                $Work->wrk_bill = $this->rukuruUtilDateIntervalToMoney($diSlotWorkHours, $Work->billhour);
+
                 $Work->notes = $this->TimekeepingDays[$dayIndex]['notes'];
                 $Work->save();
             }
         }
-    }
-
-    /**
-     * 従業員支給額レコードの作成、更新
-     */
-    protected function makeSalary()
-    {
-        // 従業員ID、対象年月から給与情報を作成または再作成
-        $salary = modelSalary::where('employee_id', $this->employee_id)
-            ->where('work_year', $this->workYear)
-            ->where('work_month', $this->workMonth)
-            ->first();
-        if(!$salary) {
-            $salary = new modelSalary();
-            $salary->employee_id = $this->employee_id;
-            $salary->work_year = $this->workYear;
-            $salary->work_month = $this->workMonth;
-            $salary->Transport = 0;
-            $salary->allow_amount = 0;
-            $salary->deduct_amount = 0;
-        }
-
-        // 給与情報を更新
-        $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
-        $lastDate = date('Y-m-t', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
-        $salary->work_amount = modelEmployeeSalarys::where('employee_id', $this->employee_id)
-            ->whereBetween('wrk_date', [$firstDate, $lastDate])
-            ->sum('wrk_pay');
-        $salary->notes = '';
-
-        $salary->pay_amount = $salary->work_amount + $salary->allow_amount - $salary->deduct_amount + $salary->Transport;
-        $salary->save();
     }
 }

@@ -191,11 +191,18 @@ function () {
             ->name('employeeworksslot');
 
         /**
-         * Routes for the 勤怠エントリー 勤怠締め
+         * Routes for the 勤怠エントリー 請求締め
          */
-        Route::view('closepayroll/', 'closepayroll')
+        Route::view('closebills', 'closebills')
             ->middleware(['auth', 'verified'])
-            ->name('closepayroll');
+            ->name('closebills');
+
+        /**
+         * Routes for the 勤怠エントリー 給与締め
+         */
+        Route::view('closepayrolls', 'closepayrolls')
+            ->middleware(['auth', 'verified'])
+            ->name('closepayrolls');
 
         /**
          * Routes for the 請求　請求書出力

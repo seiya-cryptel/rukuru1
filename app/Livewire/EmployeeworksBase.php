@@ -288,11 +288,6 @@ abstract class EmployeeworksBase extends Component
     abstract protected function insertEmployeeWork();
 
     /**
-     * 従業員支給額レコードの作成、更新
-     */
-    abstract protected function makeSalary();
-
-    /**
      * save work time
      */
     public function saveEmployeeWork()

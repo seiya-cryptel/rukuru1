@@ -32,11 +32,11 @@ use App\Models\pricetables as modelPriceTables;
 use App\Models\salary as modelSalary;
 
 /**
- * 勤怠締め処理
+ * 勤怠締め処理 請求作成
  * 
- * 従業員勤怠を元に、各種マスタを参照して、給与と請求の計算を行う
+ * 従業員勤怠を元に、各種マスタを参照して、請求額計算を行う
  */
-class Closepayrolls extends Component
+class Closebills extends Component
 {
     use rukuruUtilities;
 
@@ -49,7 +49,12 @@ class Closepayrolls extends Component
      * closing is enabled or not
      * true if closing is enabled otherwise reopen is enabled
      */
-    public $isClosed;
+    public $isClosed = [];
+
+    /**
+     * 顧客レコード
+     */
+    public $Client;
 
     /**
      * rules for validation
@@ -535,17 +540,27 @@ class Closepayrolls extends Component
      */
     public function render()
     {
+
+        // 顧客レコード
+        $Clients = modelClients::orderBy('cl_cd')
+            ->paginate(AppConsts::PAGINATION);
+
         /**
-         * 給与締め処理完了状態
+         * 顧客ごとの締め処理完了状態
          */
-        $ClosePayroll = modelClosePayrolls::where('work_year', $this->workYear)
-            ->where('work_month', $this->workMonth)
-            ->where('client_id', 0)
-            ->first();
+        $this->isClosed = [];
+        foreach($Clients as $Client) {
+            $this->isClosed[$Client->id] = false;
+        }
+        foreach($Clients as $Client) {
+            $ClosePayroll = modelClosePayrolls::where('work_year', $this->workYear)
+                ->where('work_month', $this->workMonth)
+                ->where('client_id', $Client->id)
+                ->first();
+            $this->isClosed[$Client->id] = $ClosePayroll ? $ClosePayroll->closed : false;
+        }
 
-        $this->isClosed = $ClosePayroll && $ClosePayroll->closed;
-
-        return view('livewire.closepayrolls');
+        return view('livewire.closebills', compact('Clients'));
     }
 
     /**
@@ -567,7 +582,7 @@ class Closepayrolls extends Component
     }
 
     /**
-     * close button click event
+     * 請求締め処理
      * @param integer $client_id 顧客ID
      * 
      * 従業員の勤怠をチェック
