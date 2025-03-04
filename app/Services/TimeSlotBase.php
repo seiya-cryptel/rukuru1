@@ -65,6 +65,7 @@ abstract class TimeSlotBase
     public function __construct(
         protected DateTime $currentDate,
         protected string $hhmmWorktypeTimeStart,
+        protected int $slotNo,
         protected modelClients $Client,
         protected modelClientworktypes $ClientWorkType,
         protected ?string $log_start = null,

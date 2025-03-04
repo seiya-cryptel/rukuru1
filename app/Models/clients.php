@@ -16,10 +16,6 @@ class clients extends Model
     {
         return $this->hasMany(clientplaces::class);
     }
-    public function pricetables()
-    {
-        return $this->hasMany(pricetables::class);
-    }
     public function bills()
     {
         return $this->hasMany(bills::class);

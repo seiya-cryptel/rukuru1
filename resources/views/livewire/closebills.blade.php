@@ -38,6 +38,7 @@
                     <th style="width: 4rem;">{{ __('Code') }}</th>
                     <th>{{ __('Client') }}{{ __('Name') }}</th>
                     <th>{{ __('Closing Date') }}</th>
+                    <th>{{ __('Kintai Period') }}</th>
                     <th> </th>
                 </tr>
             </thead>
@@ -52,6 +53,9 @@
                     </td>
                     <td>
                         {{$Client->cl_close_day ? $Client->cl_close_day : '末日'}}
+                    </td>
+                    <td>
+                        {{$periods[$Client->id]}}
                     </td>
                     <td>
                         @if($isClosed[$Client->id])

@@ -63,6 +63,9 @@ new class extends Component
                             <x-dropdown-link :href="route('workemployee', ['locale' => $locale])" :active="request()->routeIs($locale . '/workemployee')" wire:navigate>
                             {{ __('Kintai Entry') }}
                             </x-dropdown-link>
+                            <x-dropdown-link :href="route('reportkintaidetails', ['locale' => $locale])" :active="request()->routeIs($locale . '/reportkintaidetails')" wire:navigate>
+                            {{ __('Kintai') }}{{ __('Details') }}{{ __('Report') }}
+                            </x-dropdown-link>
                             <x-dropdown-link :href="route('closebills', ['locale' => $locale])" :active="request()->routeIs($locale . '/closebills')" wire:navigate>
                             {{ __('Bill Close') }}
                             </x-dropdown-link>
@@ -153,11 +156,6 @@ new class extends Component
                             <x-dropdown-link :href="route('clientworktype', ['locale' => $locale])" wire:navigate>
                                 {{ __('Work Type') }}
                             </x-dropdown-link>
-                            {{--
-                            <x-dropdown-link :href="route('pricetable', ['locale' => $locale])" wire:navigate>
-                                {{ __('Price Table') }}
-                            </x-dropdown-link>
-                            --}}
                             <x-dropdown-link :href="route('masterallowdeduct', ['locale' => $locale])" wire:navigate>
                                 {{ __('Deduct Item') }}
                             </x-dropdown-link>

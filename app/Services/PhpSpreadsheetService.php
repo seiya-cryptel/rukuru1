@@ -9,6 +9,10 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
 use App\Models\masterallowdeducts as modelMasterAllowDeducts;
 
+use App\Models\clients;
+use App\Models\clientplaces;
+use App\Models\employees;
+
 class PhpSpreadsheetService
 {
 
@@ -279,5 +283,116 @@ class PhpSpreadsheetService
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
          ];
         return response()->download(storage_path('data/salary_detail.xlsx'), $fileName, $headers);
+    }
+
+    /**
+     * 勤怠明細エクスポート
+     * @param $templateFile
+     * @param $KintaiInfo
+     * @param $Employeeworks
+     * @return response
+     */
+    public function exportKintaiDetail($templateFile, $KintaiInfo, $Employeeworks)
+    {
+        // load template file
+        $spreadsheet = (new XlsxReader())->load($templateFile);
+        // get first sheet
+        $sheet = $spreadsheet->getSheet(0);
+
+        $clientInfo = '';
+        if($KintaiInfo['client_id'])
+        {
+            $client = clients::find($KintaiInfo['client_id']);
+            if($client)
+            {
+                $clientInfo = $client->cl_cd . ' ' . $client->cl_name;
+            }
+        }
+
+        // 検索条件
+        $sheet->getcell('A3')->setValue('検索条件');
+        $sheet->getcell('A4')->setValue('期間');
+        $sheet->getcell('B4')->setValue($KintaiInfo['date_from'] . '〜' . $KintaiInfo['date_to']);
+        $sheet->getcell('A5')->setValue('顧客');
+        $sheet->getcell('B5')->setValue($clientInfo);
+        $sheet->getcell('A6')->setValue('従業員コード');
+        $sheet->getcell('B6')->setValue($KintaiInfo['empl_cd_from'] . '〜' . $KintaiInfo['empl_cd_to']);
+
+        $nRow = 8;
+        // ヘッダー
+        $sheet->getcell('A' . $nRow)->setValue('従業員');
+        $sheet->getcell('B' . $nRow)->setValue('日付');
+        $sheet->getcell('C' . $nRow)->setValue('有休');
+        $sheet->getcell('D' . $nRow)->setValue('顧客');
+        $sheet->getcell('E' . $nRow)->setValue('部門');
+        $sheet->getcell('F' . $nRow)->setValue('開始打刻');
+        $sheet->getcell('G' . $nRow)->setValue('終了打刻');
+        $sheet->getcell('H' . $nRow)->setValue('開始時間');
+        $sheet->getcell('I' . $nRow)->setValue('終了時間');
+        $sheet->getcell('J' . $nRow)->setValue('休憩時間');
+        $sheet->getcell('K' . $nRow)->setValue('勤務時間');
+        $sheet->getcell('L' . $nRow)->setValue('作業名');
+        $sheet->getcell('M' . $nRow)->setValue('支給単価');
+        $sheet->getcell('N' . $nRow)->setValue('支給金額');
+        $sheet->getcell('O' . $nRow)->setValue('請求単価');
+        $sheet->getcell('P' . $nRow)->setValue('請求金額');
+        $sheet->getcell('Q' . $nRow)->setValue('備考');
+
+        $nRow++;
+
+        $saveClientId = null;
+        $saveClientplaceId = null;
+        $clientName = '';
+        $clientPlaceName = '';
+        foreach($Employeeworks as $Employeework)
+        {
+            // 顧客名と部門名を取得
+            if($Employeework->client_id != $saveClientId)
+            {
+                $client = clients::find($Employeework->client_id);
+                if($client)
+                {
+                    $clientName = $client->cl_name;
+                }
+                $saveClientId = $Employeework->client_id;
+            }
+            if($Employeework->clientplace_id != $saveClientplaceId)
+            {
+                $clientplace = clientplaces::find($Employeework->clientplace_id);
+                if($clientplace)
+                {
+                    $clientPlaceName = $clientplace->cl_pl_name;
+                }
+                $saveClientplaceId = $Employeework->clientplace_id;
+            }
+
+            $sheet->getcell('A' . $nRow)->setValue($Employeework->employee->empl_cd . ' ' . $Employeework->employee->empl_name_last . ' ' . $Employeework->employee->empl_name_first);
+            $sheet->getcell('B' . $nRow)->setValue($Employeework->wrk_date);
+            $sheet->getcell('C' . $nRow)->setValue($Employeework->leave=='1' ? '有休' : ($Employeework->wrk_leave=='2' ? '特休' : ''));
+            $sheet->getcell('D' . $nRow)->setValue($clientName);
+            $sheet->getcell('E' . $nRow)->setValue($clientPlaceName);
+            $sheet->getcell('F' . $nRow)->setValue($Employeework->wrk_log_start);
+            $sheet->getcell('G' . $nRow)->setValue($Employeework->wrk_log_end);
+            $sheet->getcell('H' . $nRow)->setValue($Employeework->wrk_work_start);
+            $sheet->getcell('I' . $nRow)->setValue($Employeework->wrk_work_end);
+            $sheet->getcell('J' . $nRow)->setValue($Employeework->wrk_leave);
+            $sheet->getcell('K' . $nRow)->setValue($Employeework->wrk_work_hours);
+            $sheet->getcell('L' . $nRow)->setValue($Employeework->summary_name);
+            $sheet->getcell('M' . $nRow)->setValue($Employeework->payhour);
+            $sheet->getcell('N' . $nRow)->setValue($Employeework->wrk_pay);
+            $sheet->getcell('O' . $nRow)->setValue($Employeework->billhour);
+            $sheet->getcell('P' . $nRow)->setValue($Employeework->wrk_bill);
+            $sheet->getcell('Q' . $nRow)->setValue($Employeework->notes);
+            $nRow++;
+        }
+        // create writer object
+        $writer = new XlsxWriter($spreadsheet);
+        // save file
+        $writer->save(storage_path('data/kintai_detail.xlsx'));
+        $fileName = '勤怠明細' . date('Y-m-d H:i') . '.xlsx';
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+         ];
+        return response()->download(storage_path('data/kintai_detail.xlsx'), $fileName, $headers);
     }
 }

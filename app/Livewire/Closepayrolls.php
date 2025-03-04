@@ -21,13 +21,11 @@ use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorkTypes;
 
 use App\Models\employees as modelEmployees;
-use App\Models\employeepays as modelEmployeePays;
 use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeesalarys as modelEmployeeSalarys;
 
 use App\Models\bills as modelBills;
 use App\Models\billdetails as modelBillDetails;
-use App\Models\pricetables as modelPriceTables;
 
 use App\Models\salary as modelSalary;
 
@@ -87,7 +85,8 @@ class Closepayrolls extends Component
     protected function deleteEmployeeSalary()
     {
         // work_year, work_month, client_id に該当する従業員給与を削除
-        $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-' .  ($this->Client->cl_close_day + 1));
+        // $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-' .  ($this->Client->cl_close_day + 1));
+        $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
         $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));        
         $sStartDay = date('Y-m-d', $dtFirstDate);
         $sEndDay = date('Y-m-d', $dtLastDate);

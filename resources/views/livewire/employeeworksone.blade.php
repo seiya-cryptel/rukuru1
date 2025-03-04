@@ -128,11 +128,11 @@
                     <select class="form-control py-1 text-sm" 
                         id="TimekeepingDays.{{$dayIndex}}.leave" 
                         wire:model="TimekeepingDays.{{$dayIndex}}.leave" 
-                        wire:change="holidayChange($event.target.value, {{$dayIndex}})"
+                        wire:change="yukyuTypeChange($event.target.value, {{$dayIndex}})" 
                         style="width: 3.5rem; padding: 0px;">
                         <option value="0"></option>
-                        <option value="1">有給</option>
-                        <option value="2">特給</option>
+                        <option value="1">有休</option>
+                        <option value="2">特休</option>
                     </select>
                     @error('TimekeepingDays.'.$dayIndex.'.leave') 
                         <span class="text-danger">{{ $message }}</span>
@@ -143,6 +143,7 @@
                         class="form-control py-1 text-xs text-right" 
                         id="TimekeepingDays.{{$dayIndex}}.wrk_leave_hour1" 
                         wire:model="TimekeepingDays.{{$dayIndex}}.wrk_leave_hour1" 
+                        wire:change="yukyuTimeChange($event.target.value, {{$dayIndex}}, 1)" 
                         style="width: 2.5rem; height: 22px; padding: 0px;" />
                     @error('TimekeepingDays.'.$dayIndex.'.wrk_leave_hour1')
                         <span class="text-red-500" style="color: red;">{{ $message }}</span>
@@ -153,6 +154,7 @@
                         class="form-control py-1 text-xs text-right" 
                         id="TimekeepingDays.{{$dayIndex}}.wrk_leave_hour2" 
                         wire:model="TimekeepingDays.{{$dayIndex}}.wrk_leave_hour2" 
+                        wire:change="yukyuTimeChange($event.target.value, {{$dayIndex}}, 2)" 
                         style="width: 2.5rem; height: 22px; padding: 0px;" />
                     @error('TimekeepingDays.'.$dayIndex.'.wrk_leave_hour2')
                         <span class="text-red-500" style="color: red;">{{ $message }}</span>

@@ -156,7 +156,7 @@ abstract class EmployeeworksBase extends Component
         $dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
 
         // 勤怠の開始日と終了日を計算する
-        $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-' .  ($this->Client->cl_close_day + 1));
+        $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
         $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
 
         $this->TimekeepingDays = [];    // 日ごとの情報
@@ -260,7 +260,7 @@ abstract class EmployeeworksBase extends Component
     protected function deleteEmployeeWork()
     {
         // 勤怠の開始日と終了日を計算する
-        $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-' .  ($this->Client->cl_close_day + 1));
+        $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
         $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
 
         $firstDay = date('Y-m-d', $dtFirstDate);

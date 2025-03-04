@@ -82,8 +82,34 @@ class TimeSlotOne extends TimeSlotBase
         {
             throw new Exception('終業時刻が開始時刻より前です');
         }
+        // 休憩時間
+        $sBreak = '';
+        switch($this->slotNo)
+        {
+            case 1:
+                $sBreak = $this->ClientWorkType->wt_lunch_break;
+                break;
+            case 2:
+                $sBreak = $this->ClientWorkType->wt_evening_break;
+                break;
+            case 3:
+                $sBreak = $this->ClientWorkType->wt_night_break;
+                break;
+            case 4:
+                $sBreak = $this->ClientWorkType->wt_midnight_break;
+                break;
+            default:
+                break;
+        }
+        if(empty($sBreak))
+        {
+            $sBreak = '00:00';
+        }
+        $diBreak = $this->rukuruUtilTimeToDateInterval($sBreak);
         // 休憩時間差し引き前の就業時間
         $this->work_hours = $this->rukuruUtilWorkHours($this->currentDate, $this->work_start, $this->work_end, $this->ClientWorkType);
+        // 休憩時間差し引き後の就業時間
+        $this->work_hours = $this->rukuruUtilDateIntervalSub($this->work_hours, $diBreak);
     }
 
     /**
@@ -92,13 +118,14 @@ class TimeSlotOne extends TimeSlotBase
     public function __construct(
         protected DateTime $currentDate,
         protected string $hhmmWorktypeTimeStart,
+        protected int $slotNo,
         protected modelClients $Client,
         protected modelClientworktypes $ClientWorkType,
         protected ?string $log_start = null,
         protected ?string $log_end = null
         )
     {
-        parent::__construct($currentDate, $hhmmWorktypeTimeStart, $Client, $ClientWorkType, $log_start, $log_end);
+        parent::__construct($currentDate, $hhmmWorktypeTimeStart, $slotNo, $Client, $ClientWorkType, $log_start, $log_end);
     }
 
     /**

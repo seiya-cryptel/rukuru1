@@ -179,6 +179,8 @@
                         <td rowspan="2" class="form-control px-1 py-1" style="width: 3rem; padding: 0px; text-align: center; color: #ff00ff;">勤怠</td>
                         <td class="form-control px-1 py-1" style="width: 3.5rem; text-align: center; background-color: #cc00cc; color: white;">出勤</td>
                         <td> </td>
+                        <td class="form-control px-1 py-1" style="width: 3.5rem; text-align: center; background-color: #cc00cc; color: white;">有給</td>
+                        <td> </td>
                         @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
                             <td class="form-control px-1 py-1" style="width: 3.5rem; padding: 0px; text-align: center; background-color: #cc00cc; color: white;">作業{{ $slotNo }}</td>
                         @endfor
@@ -186,7 +188,9 @@
                         <td style="width: 4rem; padding: 0px; text-align: center; background-color: #cc00cc; color: white;">時間計</td>
                     </tr>
                     <tr> {{-- 勤怠日数、時間数 --}}
-                        <td style="text-align: center;">{{ $SumDays }}</td>
+                    <td style="text-align: center;">{{ $SumDays }}</td>
+                        <td> </td>
+                        <td style="text-align: center;">{{ $SumDaysYukyu }}</td>
                         <td> </td>
                         @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
                             <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ $SumWorkHours[$slotNo] }}</td>
@@ -199,6 +203,8 @@
                         <td rowspan="2" class="form-control px-1 py-1" style="width: 3.3rem; padding: 0px; text-align: center; color: #aa8800;">支給</td>
                         <td class="form-control px-1 py-1" style="text-align: center; background-color:#aa8800; color: white;">交通費</td>
                         <td> </td>
+                        <td class="form-control px-1 py-1" style="text-align: center; background-color:#aa8800; color: white;">有給</td>
+                        <td> </td>
                         @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
                             <td class="form-control px-1 py-1" style="width: 3.5rem; padding: 0px; text-align: center; background-color: #aa8800; color: white;">作業{{ $slotNo }}</td>
                         @endfor
@@ -207,6 +213,8 @@
                     </tr>
                     <tr> {{-- 支給 金額 --}}
                         <td style="text-align: right;"></td>
+                        <td> </td>
+                        <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkPayYukyu) }}</td>
                         <td> </td>
                         @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
                             <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkPays[$slotNo]) }}</td>
@@ -219,6 +227,8 @@
                         <td rowspan="2" class="form-control px-1 py-1" style="width: 3.3rem; padding: 0px; text-align: center; color: #0000aa;">請求</td>
                         <td class="form-control px-1 py-1"> </td>
                         <td> </td>
+                        <td> </td>
+                        <td> </td>
                         @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
                             <td class="form-control px-1 py-1" style="width: 3.5rem; padding: 0px; text-align: center; background-color: #0000aa; color: white;">作業{{ $slotNo }}</td>
                         @endfor
@@ -227,6 +237,8 @@
                     </tr>
                     <tr>
                         <td style="text-align: center;"></td>
+                        <td> </td>
+                        <td> </td>
                         <td> </td>
                         @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
                             <td style="width: 3.5rem; padding: 0px; text-align: right;">{{ number_format($SumWorkBills[$slotNo]) }}</td>

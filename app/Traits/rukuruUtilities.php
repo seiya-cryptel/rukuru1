@@ -162,6 +162,10 @@ trait rukuruUtilities
     public function rukuruUtilTimeToDateInterval($time) : DateInterval
     {
         // 時刻を DateInterval に変換する
+        if(empty($time))
+        {
+            return new DateInterval('PT0S');
+        }
         return new DateInterval('PT' . substr($time, 0, 2) . 'H' . substr($time, 3, 2) . 'M');
     }
 
@@ -647,5 +651,30 @@ trait rukuruUtilities
             'wt_bill_holiday'           => str_replace(',', '', $ClientWorkType->wt_bill_holiday),
             'wt_bill_holiday_midnight'  => str_replace(',', '', $ClientWorkType->wt_bill_holiday_midnight),
         ];
+    }
+
+    /**
+     * 締日をもとに勤怠の開始日を取得する
+     * @param int $workYear 年
+     * @param int $workMonth 月
+     * @param int $cl_close_day 締日; 0: 末日, 1-31: 日
+     * @return int 開始日付
+     * 
+     * 締日が末日の場合、当月の1日を開始日とする
+     * 締日が1-31の場合、前月の締日+1日を開始日とする
+     */
+    public function rukuruUtilGetStartDate($workYear, $workMonth, $cl_close_day) : int
+    {
+        // 締日が末日の場合
+        if($cl_close_day != 0)
+        {
+            $workMonth--;
+            if($workMonth < 1)
+            {
+                $workYear--;
+                $workMonth = 12;
+            }
+        }
+        return strtotime($workYear . '-' . $workMonth . '-' . ($cl_close_day + 1));
     }
 }

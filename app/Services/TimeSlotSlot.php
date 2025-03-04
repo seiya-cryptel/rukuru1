@@ -92,13 +92,14 @@ class TimeSlotSlot extends TimeSlotBase
     public function __construct(
         protected DateTime $currentDate,
         protected string $hhmmWorktypeTimeStart,
+        protected int $slotNo,
         protected modelClients $Client,
         protected modelClientworktypes $ClientWorkType,
         protected ?string $log_start = null,
         protected ?string $log_end = null
         )
     {
-        parent::__construct($currentDate, $hhmmWorktypeTimeStart, $Client, $ClientWorkType, $log_start, $log_end);
+        parent::__construct($currentDate, $hhmmWorktypeTimeStart, $slotNo, $Client, $ClientWorkType, $log_start, $log_end);
     }
 
     /**

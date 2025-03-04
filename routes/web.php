@@ -110,13 +110,6 @@ function () {
             ->name('clientworktypeupdate');
 
         /**
-         * Route for the 請求単価マスタ ※削除予定
-         */
-        Route::view('pricetable', 'pricetable')
-            ->middleware(['auth', 'verified'])
-            ->name('pricetable');
-
-        /**
          * Route for the 手当控除項目マスタ
          */
         Route::view('masterallowdeduct', 'masterallowdeduct')
@@ -189,6 +182,13 @@ function () {
         Route::view('employeeworksslot/{workYear}/{workMonth}/{clientId}/{clientPlaceId}/{employeeId}', 'employeeworksslot')
             ->middleware(['auth', 'verified'])
             ->name('employeeworksslot');
+
+        /**
+         * Routes for the 勤怠詳細レポート
+         */
+        Route::view('reportkintaidetails', 'reportkintaidetails')
+            ->middleware(['auth', 'verified'])
+            ->name('reportkintaidetails');
 
         /**
          * Routes for the 勤怠エントリー 請求締め

@@ -21,13 +21,10 @@ use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorkTypes;
 
 use App\Models\employees as modelEmployees;
-use App\Models\employeepays as modelEmployeePays;
-use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeesalarys as modelEmployeeSalarys;
 
 use App\Models\bills as modelBills;
 use App\Models\billdetails as modelBillDetails;
-use App\Models\pricetables as modelPriceTables;
 
 use App\Models\salary as modelSalary;
 
@@ -92,7 +89,7 @@ class Closebills extends Component
     protected function deleteEmployeeSalary()
     {
         // work_year, work_month, client_id に該当する従業員給与を削除
-        $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-' .  ($this->Client->cl_close_day + 1));
+        $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
         $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));        
         $sStartDay = date('Y-m-d', $dtFirstDate);
         $sEndDay = date('Y-m-d', $dtLastDate);
@@ -560,7 +557,15 @@ class Closebills extends Component
             $this->isClosed[$Client->id] = $ClosePayroll ? $ClosePayroll->closed : false;
         }
 
-        return view('livewire.closebills', compact('Clients'));
+        // 対象期間文字列を作成する
+        $periods = [];
+        foreach($Clients as $Client) {
+            $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $Client->cl_close_day);
+            $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));        
+            $periods[$Client->id] = date('Y/m/d', $dtFirstDate) . '～' . date('Y/m/d', $dtLastDate);
+        }
+
+        return view('livewire.closebills', compact('Clients', 'periods'));
     }
 
     /**
@@ -569,7 +574,7 @@ class Closebills extends Component
     public function changeWorkYear($value)
     {
         $this->validate();
-        session([AppConsts::WORK_YEAR => $this->workYear]);
+        session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
     }
 
     /**
@@ -578,7 +583,7 @@ class Closebills extends Component
     public function changeWorkMonth()
     {
         $this->validate();
-        session([AppConsts::WORK_MONTH => $this->workMonth]);
+        session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
     }
 
     /**
