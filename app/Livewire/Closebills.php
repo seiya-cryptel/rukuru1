@@ -21,7 +21,6 @@ use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorkTypes;
 
 use App\Models\employees as modelEmployees;
-use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeesalarys as modelEmployeeSalarys;
 
 use App\Models\bills as modelBills;
@@ -30,11 +29,11 @@ use App\Models\billdetails as modelBillDetails;
 use App\Models\salary as modelSalary;
 
 /**
- * 勤怠締め処理
+ * 勤怠締め処理 請求作成
  * 
- * 従業員勤怠を元に、各種マスタを参照して、給与と請求の計算を行う
+ * 従業員勤怠を元に、各種マスタを参照して、請求額計算を行う
  */
-class Closepayrolls extends Component
+class Closebills extends Component
 {
     use rukuruUtilities;
 
@@ -47,7 +46,12 @@ class Closepayrolls extends Component
      * closing is enabled or not
      * true if closing is enabled otherwise reopen is enabled
      */
-    public $isClosed;
+    public $isClosed = [];
+
+    /**
+     * 顧客レコード
+     */
+    public $Client;
 
     /**
      * rules for validation
@@ -85,7 +89,6 @@ class Closepayrolls extends Component
     protected function deleteEmployeeSalary()
     {
         // work_year, work_month, client_id に該当する従業員給与を削除
-        // $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-' .  ($this->Client->cl_close_day + 1));
         $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
         $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));        
         $sStartDay = date('Y-m-d', $dtFirstDate);
@@ -534,17 +537,35 @@ class Closepayrolls extends Component
      */
     public function render()
     {
+
+        // 顧客レコード
+        $Clients = modelClients::orderBy('cl_cd')
+            ->paginate(AppConsts::PAGINATION);
+
         /**
-         * 給与締め処理完了状態
+         * 顧客ごとの締め処理完了状態
          */
-        $ClosePayroll = modelClosePayrolls::where('work_year', $this->workYear)
-            ->where('work_month', $this->workMonth)
-            ->where('client_id', 0)
-            ->first();
+        $this->isClosed = [];
+        foreach($Clients as $Client) {
+            $this->isClosed[$Client->id] = false;
+        }
+        foreach($Clients as $Client) {
+            $ClosePayroll = modelClosePayrolls::where('work_year', $this->workYear)
+                ->where('work_month', $this->workMonth)
+                ->where('client_id', $Client->id)
+                ->first();
+            $this->isClosed[$Client->id] = $ClosePayroll ? $ClosePayroll->closed : false;
+        }
 
-        $this->isClosed = $ClosePayroll && $ClosePayroll->closed;
+        // 対象期間文字列を作成する
+        $periods = [];
+        foreach($Clients as $Client) {
+            $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $Client->cl_close_day);
+            $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));        
+            $periods[$Client->id] = date('Y/m/d', $dtFirstDate) . '～' . date('Y/m/d', $dtLastDate);
+        }
 
-        return view('livewire.closepayrolls');
+        return view('livewire.closebills', compact('Clients', 'periods'));
     }
 
     /**
@@ -553,7 +574,7 @@ class Closepayrolls extends Component
     public function changeWorkYear($value)
     {
         $this->validate();
-        session([AppConsts::WORK_YEAR => $this->workYear]);
+        session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
     }
 
     /**
@@ -562,11 +583,11 @@ class Closepayrolls extends Component
     public function changeWorkMonth()
     {
         $this->validate();
-        session([AppConsts::WORK_MONTH => $this->workMonth]);
+        session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
     }
 
     /**
-     * close button click event
+     * 請求締め処理
      * @param integer $client_id 顧客ID
      * 
      * 従業員の勤怠をチェック
