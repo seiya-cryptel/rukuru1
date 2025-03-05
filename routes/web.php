@@ -57,6 +57,10 @@ function () {
             ->middleware(['auth', 'verified'])
             ->name('dashboard');
 
+        Route::view('test', 'test')
+            ->middleware(['auth', 'verified'])
+            ->name('test');
+
         /**
          * Route for the 祝日マスタ
          */

@@ -74,7 +74,7 @@ class Clientworktypes extends Component
         $Query->orderBy('client.cl_cd', 'asc');
         $Query->orderBy('clientplace.cl_pl_cd', 'asc');
         $Query->orderBy('wt_cd', 'asc');
-        $ClientWorktypes = $Query->paginate(10);
+        $ClientWorktypes = $Query->paginate(AppConsts::PAGINATION);
         return view('livewire.clientworktypes', compact('ClientWorktypes'));
     }
 

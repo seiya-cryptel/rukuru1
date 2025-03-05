@@ -98,6 +98,7 @@
                 </tbody>
             </table>
         </div>
+        {{ $ClientWorktypes->links() }}
     </div>    
     <script>
         function deleteClientWorkType(id){

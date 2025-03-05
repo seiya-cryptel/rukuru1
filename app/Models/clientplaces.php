@@ -17,13 +17,6 @@ class clientplaces extends Model
         return $this->belongsTo(clients::class);
     }
     /**
-     * Relationship with client places
-     */
-    public function pricetables()
-    {
-        return $this->hasMany(pricetables::class);
-    }
-    /**
      * Relationship with bills
      */
     public function bills()

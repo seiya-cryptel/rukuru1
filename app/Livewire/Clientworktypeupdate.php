@@ -49,6 +49,7 @@ class Clientworktypeupdate extends ClientworktypeBase
         $this->wt_pay_ovr = $clientWorktype->wt_pay_ovr;
         $this->wt_pay_ovr_midnight = $clientWorktype->wt_pay_ovr_midnight;
         $this->wt_pay_holiday = $clientWorktype->wt_pay_holiday;
+        $this->wt_pay_holiday_midnight = $clientWorktype->wt_pay_holiday_midnight;
 
         $this->wt_bill_std = $clientWorktype->wt_bill_std;
         $this->wt_bill_ovr = $clientWorktype->wt_bill_ovr;
@@ -66,6 +67,10 @@ class Clientworktypeupdate extends ClientworktypeBase
     {
         parent::mount($id);
         $this->loadClientWorktype($id);
+        if($this->client_id)
+        {            
+            $this->refClientPlaces = modelClientPlaces::where('client_id', $this->client_id)->get(); // 新しいclient_idに基づいて場所のデータを取得
+        }
     }
     
     public function render()
