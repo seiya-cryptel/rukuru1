@@ -119,16 +119,6 @@ abstract class WorkhoursBase
     {
         db::beginTransaction();
         try{
-            // 削除
-            /* ちょっと乱暴なのでコメントアウト
-            modelEmployeeworks::deleteWorkData(
-                $this->client_id,
-                $this->clientplace_id,
-                $this->employee_id,
-                $this->targetYear,
-                $this->targetMonth
-            );
-            */
             // 追加
             foreach($this->workDays as $workDay)
             {

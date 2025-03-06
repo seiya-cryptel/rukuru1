@@ -57,6 +57,10 @@ function () {
             ->middleware(['auth', 'verified'])
             ->name('dashboard');
 
+        Route::view('test', 'test')
+            ->middleware(['auth', 'verified'])
+            ->name('test');
+
         /**
          * Route for the 祝日マスタ
          */
@@ -108,13 +112,6 @@ function () {
         Route::view('clientworktypeupdate/{id}', 'clientworktypeupdate')
             ->middleware(['auth', 'verified'])
             ->name('clientworktypeupdate');
-
-        /**
-         * Route for the 請求単価マスタ ※削除予定
-         */
-        Route::view('pricetable', 'pricetable')
-            ->middleware(['auth', 'verified'])
-            ->name('pricetable');
 
         /**
          * Route for the 手当控除項目マスタ
@@ -198,11 +195,25 @@ function () {
             ->name('rk');
 
         /**
-         * Routes for the 勤怠エントリー 勤怠締め
+         * Routes for the 勤怠詳細レポート
          */
-        Route::view('closepayroll/', 'closepayroll')
+        Route::view('reportkintaidetails', 'reportkintaidetails')
             ->middleware(['auth', 'verified'])
-            ->name('closepayroll');
+            ->name('reportkintaidetails');
+
+        /**
+         * Routes for the 勤怠エントリー 請求締め
+         */
+        Route::view('closebills', 'closebills')
+            ->middleware(['auth', 'verified'])
+            ->name('closebills');
+
+        /**
+         * Routes for the 勤怠エントリー 給与締め
+         */
+        Route::view('closepayrolls', 'closepayrolls')
+            ->middleware(['auth', 'verified'])
+            ->name('closepayrolls');
 
         /**
          * Routes for the 請求　請求書出力

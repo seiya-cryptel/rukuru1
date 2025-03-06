@@ -12,6 +12,10 @@ use App\Models\clientplaces as clientplaces;
 use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
 use App\Models\masterallowdeducts as modelMasterAllowDeducts;
 
+use App\Models\clients;
+use App\Models\clientplaces;
+use App\Models\employees;
+
 class PhpSpreadsheetService
 {
 
