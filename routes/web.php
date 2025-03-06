@@ -195,13 +195,6 @@ function () {
             ->name('rk');
 
         /**
-         * Routes for the 勤怠詳細レポート
-         */
-        Route::view('reportkintaidetails', 'reportkintaidetails')
-            ->middleware(['auth', 'verified'])
-            ->name('reportkintaidetails');
-
-        /**
          * Routes for the 勤怠エントリー 請求締め
          */
         Route::view('closebills', 'closebills')
