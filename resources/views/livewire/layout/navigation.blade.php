@@ -63,7 +63,7 @@ new class extends Component
                             <x-dropdown-link :href="route('workemployee', ['locale' => $locale])" :active="request()->routeIs($locale . '/workemployee')" wire:navigate>
                             {{ __('Kintai Entry') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('reportkintaidetails', ['locale' => $locale])" :active="request()->routeIs($locale . '/reportkintaidetails')" wire:navigate>
+                            <x-dropdown-link :href="route('rk', ['locale' => $locale])" :active="request()->routeIs($locale . '/rk')" wire:navigate>
                             {{ __('Kintai') }}{{ __('Details') }}{{ __('Report') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('closebills', ['locale' => $locale])" :active="request()->routeIs($locale . '/closebills')" wire:navigate>

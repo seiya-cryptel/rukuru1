@@ -6,9 +6,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 
-use App\Models\clients as clients;
-use App\Models\clientplaces as clientplaces;
-
 use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
 use App\Models\masterallowdeducts as modelMasterAllowDeducts;
 
