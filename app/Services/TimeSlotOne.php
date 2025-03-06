@@ -32,7 +32,7 @@ class TimeSlotOne extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start);
+        $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start, $this->beginHourOfDay);
         if($this->Client->cl_round_start)
         {
             $this->rukuruUtilTimeRoundUp($this->work_start, $this->Client->cl_round_start);
@@ -51,7 +51,7 @@ class TimeSlotOne extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end);
+        $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end, $this->beginHourOfDay);
         // work_start よりも後の日時となるよう日にちを加算
         if($this->work_start)
         {
@@ -82,17 +82,42 @@ class TimeSlotOne extends TimeSlotBase
         {
             throw new Exception('終業時刻が開始時刻より前です');
         }
+        // 休憩時間
+        $sBreak = '';
+        switch($this->slotNo)
+        {
+            case 1:
+                $sBreak = $this->ClientWorkType->wt_lunch_break;
+                break;
+            case 2:
+                $sBreak = $this->ClientWorkType->wt_evening_break;
+                break;
+            case 3:
+                $sBreak = $this->ClientWorkType->wt_night_break;
+                break;
+            case 4:
+                $sBreak = $this->ClientWorkType->wt_midnight_break;
+                break;
+            default:
+                break;
+        }
+        if(empty($sBreak))
+        {
+            $sBreak = '00:00';
+        }
+        $diBreak = $this->rukuruUtilTimeToDateInterval($sBreak);
         // 休憩時間差し引き前の就業時間
         $this->work_hours = $this->rukuruUtilWorkHours($this->currentDate, $this->work_start, $this->work_end, $this->ClientWorkType);
+        // 休憩時間差し引き後の就業時間
+        $this->work_hours = $this->rukuruUtilDateIntervalSub($this->work_hours, $diBreak);
     }
 
     /**
      * TimeSlotType1 constructor
-     * @param protected int $slotNo >= 1 スロット番号
-     * @param protected modelClientworktypes $ClientWorkType 作業種別レコード
      */
     public function __construct(
         protected DateTime $currentDate,
+        protected string $hhmmWorktypeTimeStart,
         protected int $slotNo,
         protected modelClients $Client,
         protected modelClientworktypes $ClientWorkType,
@@ -100,7 +125,7 @@ class TimeSlotOne extends TimeSlotBase
         protected ?string $log_end = null
         )
     {
-        parent::__construct($currentDate, $slotNo, $Client, $ClientWorkType, $log_start, $log_end);
+        parent::__construct($currentDate, $hhmmWorktypeTimeStart, $slotNo, $Client, $ClientWorkType, $log_start, $log_end);
     }
 
     /**

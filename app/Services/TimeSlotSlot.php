@@ -88,11 +88,10 @@ class TimeSlotSlot extends TimeSlotBase
 
     /**
      * TimeSlotType1 constructor
-     * @param protected int $slotNo >= 1 スロット番号
-     * @param protected modelClientworktypes $ClientWorkType 作業種別レコード
      */
     public function __construct(
         protected DateTime $currentDate,
+        protected string $hhmmWorktypeTimeStart,
         protected int $slotNo,
         protected modelClients $Client,
         protected modelClientworktypes $ClientWorkType,
@@ -100,7 +99,7 @@ class TimeSlotSlot extends TimeSlotBase
         protected ?string $log_end = null
         )
     {
-        parent::__construct($currentDate, $slotNo, $Client, $ClientWorkType, $log_start, $log_end);
+        parent::__construct($currentDate, $hhmmWorktypeTimeStart, $slotNo, $Client, $ClientWorkType, $log_start, $log_end);
     }
 
     /**

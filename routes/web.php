@@ -191,6 +191,13 @@ function () {
             ->name('employeeworksslot');
 
         /**
+         * Routes for the 勤怠エントリー 勤怠一覧
+         */
+        Route::view('rk', 'rk')
+            ->middleware(['auth', 'verified'])
+            ->name('rk');
+
+        /**
          * Routes for the 勤怠エントリー 勤怠締め
          */
         Route::view('closepayroll/', 'closepayroll')

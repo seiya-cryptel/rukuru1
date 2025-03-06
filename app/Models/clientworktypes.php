@@ -128,7 +128,7 @@ class clientworktypes extends Model
     public function wtLunchBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value,
+            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_lunch_break'] = $value === '' ? null : $value, 
         );
     }
@@ -149,7 +149,7 @@ class clientworktypes extends Model
     public function wtEveningBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value,
+            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_evening_break'] = $value === '' ? null : $value, 
         );
     }
@@ -171,7 +171,7 @@ class clientworktypes extends Model
     public function wtNightBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value,
+            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_night_break'] = $value === '' ? null : $value, 
         );
     }
@@ -192,7 +192,7 @@ class clientworktypes extends Model
     public function wtMidnightBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value,
+            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_midnight_break'] = $value === '' ? null : $value, 
         );
     }
@@ -359,6 +359,32 @@ class clientworktypes extends Model
         */
     
         return $workTypeRecords;
+    }
+
+    /**
+     * 顧客と部門で可能な作業種別レコードの最初のレコード
+     *
+     * @return array<string, string>
+     */
+    static public function possibleWorkTypeRecordFirst($client_id, $clientplace_id)
+    {
+        // 顧客と部門が両方指定されている
+        if($client_id && $clientplace_id)
+        {
+            $workType = modelClientworktypes::where('client_id', $client_id)
+                ->where('clientplace_id', $clientplace_id)
+                ->orderBy('wt_cd')
+                ->first();
+        }
+        // 顧客のみ指定sれている
+        elseif($client_id)
+        {
+            $workType = modelClientworktypes::where('client_id', $client_id)
+                ->whereNull('clientplace_id')
+                ->orderBy('wt_cd')
+                ->first();
+        }    
+        return $workType;
     }
 
     /**

@@ -46,12 +46,22 @@ class employeeworks extends Model
         'leave',
         'client_id',
         'clientplace_id',
+        'holiday_type',
+        'work_type',
         'wt_cd',
+        'wt_name',
         'wrk_log_start',
         'wrk_log_end',
         'wrk_work_start',
         'wrk_work_end',
+        'wrk_break',
         'wrk_work_hours',
+        'summary_index',
+        'summary_name',
+        'payhour',
+        'wrk_pay',
+        'billhour',
+        'wrk_bill',
         'notes',
     ];
 
@@ -67,6 +77,7 @@ class employeeworks extends Model
             'wrk_log_end' => 'datetime',
             'wrk_work_start' => 'datetime',
             'wrk_work_end' => 'datetime',
+            'work_break' => 'datetime',
             'wrk_work_hours' => 'datetime',
         ];
     }
@@ -113,11 +124,15 @@ class employeeworks extends Model
     }
 
     /**
-     * Accesor/Mutator for wrk_log_start
-     *
-     * @param  string  $value
-     * @return void
+     * Accesor/Mutator
      */
+    public function wrkDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null) ? '' : date('Y-m-d', strtotime($value)),
+            set: fn ($value) => $this->attributes['wrk_date'] = $value === '' ? null : $value, 
+        );
+    }
     public function wrkLogStart(): Attribute
     {
         return Attribute::make(
@@ -125,13 +140,6 @@ class employeeworks extends Model
             set: fn ($value) => $this->attributes['wrk_log_start'] = $value === '' ? null : $value, 
         );
     }
-
-    /**
-     * Accesor/Mutator for wrk_log_end
-     *
-     * @param  string  $value
-     * @return void
-     */
     public function wrkLogEnd(): Attribute
     {
         return Attribute::make(
@@ -139,13 +147,6 @@ class employeeworks extends Model
             set: fn ($value) => $this->attributes['wrk_log_end'] = $value === '' ? null : $value, 
         );
     }
-
-    /**
-     * Accesor/Mutator for wrk_work_start
-     *
-     * @param  string  $value
-     * @return void
-     */
     public function wrkWorkStart(): Attribute
     {
         return Attribute::make(
@@ -153,13 +154,6 @@ class employeeworks extends Model
             set: fn ($value) => $this->attributes['wrk_work_start'] = $value === '' ? null : $value, 
         );
     }
-
-    /**
-     * Accesor/Mutator for wrk_work_end
-     *
-     * @param  string  $value
-     * @return void
-     */
     public function wrkWorkEnd(): Attribute
     {
         return Attribute::make(
@@ -167,17 +161,17 @@ class employeeworks extends Model
             set: fn ($value) => $this->attributes['wrk_work_end'] = $value === '' ? null : $value, 
         );
     }
-
-    /**
-     * Accesor/Mutator for wrk_work_hours
-     *
-     * @param  string  $value
-     * @return void
-     */
+    public function wrkBreak(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
+            set: fn ($value) => $this->attributes['wrk_break'] = $value === '' ? null : $value, 
+        );
+    }
     public function wrkWorkHours(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value,
+            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_work_hours'] = $value === '' ? null : $value, 
         );
     }
