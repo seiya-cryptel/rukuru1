@@ -27,4 +27,9 @@ class AppConsts
      * standard pagination
      */
     const PAGINATION = 15;
+
+    /**
+     * 交通費の手当控除コード
+     */
+    const MAD_CD_TRANSPORT = '31';
 }

@@ -21,8 +21,6 @@ use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeesalarys as modelEmployeeSalarys;
 use App\Models\salary as modelSalary;
 
-use App\Services\WorkhoursType1;
-
 /**
  * 勤怠入力画面標準
  */
@@ -34,7 +32,6 @@ class Employeeworksone extends EmployeeworksBase
 
     // constants
     private const MAX_TIMESLOT = 4;
-    private const MAX_HOURSLOT = 5;
     private const MAX_SUM_HOURSLOT = 8; // 時間集計用スロット数
 
     /**
@@ -47,18 +44,12 @@ class Employeeworksone extends EmployeeworksBase
      */
     public $WorktypeRecords;
 
-    /**
-     * スロットの背景色
-     */
-    public $SlotBGColors = [];
-
     // 計算用
                                     // 0 作業なし, 1 作業あり
     public $DayHasWorkShukkin = [];        // 出勤日数 [$dayIndex] ごとの作業の有無
     public $DayHasWorkKyujitsu = [];        // 法定外休日出勤日数 [$dayIndex] ごとの作業の有無
     public $DayHasWorkHoutei = [];        // 法定休日出勤日数 [$dayIndex] ごとの作業の有無
     public $DayHasWorkYukyu = [];        // 有給休暇日数 [$dayIndex] ごとの作業の有無
-    public $DayHasWorkTokkyu = [];        // 特別休暇日数 [$dayIndex] ごとの作業の有無
 
     /**
      * 集計表示用
@@ -67,9 +58,6 @@ class Employeeworksone extends EmployeeworksBase
     public $SumDaysKyujitsu;           // 日数 法定外休日
     public $SumDaysHoutei;             // 日数 法定休日
     public $SumDaysYukyu;              // 日数 有給
-    public $SumDaysTokkyu;            // 日数 特休
-
-    public $SumWorksPayYukyu = 0;   //  1ヶ月の有給支給額の合計
 
     /**
      * validation rules
@@ -90,22 +78,20 @@ class Employeeworksone extends EmployeeworksBase
      */
     protected function clearSummary()
     {
+        // 出勤日数
         $this->SumDaysShukkin = 0;            // 平日出勤日数
         $this->SumDaysKyujitsu = 0;            // 休日出勤日数
         $this->SumDaysHoutei = 0;       // 法定休日出勤日数
         $this->SumDaysYukyu = 0;            // 有給休暇日数
-        $this->SumDaysTokkyu = 0;            // 特別休暇日数
-        
-        $this->SumWorkHours = array_fill(1, 10, '00:00');  // 作業時間合計
+  
+        // 1ヶ月の作業時間合計
+        $this->SumWorkHours = array_fill(1, self::MAX_SUM_HOURSLOT, '00:00');  // 作業時間合計
         $this->SumWorkHoursAll = '00:00';  // 1ヶ月の作業時間合計
-        $this->SumWorkHoursYukyu = '00:00';  // 1ヶ月の有給時間合計
-        $this->SumWorkHoursYukyuYakan = '00:00';  // 1ヶ月の夜間有給時間合計
-
-        $this->SumWorkPays = array_fill(1, 8, 0);  // 支給額合計
-        $this->SumWorksPayYukyu = 0;   // 1ヶ月の有給支給額合計
+ 
+        $this->SumWorkPays = array_fill(1, self::MAX_SUM_HOURSLOT, 0);  // 支給額合計
         $this->SumWorkPayAll = 0;   // 1ヶ月の支給額合計
 
-        $this->SumWorkBills = array_fill(1, 8, 0);  // 請求額合計
+        $this->SumWorkBills = array_fill(1, self::MAX_SUM_HOURSLOT, 0);  // 請求額合計
         $this->SumWorkBillAll = 0;   // 1ヶ月の請求額合計
 
         // 作業種別名、時給、請求額をクリア
@@ -122,24 +108,6 @@ class Employeeworksone extends EmployeeworksBase
     }
 
     /**
-     * 更新スロット番号から時間を表示するスロットを計算する
-     * @param $slotNo スロット番号
-     * @param $holiday_type 休日区分
-     * @return int 時間スロット番号
-     */
-    protected function calcSlotHour($slotNo, $holiday_type)
-    {
-        if($slotNo == 1)  // 就業時間
-        {
-            $slotHour = $holiday_type == 0 ? 1 : 2;    // 就業または休出に時間数表示
-        }
-        else{
-            $slotHour = $slotNo + 1;
-        }
-        return $slotHour;
-    }
-
-    /**
      * 更新スロット番号から時間を集計するスロットを計算する
      * @param $slotNo スロット番号
      * @param $holiday_type 休日区分
@@ -150,7 +118,8 @@ class Employeeworksone extends EmployeeworksBase
         switch($slotNo)
         {
             case 1: // 就業時間
-                switch($holiday_type)  // 勤務
+            case 2: // 普通残業
+                switch($holiday_type)
                 {
                     case 1: // 法定外休日
                         $slotSum = 5;
@@ -159,14 +128,12 @@ class Employeeworksone extends EmployeeworksBase
                         $slotSum = 7;
                         break;
                     default:
-                        $slotSum = 1;
+                        $slotSum = $slotNo;
                         break;
                 }
                 break;
-            case 2: // 普通残業
-                $slotSum = 2;
-                break;
             case 3: // 深夜時間
+            case 4: // 深夜残業
                 switch($holiday_type)  // 勤務
                 {
                     case 1: // 法定外休日
@@ -176,14 +143,12 @@ class Employeeworksone extends EmployeeworksBase
                         $slotSum = 8;
                         break;
                     default:
-                        $slotSum = 3;
+                        $slotSum = $slotNo;
                         break;
                 }
                 break;
-            case 4: // 深夜残業
-                $slotSum = 4;
-                break;
             default:
+                $slotSum = $slotNo;
                 break;
         }
         return $slotSum;
@@ -198,7 +163,7 @@ class Employeeworksone extends EmployeeworksBase
         // 1ヶ月の作業時間合計 有給含む クリア
         $diSumWorkHours = [];
         $diZero = new DateInterval('P0D');  // DateInterval 就業時間
-        for($slotSum = 1; $slotSum <= self::MAX_SUM_HOURSLOT + 2; $slotSum++)
+        for($slotSum = 1; $slotSum <= self::MAX_SUM_HOURSLOT; $slotSum++)
         {
             $diSumWorkHours[$slotSum] = clone $diZero;
         }
@@ -212,83 +177,27 @@ class Employeeworksone extends EmployeeworksBase
             // 入力スロットごとに
             for($slotNo = 1; $slotNo <= self::MAX_TIMESLOT; $slotNo++)
             {
-                // 時間スロット番号を計算する
-                $slotHour = $this->calcSlotHour($slotNo, $holiday_type);
                 // 集計スロット番号を計算する
                 $slotSum = $this->calcSlotSum($slotNo, $holiday_type);
 
-                switch($holiday_type)
+                $hhmmHour = empty($this->TimekeepingSlots[$day][$slotNo]['wrk_work_hours']) ? 
+                    '00:00' : $this->TimekeepingSlots[$day][$slotNo]['wrk_work_hours']; // 時間 hh:mm
+                if(!empty($hhmmHour))
                 {
-                    case 1: // 法定外休日
-                    case 2: // 法定休日
-                        switch($slotNo)
-                        {
-                            case 1: // 就業
-                                $hhmmHour = $this->TimekeepingSlots[$day][$slotHour]['wrk_work_hours']; // 時間 hh:mm
-                                if(!empty($hhmmHour))
-                                {
-                                    $diHour1 = $this->rukuruUtilTimeToDateInterval($hhmmHour);
-                                    $diSumWorkHours[$slotSum] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[$slotSum], $diHour1);
-                                }
-                                // 普通残業
-                                $hhmmHour = $this->TimekeepingSlots[$day][$slotHour + 1]['wrk_work_hours']; // 時間 hh:mm
-                                if(!empty($hhmmHour))
-                                {
-                                    $diHour1 = $this->rukuruUtilTimeToDateInterval($hhmmHour);
-                                    $diSumWorkHours[$slotSum] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[$slotSum], $diHour1);
-                                }
-                                break;
-                            case 3: // 深夜時間
-                                $hhmmHour = $this->TimekeepingSlots[$day][$slotHour]['wrk_work_hours']; // 時間 hh:mm
-                                if(!empty($hhmmHour))
-                                {
-                                    $diHour1 = $this->rukuruUtilTimeToDateInterval($hhmmHour);
-                                    $diSumWorkHours[$slotSum] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[$slotSum], $diHour1);
-                                }
-                                // 深夜残業
-                                $hhmmHour = $this->TimekeepingSlots[$day][$slotHour + 1]['wrk_work_hours']; // 時間 hh:mm
-                                if(!empty($hhmmHour))
-                                {
-                                    $diHour1 = $this->rukuruUtilTimeToDateInterval($hhmmHour);
-                                    $diSumWorkHours[$slotSum] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[$slotSum], $diHour1);
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    default:    // 平日
-                        $hhmmHour = empty($this->TimekeepingSlots[$day][$slotHour]['wrk_work_hours']) ? 
-                            '00:00' : $this->TimekeepingSlots[$day][$slotHour]['wrk_work_hours']; // 時間 hh:mm
-                        if(!empty($hhmmHour))
-                        {
-                            $diHour1 = $this->rukuruUtilTimeToDateInterval($hhmmHour);
-                            $diSumWorkHours[$slotSum] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[$slotSum], $diHour1);
-                        }
-                        break;
+                    $diHour = $this->rukuruUtilTimeToDateInterval($hhmmHour);
+                    $diSumWorkHours[$slotSum] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[$slotSum], $diHour);
                 }
-            }
-            // 有給時間
-            $hhmmHour = $this->TimekeepingDays[$day]['wrk_leave_hour1']; // 時間 hh:mm
-            if(!empty($hhmmHour))
-            {
-                $diHour = $this->rukuruUtilTimeToDateInterval($hhmmHour);
-                $diSumWorkHours[9] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[9], $diHour);
-            }
-            // 夜間有給
-            $hhmmHour = $this->TimekeepingDays[$day]['wrk_leave_hour2']; // 時間 hh:mm
-            if(!empty($hhmmHour))
-            {
-                $diHour = $this->rukuruUtilTimeToDateInterval($hhmmHour);
-                $diSumWorkHours[10] = $this->rukuruUtilDateIntervalAdd($diSumWorkHours[10], $diHour);
             }
             $i++;
         }
 
-        for($i = 1; $i <= self::MAX_SUM_HOURSLOT + 2; $i++)
+        $diHourAll = new DateInterval('P0D');  // DateInterval 作業時間合計
+        for($i = 1; $i <= self::MAX_SUM_HOURSLOT; $i++)
         {
+            $diHourAll = $this->rukuruUtilDateIntervalAdd($diHourAll, $diSumWorkHours[$i]);
             $this->SumWorkHours[$i] = $this->rukuruUtilDateIntervalFormat($diSumWorkHours[$i]);
         }
+        $this->SumWorkHoursAll = $this->rukuruUtilDateIntervalFormat($diHourAll);
         return;
     }
 
@@ -304,7 +213,7 @@ class Employeeworksone extends EmployeeworksBase
     protected function calcSlot($day, $slot)
     {
         // 1 日の作業時間合計を計算
-        $dayWorkHours = $this->sumDayWorkHours($day, self::MAX_HOURSLOT);  // DateInterval object
+        $dayWorkHours = $this->sumDayWorkHours($day, self::MAX_TIMESLOT);  // DateInterval object
         $hhmmDayWorkHours = $this->rukuruUtilDateIntervalFormat($dayWorkHours);
 
         // 勤務区分 0: 平日, 1: 法定外休日, 2: 法定休日）
@@ -330,7 +239,7 @@ class Employeeworksone extends EmployeeworksBase
         $this->SumDaysKyujitsu = array_sum($this->DayHasWorkKyujitsu);
         $this->SumDaysHoutei = array_sum($this->DayHasWorkHoutei);
 
-        // 休暇 1: 有給, 2: 特急
+        // 休暇 1: 有給
         $leave = $this->TimekeepingDays[$day]['leave'];
 
         switch($leave)
@@ -344,34 +253,25 @@ class Employeeworksone extends EmployeeworksBase
                     $this->DayHasWorkYukyu[$day] = 1;
                 }
                 break;
-            case 2: // 特急
-                $hhmmWorkHour = $this->TimekeepingSlots[$day]['wrk_leave_hour2']; // 時間 hh:mm
-                $dayWorkHours = $this->rukuruUtilTimeToDateInterval($hhmmWorkHour);
-                $hhmmWorkHour = $this->rukuruUtilDateIntervalFormat($dayWorkHours);
-                if($hhmmWorkHour != '00:00')
-                {
-                    $this->DayHasWorkTokkyu[$day] = 1;
-                }
-                break;
             default:
                 break;
         }
         $this->SumDaysYukyu = array_sum($this->DayHasWorkYukyu);
-        $this->SumDaysTokkyu = array_sum($this->DayHasWorkTokkyu);
+        // $this->SumDaysTokkyu = array_sum($this->DayHasWorkTokkyu);
 
         // 時間スロットの1ヶ月の作業時間合計
         $diWorkHours = $this->calcMonthWorkHours();
 
         // 有給金額の計算
-        $di = $this->rukuruUtilTimeToDateInterval($this->SumWorkHours[9]);
-        $unit_price = $this->rukuruUtilMoneyValue($this->Employee->empl_paid_leave_pay);
-        $pay = $this->rukuruUtilDateIntervalToMoney($di, $unit_price);
-        $di = $this->rukuruUtilTimeToDateInterval($this->SumWorkHours[10]);
-        $unit_price = $this->rukuruUtilMoneyValue($this->Employee->empl_paid_leave_pay);  // ? 夜間有給金額単価は？
-        $pay += $this->rukuruUtilDateIntervalToMoney($di, $unit_price);
-        $this->SumWorksPayYukyu = $pay;
+        // $di = $this->rukuruUtilTimeToDateInterval($this->SumWorkHours[9]);
+        // $unit_price = $this->rukuruUtilMoneyValue($this->Employee->empl_paid_leave_pay);
+        // $pay = $this->rukuruUtilDateIntervalToMoney($di, $unit_price);
+        // $di = $this->rukuruUtilTimeToDateInterval($this->SumWorkHours[10]);
+        // $unit_price = $this->rukuruUtilMoneyValue($this->Employee->empl_paid_leave_pay);  // ? 夜間有給金額単価は？
+        // $pay += $this->rukuruUtilDateIntervalToMoney($di, $unit_price);
+        // $this->SumWorksPayYukyu = $pay;
         // 支給合計
-        $payAll = $pay;
+        $payAll = 0;
         // 支給額の計算
         for($i = 1; $i <= self::MAX_SUM_HOURSLOT; $i++)
         {
@@ -441,8 +341,9 @@ class Employeeworksone extends EmployeeworksBase
                     $this->TimekeepingDays[$dayIndex]['leave'] = $Slot->leave;
                     $this->TimekeepingDays[$dayIndex]['holiday_type'] = $Slot->holiday_type;
                     $this->TimekeepingDays[$dayIndex]['work_type'] = $Slot->work_type;
-                    $this->TimekeepingDays[$dayIndex]['wrk_leave_hour' . $Slot->leave] = $sLeave;
+                    // $this->TimekeepingDays[$dayIndex]['wrk_leave_hour' . $Slot->leave] = $sLeave;
                     $this->TimekeepingDays[$dayIndex]['notes'] = $Slot->notes;
+                    $this->TimekeepingDays[$dayIndex]['rowColor'] = $this->holidayTypeColor($Slot->holiday_type);
 
                     $this->TimekeepingSlots[$dayIndex][$slotNo] = [
                         'wrk_seq' => $slotNo,
@@ -459,7 +360,7 @@ class Employeeworksone extends EmployeeworksBase
                     continue;
                 }
 
-                $slotHour = $this->calcSlotHour($slotNo, $Slot->holiday_type);
+                // $slotHour = $this->calcSlotHour($slotNo, $Slot->holiday_type);
                 if($slotNo == 1)
                 {
                     $this->TimekeepingDays[$dayIndex]['leave'] = $Slot->leave;
@@ -477,8 +378,7 @@ class Employeeworksone extends EmployeeworksBase
                     'class_bg_color' => $this->TimekeepingDays[$dayIndex]['leave'] ? 'bg-gray-100' : '',
                     'readonly' => $this->TimekeepingDays[$dayIndex]['leave'] ? 'readonly=\"readonly\"' : '',
                 ];
-                $this->TimekeepingSlots[$dayIndex][$slotHour]['wrk_work_hours'] = 
-                    substr($Slot->wrk_work_hours, 0, 2) . ':' . substr($Slot->wrk_work_hours, 3, 2);
+                $this->TimekeepingSlots[$dayIndex][$slotNo]['wrk_work_hours'] = $Slot->wrk_work_hours;
                 $clientworktype = $this->PossibleWorkTypeFirst;
                 // 勤務体系
                 $work_type = $this->TimekeepingDays[$dayIndex]['work_type'];
@@ -522,19 +422,44 @@ class Employeeworksone extends EmployeeworksBase
         $this->SumWorkTypes[8]['wt_bill'] = $this->PossibleWorkTypeFirst->wt_bill_holiday_midnight;
         
         $this->fillTimekeepings();
-
-        // スロットの背景色を設定する
-        $this->SlotBGColors = [
-            1 => 0,
-            2 => 1,
-            3 => 0,
-            4 => 1,
-        ];
     }
 
     public function render()
     {
         return view('livewire.employeeworksone');
+    }
+
+    /**
+     * 休日区分による文字色
+     */
+    public function holidayTypeColor($holiday_type)
+    {
+        switch($holiday_type)
+        {
+            case 1: // 法定外休日
+                return 'color: blue;';
+            case 2: // 法定休日
+                return 'color: red;';
+            default:
+                return '';
+        }
+    }
+    /**
+     * 休日区分（勤務）が変わった
+     */
+    public function holidayTypeChange($value, $day)
+    {
+        // 項目名
+        $item = 'TimekeepingDays.' . $day . '.holiday_type';
+    }
+
+    /**
+     * 勤務体系が変わった
+     */
+    public function workTypeChange($value, $day)
+    {
+        // 項目名
+        $item = 'TimekeepingDays.' . $day . '.work_type';
     }
 
     /**
@@ -556,7 +481,7 @@ class Employeeworksone extends EmployeeworksBase
         $worktype_time = $this->WorktypeRecords[$work_type]->worktype_time_end;
         
         // 時間数表示インデクス
-        $slotWorkHour = $this->calcSlotHour($slotNo, $holiday_type);
+        // $slotWorkHour = $this->calcSlotHour($slotNo, $holiday_type);
 
         // 勤務の区切り時刻
         $hhmmWorktypeTimeStart = date('H:i', strtotime($worktype_time));
@@ -580,7 +505,7 @@ class Employeeworksone extends EmployeeworksBase
         }
 
         $this->TimekeepingSlots[$day][$slotNo]['wrk_log_start'] = $value;
-        $this->TimekeepingSlots[$day][$slotWorkHour]['wrk_work_hours'] = '';
+        $this->TimekeepingSlots[$day][$slotNo]['wrk_work_hours'] = '';
 
 
         // 時間計算用のクラスインスタンスを作成
@@ -597,7 +522,7 @@ class Employeeworksone extends EmployeeworksBase
         // 作業時間を計算
         $this->TimekeepingSlots[$day][$slotNo]['wrk_work_start'] = $Slot->getWorkStart();
         $this->TimekeepingSlots[$day][$slotNo]['wrk_work_end'] = $Slot->getWorkEnd();
-        $this->TimekeepingSlots[$day][$slotWorkHour]['wrk_work_hours'] = $Slot->getWorkHours();
+        $this->TimekeepingSlots[$day][$slotNo]['wrk_work_hours'] = $Slot->getWorkHours();
 
         // 集計作業
         $this->calcSlot($day, $slotNo);
@@ -622,7 +547,7 @@ class Employeeworksone extends EmployeeworksBase
         $worktype_time = $this->WorktypeRecords[$work_type]->worktype_time_end;
 
         // 時間数表示インデクス
-        $slotWorkHour = $this->calcSlotHour($slotNo, $holiday_type);
+        // $slotWorkHour = $this->calcSlotHour($slotNo, $holiday_type);
 
         // 勤務の区切り時刻
         $hhmmWorktypeTimeStart = date('H:i', strtotime($worktype_time));
@@ -646,7 +571,7 @@ class Employeeworksone extends EmployeeworksBase
         }
 
         $this->TimekeepingSlots[$day][$slotNo]['wrk_log_end'] = $value;
-        $this->TimekeepingSlots[$day][$slotWorkHour]['wrk_work_hours'] = '';
+        $this->TimekeepingSlots[$day][$slotNo]['wrk_work_hours'] = '';
         
         // 時間計算用のクラスインスタンスを作成
         $Slot = new TimeSlotOne(
@@ -662,48 +587,7 @@ class Employeeworksone extends EmployeeworksBase
         // 作業時間を計算
         $this->TimekeepingSlots[$day][$slotNo]['wrk_work_start'] = $Slot->getWorkStart();
         $this->TimekeepingSlots[$day][$slotNo]['wrk_work_end'] = $Slot->getWorkEnd();
-        $this->TimekeepingSlots[$day][$slotWorkHour]['wrk_work_hours'] = $Slot->getWorkHours();
-
-        // 集計作業
-        $this->calcSlot($day, $slotNo);
-    }
-
-    /**
-     * 有給種別が変更された
-     * @param $value 変更値
-     * @param $day 日
-     */
-    public function yukyuTypeChange($value, $day)
-    {
-        // 項目名
-        $item = 'TimekeepingDays.' . $day . '.leave';
-
-        // 集計作業
-        $this->calcSlot($day, 1);
-    }
-
-    /**
-     * 有給時間が変更された
-     * @param $value 変更値
-     * @param $day 日
-     * @param $slotNo 時間番号 [1, 2]
-     * */
-    public function yukyuTimeChange($value, $day, $slotNo)
-    {
-        // 項目名
-        $item = 'TimekeepingDays.' . $day . '.wrk_leave_hour' . $slotNo;
-
-        // チェックを実行
-        try {
-            // エラーメッセージをリセット
-            $this->resetErrorBag($item);
-            $value = $this->rukuruUtilTimeNormalize($value);
-        } catch (\Exception $e) {
-            $this->addError($item, $e->getMessage());
-            return;
-        }
-
-        $this->TimekeepingDays[$day]['wrk_leave_hour' . $slotNo] = $value;
+        $this->TimekeepingSlots[$day][$slotNo]['wrk_work_hours'] = $Slot->getWorkHours();
 
         // 集計作業
         $this->calcSlot($day, $slotNo);
@@ -742,7 +626,7 @@ class Employeeworksone extends EmployeeworksBase
     {
         foreach($this->TimekeepingDays as $dayIndex => $Day)
         {
-            for($slotNo = 1; $slotNo < self::MAX_TIMESLOT; $slotNo++)
+            for($slotNo = 1; $slotNo <= self::MAX_TIMESLOT; $slotNo++)
             {
                 if(! $this->mustWriteSlot($dayIndex, $slotNo))
                 {
@@ -790,10 +674,7 @@ class Employeeworksone extends EmployeeworksBase
                     continue;
                 }
 
-                $slotHour = $this->calcSlotHour($slotNo, $Day['holiday_type']);
-
                 $Slot = $this->TimekeepingSlots[$dayIndex][$slotNo];
-                $SlotWorkHour = $this->TimekeepingSlots[$dayIndex][$slotHour];
 
                 $Work = new modelEmployeeWorks();
                 $Work->employee_id = $this->employee_id;
@@ -812,7 +693,7 @@ class Employeeworksone extends EmployeeworksBase
                 $Work->wrk_work_start = empty($Slot['wrk_work_start']) ? null : $Slot['wrk_work_start'];
                 $Work->wrk_work_end = empty($Slot['wrk_work_end']) ? null : $Slot['wrk_work_end'];
                 $Work->wrk_break = $this->getBreakTime($slotNo);
-                $Work->wrk_work_hours = empty($SlotWorkHour['wrk_work_hours']) ? null : $SlotWorkHour['wrk_work_hours'];
+                $Work->wrk_work_hours = empty($Slot['wrk_work_hours']) ? null : $Slot['wrk_work_hours'];
 
                 $Work->summary_index = $slotNo;
                 $slotSumNo = $this->calcSlotSum($slotNo, $Work->holiday_type);

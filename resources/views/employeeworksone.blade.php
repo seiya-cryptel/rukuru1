@@ -8,7 +8,6 @@ $Employee = modelEmployees::find($employeeId);
     <x-slot name="header">
         <h3 class="{{-- font-semibold text-xl --}} text-gray-800 leading-tight text-sm">
             {{ __('Kintai Entry') }} > {{ __('Employee') }} 
-            <span class="font-semibold"> {{ $Employee->empl_cd }} {{ $Employee->empl_name_last }} {{ $Employee->empl_name_first }}</span> さん
         </h3>
     </x-slot>
     <div>

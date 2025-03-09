@@ -155,7 +155,7 @@ trait rukuruUtilities
     }
 
     /**
-     * hh:mm, hh:mm:ss 文字列を DateInterval に変換する
+     * hhh:mm 文字列を DateInterval に変換する
      * @param string $time
      * @return DateInterval
      */
@@ -166,11 +166,19 @@ trait rukuruUtilities
         {
             return new DateInterval('PT0S');
         }
-        return new DateInterval('PT' . substr($time, 0, 2) . 'H' . substr($time, 3, 2) . 'M');
+        $parts = explode(':', $time);
+        if(count($parts) < 2)
+        {
+            return new DateInterval('PT' . $time . 'M');
+        }
+        $h = $parts[0];
+        $d = floor($h / 24);
+        $h = $h % 24;
+        return new DateInterval('P' . $d . 'DT' . $h . 'H' . $parts[1] . 'M');
     }
 
     /**
-     * DateInterval を hh:mm 形式の文字列に変換する
+     * DateInterval を hhh:mm 形式の文字列に変換する
      * @param DateInterval $interval
      * @return string
      */
@@ -182,7 +190,7 @@ trait rukuruUtilities
         }
         $hours = $interval->h + ($interval->d * 24);
         $minutes = $interval->i;
-        return sprintf('%02d:%02d', $hours, $minutes);
+        return sprintf('%d:%02d', $hours, $minutes);
     }
 
     /**

@@ -18,10 +18,6 @@ use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\worktype as modelWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
-use App\Models\employeesalarys as modelEmployeeSalarys;
-use App\Models\salary as modelSalary;
-
-use App\Services\WorkhoursType1;
 
 /**
  * スロットごと勤怠入力画面
@@ -49,6 +45,7 @@ class Employeeworksslot extends EmployeeworksBase
     /**
      * timekeeping array
      */
+    public $HeaderWorkType;        // ヘッダの勤務体系
     public $TimekeepingTypes = [];  // スロットごとの情報
                                     // ['wt_cd' => 作業種別]
 
@@ -100,6 +97,11 @@ class Employeeworksslot extends EmployeeworksBase
     protected function setWorkType($slot, $wt_cd)
     {
         // 作業種別名、時給、請求額を設定
+        if(empty($this->PossibleWorkTypeRecords[$wt_cd]))
+        {
+            $this->clearWorkType($slot);
+            return;
+        }
         $this->SumWorkTypes[$slot]['wt_cd'] = $wt_cd;
         $this->SumWorkTypes[$slot]['wt_name'] = $wt_cd . ' ' . $this->PossibleWorkTypeRecords[$wt_cd]->wt_name;
         $this->SumWorkTypes[$slot]['wt_pay_std'] = $this->PossibleWorkTypeRecords[$wt_cd]->wt_pay_std;
@@ -303,6 +305,7 @@ class Employeeworksslot extends EmployeeworksBase
                     continue;
                 }
 
+                // スロットに作業種別が設定されていない場合
                 if(empty($this->SumWorkTypes[$slotNo]['wt_cd']))
                 {
                     $this->setWorkType($slotNo, $Slot->wt_cd);
@@ -324,8 +327,11 @@ class Employeeworksslot extends EmployeeworksBase
                     'wrk_work_end' => $Slot->wrk_work_end,
                     'wrk_work_hours' => substr($Slot->wrk_work_hours, 0, 2) . ':' . substr($Slot->wrk_work_hours, 3, 2),
                 ];
-                $clientworktype = $this->PossibleWorkTypeRecords[$Slot->wt_cd];
-                $this->calcSlot($dayIndex, $slotNo, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
+                if(!empty($this->PossibleWorkTypeRecords[$Slot->wt_cd]))
+                {
+                    $clientworktype = $this->PossibleWorkTypeRecords[$Slot->wt_cd];
+                    $this->calcSlot($dayIndex, $slotNo, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
+                }
             }
             $dayIndex++;
         }
@@ -381,6 +387,19 @@ class Employeeworksslot extends EmployeeworksBase
         {
             $this->TimekeepingSlots[$day][$slotNo]['class_bg_color'] = $value ? 'bg-gray-100' : '';
             $this->TimekeepingSlots[$day][$slotNo]['readonly'] = $value ? 'readonly=\"readonly\"' : '';
+        }
+    }
+
+    /**
+     * ヘッダで勤務体系が変更された場合の処理
+     * @param int $value 勤務体系
+     * @return void
+     */
+    public function workTypeChangeHeader($value)
+    {
+        foreach($this->TimekeepingDays as $day => $Day)
+        {
+            $this->TimekeepingDays[$day]['work_type'] = $value;
         }
     }
 
@@ -448,7 +467,7 @@ class Employeeworksslot extends EmployeeworksBase
         $Slot = new TimeSlotSlot(
             $this->TimekeepingDays[$day]['DateTime'],
             "05:00", 
-            intval($slotNo),
+            intval($slot),
             $this->Client, 
             $clientworktype, 
             $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
@@ -461,7 +480,6 @@ class Employeeworksslot extends EmployeeworksBase
         $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
 
         // 集計作業
-        $this->calcSlot($day, $slot, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
     }
 
     /**
@@ -498,7 +516,7 @@ class Employeeworksslot extends EmployeeworksBase
         $Slot = new TimeSlotSlot(
             $this->TimekeepingDays[$day]['DateTime'],
             "05:00", 
-            intval($slotNo),
+            intval($slot),
             $this->Client, 
             $clientworktype, 
             $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
@@ -512,6 +530,29 @@ class Employeeworksslot extends EmployeeworksBase
 
         // 集計作業
         $this->calcSlot($day, $slot, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
+    }
+
+    /**
+     * 1日の勤怠をクリアする
+     * @param int $day インデクス
+     */
+    public function deleteTimekeepingDay($dayIndex)
+    {
+        for($slotNo=1; $slotNo<=self::MAX_SLOTS; $slotNo++)
+        {
+            $this->TimekeepingSlots[$dayIndex][$slotNo] = [
+                'wrk_seq' => $slotNo,
+                'wt_cd' => '',
+                'wrk_log_start' => null,
+                'wrk_log_end' => null,
+                'wrk_work_start' => null,
+                'wrk_work_end' => null,
+                'wrk_work_hours' => null,
+                'class_bg_color' => '',
+                'readonly' => '',
+            ];
+            $this->calcSlot($dayIndex, $slotNo, 0, 0);
+        }
     }
 
     /**
@@ -563,7 +604,8 @@ class Employeeworksslot extends EmployeeworksBase
                     continue;
                 }
 
-                $clientworktype = $this->PossibleWorkTypeRecords[$Slot['wt_cd']];
+                $wt_cd = $this->TimekeepingTypes[$slotNo];
+                $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
         
                 $Work = new modelEmployeeWorks();
                 $Work->employee_id = $this->employee_id;

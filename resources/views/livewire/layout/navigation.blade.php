@@ -66,12 +66,6 @@ new class extends Component
                             <x-dropdown-link :href="route('rk', ['locale' => $locale])" :active="request()->routeIs($locale . '/rk')" wire:navigate>
                             {{ __('Kintai') }}{{ __('Details') }}{{ __('Report') }}
                             </x-dropdown-link>
-                            <x-dropdown-link :href="route('closebills', ['locale' => $locale])" :active="request()->routeIs($locale . '/closebills')" wire:navigate>
-                            {{ __('Bill Close') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('closepayrolls', ['locale' => $locale])" :active="request()->routeIs($locale . '/closepayrolls')" wire:navigate>
-                            {{ __('Salary Close') }}
-                            </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
                 </div>
@@ -93,6 +87,9 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
+                            <x-dropdown-link :href="route('closebills', ['locale' => $locale])" :active="request()->routeIs($locale . '/closebills')" wire:navigate>
+                            {{ __('Bill Close') }}
+                            </x-dropdown-link>
                             <x-dropdown-link  :href="route('bills', ['locale' => $locale])" :active="request()->routeIs($locale . '/bills')" wire:navigate>
                             {{ __('Bill Export') }}
                             </x-dropdown-link>
@@ -120,8 +117,11 @@ new class extends Component
                             <x-dropdown-link :href="route('salaryemployee', ['locale' => $locale])" wire:navigate>
                                 {{ __('Salary Deduct') }}
                             </x-dropdown-link>
+                            <x-dropdown-link :href="route('closepayrolls', ['locale' => $locale])" :active="request()->routeIs($locale . '/closepayrolls')" wire:navigate>
+                            {{ __('Salary Close') }}
+                            </x-dropdown-link>
                             <x-dropdown-link :href="route('closesalaries', ['locale' => $locale])" wire:navigate>
-                            {{ __('Salary Calc') }}
+                            {{ __('Salary Export') }}
                             </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>

@@ -113,7 +113,7 @@ class TimeSlotOne extends TimeSlotBase
     }
 
     /**
-     * TimeSlotType1 constructor
+     * TimeSlotOne constructor
      */
     public function __construct(
         protected DateTime $currentDate,

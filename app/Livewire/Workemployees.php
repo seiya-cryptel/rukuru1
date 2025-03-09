@@ -256,6 +256,12 @@ class Workemployees extends Component
             return 'error';
         }
 
+        // 部門を持つ顧客の場合、部門が選択されているかどうかを確認する
+        if($this->clientHasClientPlace && $this->clientplace_id == null)
+        {
+            return 'notselected';
+        }
+
         // 勤怠データが存在するかどうかを確認する
         $firstDay = date('Y-m-01', strtotime($this->workYear.'-'.$this->workMonth.'-01'));
         $lastDay = date('Y-m-t', strtotime($this->workYear.'-'.$this->workMonth.'-01'));

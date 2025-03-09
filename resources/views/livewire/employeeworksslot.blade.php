@@ -13,15 +13,17 @@
         @endif
     </div>
     <div class="col-md-8 py-1">
-        {{ $workYear }}年 {{ $workMonth }}月 {{ $Client['cl_name'] }} 様 {{ $ClientPlace ? $ClientPlace['cl_pl_name'] : '' }}
-        {{--
-        【作業】
-        @foreach($WorkTypes as $key => $value)
-            @if($key != '')
-            <span class="font-semibold text-green-500">{{ $key }}</span>:{{ $value }}
-            @endif
-        @endforeach
-        --}}
+        {{ $workYear }}年 {{ $workMonth }}月
+        <select class="form-control py-1 px-1 text-sm" 
+            id="employee_id" 
+            wire:model="employee_id" 
+            wire:change="employeeChanged($event.target.value)"
+            style="width: 16rem; padding: 0px;">
+            @foreach($Employees as $key => $EmployeeRecord)
+                <option value="{{ $EmployeeRecord->id }}">{{ $EmployeeRecord->empl_cd }} {{ $EmployeeRecord->empl_name_last }} {{ $EmployeeRecord->empl_name_first }}</option>
+            @endforeach
+        </select>
+        {{ $Client['cl_name'] }} {{ $ClientPlace ? $ClientPlace['cl_pl_name'] : '' }}
         <button wire:click.prevent="saveEmployeeWork" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold text-bold text-sm py-1 px-2 rounded" data-save="true">{{ __('Save') }}</button>
         {{-- <button wire:click.prevent="selectAllowDeduct()" class="bg-green-500 hover:bg-green-700 text-white font-semibold text-sm py-1 px-2 rounded" data-cancel="true">{{ __('Salary Deduct') }}</button> --}}
         <button wire:click.prevent="cancelEmployeepay()" class="bg-orange-500 hover:bg-orange-700 text-white font-semibold text-sm py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
@@ -30,11 +32,11 @@
         <table style="width: 100%;">
             <thead style="display: block;">
             <tr> {{-- 列名 --}}
-                <th style="width: 1rem;"> </th>
-                <th style="width: 1.2rem;"> </th>
-                <td style="width: 1.2rem;"> </td>
-                <td class="text-center" style="width: 2.5rem; padding: 0px;"> </td>
-                <td class="text-center" style="width: 3.5rem; padding: 0px;"> </td>
+                <th style="width: 1rem;"> </th>{{-- 1 日付 --}}
+                <th style="width: 1.2rem;"> </th>{{-- 1 曜日 --}}
+                <th style="width: 2rem;"> </th>{{-- 3 有給 --}}
+                <th style="width: 3rem;"> </th>{{-- 4 休日区分（勤務） --}}
+                <th style="width: 3.5rem;">体系</th>{{-- 5 勤務体系 --}}
                 @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
                 <th colspan="2" style="width: 5rem; padding: 0px; text-align: center;">作業{{$slotNo}}</th>
                 @endfor
@@ -43,15 +45,26 @@
                 <th style="width: 2.5rem; padding: 0px; text-align: center;"> </th>
                 @endfor
                 <th style="width: 8rem; padding: 0px; text-align: center;">備考</th>
+                <th></th>
             </tr>
             <tr> {{-- 作業種別選択 --}}
-                <td style="width: 1rem;"> </td>
-                <td style="width: 1.2rem;"> </td>
-                <th style="width: 1.2rem;">休</th>
-                <th class="text-center" style="width: 2.5rem; padding: 0px;">勤務</th>
-                <th class="text-center" style="width: 3.5rem; padding: 0px;">体系</th>
+                <th> </th>
+                <th> </th>
+                <th>有休</th>
+                <th>勤務</th>
+                <th>
+                    <select class="form-control py-1 text-sm" 
+                        id="HeaderWorkType" 
+                        wire:model="HeaderWorkType" 
+                        wire:change="workTypeChangeHeader($event.target.value)"
+                        style="width: 3.5rem; padding: 0px;">
+                        @foreach($KinmuTaikeies as $kinmuNo => $value)
+                            <option value="{{ $kinmuNo }}">{{ $value }}</option>
+                        @endforeach
+                    </select>
+                </th>
                 @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
-                <td colspan="2" style="width: 5rem; padding: 0px;">
+                <th colspan="2" style="width: 5rem; padding: 0px;">
                     <select class="form-control py-1 text-sm" 
                         id="TimekeepingTypes.{{$slotNo}}" 
                         wire:model="TimekeepingTypes.{{$slotNo}}" 
@@ -64,20 +77,21 @@
                     @error('slot'.$slotNo.'_work_type') 
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
-                </td>
+                </th>
                 @endfor
-                <td></td>
+                <th></th>
                 @for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
-                <td style="width: 2.5rem; padding: 0px; text-align: center;">{{$slotNo}}</td>
+                <th style="width: 2.5rem; padding: 0px; text-align: center;">{{$slotNo}}</th>
                 @endfor
-                <td style="width: 8rem; padding: 0px; text-align: center;"> </td>
+                <th style="width: 8rem; padding: 0px; text-align: center;"> </th>
+                <th></th>
             </tr>
             </thead>
 
             <tbody style="display: block; height: 430px; overflow-y: auto;">
             @foreach($TimekeepingDays as $dayIndex => $value)
             <tr>
-                <td>{{ $value['day'] }}</td> 
+                <td style="text-align: right;">{{ $value['day'] }}</td> {{-- 1 日付 --}}
                 <td> {{-- 曜日 --}}
                     @if($this->rukuruUtilIsHoliday($client_id, $value['DateTime']->format('Y-m-d')))
                         <span style="color: red;">{{ $value['dispDayOfWeek'] }}</span>
@@ -85,17 +99,17 @@
                         {{ $value['dispDayOfWeek'] }}
                     @endif
                 </td>
-                <td> {{-- 有給 --}}
+                <td style="width: 2rem;"> {{-- 有給 --}}
                     <input type="checkbox" 
                         wire:model="TimekeepingDays.{{ $dayIndex }}.leave" 
-                        wire:change="leaveChange($event.target.checked, {{$dayIndex}})" />
+                        wire:change="leaveChange($event.target.checked, {{$dayIndex}})" 
+                        />
                 </td>
-                <td style="width: 2.5rem; padding: 0px;"> {{-- 休日区分 0: 平日, 1: 法定外休日, 2: 法定休日 --}}
+                <td style="width: 3rem; padding: 0px;"> {{-- [勤務] 休日区分 0: 平日, 1: 法定外休日, 2: 法定休日 --}}
                     <select class="form-control py-1 text-sm" 
                         id="TimekeepingDays.{{$dayIndex}}.holiday_type" 
                         wire:model="TimekeepingDays.{{$dayIndex}}.holiday_type" 
-                        wire:change="holidayTypeChange($event.target.value, {{$dayIndex}})"
-                        style="width: 2.5rem; padding: 0px;">
+                        style="width: 3rem; padding: 0px;">
                         <option value="0">平</option>
                         <option value="1">外</option>
                         <option value="2">法</option>
@@ -167,11 +181,17 @@
                         <span class="text-red-500" style="color: red;">{{ $message }}</span>
                     @enderror
                 </td>
+                <td>
+                    <button 
+                        wire:click.prevent="deleteTimekeepingDay({{ $dayIndex }})" 
+                        class="bg-orange-500 hover:bg-orange-700 text-white font-semibold text-sm px-2 rounded" data-delete="true">X</button>
+                </td>
             </tr>
             @endforeach
             </tbody>
         </table>
-        <table style="width: 100%;">
+
+        <table style="width: 100%;"> {{-- 集計エリア --}}
         <tr>
             <td> {{-- 集計 --}}
                 <table class="border border-gray-300">

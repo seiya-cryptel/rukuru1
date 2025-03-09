@@ -10,18 +10,12 @@ use Illuminate\Support\Facades\DB;
 
 use App\Consts\AppConsts;
 use App\Traits\rukuruUtilities;
-use App\Services\TimeSlotOne;
 
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
-use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\worktype as modelWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
-use App\Models\employeesalarys as modelEmployeeSalarys;
-use App\Models\salary as modelSalary;
-
-use App\Services\WorkhoursType1;
 
 /**
  * 勤怠入力画面標準
@@ -44,12 +38,17 @@ abstract class EmployeeworksBase extends Component
     /**
      * client record
      * */
-    public modelClients $Client;
+    public $Client;
 
     /**
      * client place record
      * */
     public $ClientPlace;
+
+    /**
+     * employee list
+     */
+    public $Employees = [];
 
     /**
      * employee record
@@ -217,6 +216,8 @@ abstract class EmployeeworksBase extends Component
         $this->Client = modelClients::find($this->client_id);
         $this->ClientPlace = $this->clientplace_id ? modelClientPlaces::find($this->clientplace_id) : null;
         $this->Employee = modelEmployees::find($this->employee_id);
+        $this->Employees = modelEmployees::orderBy('empl_cd')
+            ->get();
 
         // 勤務体系の配列を作る
         $workTypeRecords = modelWorktypes::where('worktype_kintai', $this->worktypeKintai())
@@ -253,6 +254,16 @@ abstract class EmployeeworksBase extends Component
      * @param $slotNo スロット番号
      * */
     abstract public function logEndTimeChange($value, $day, $slotNo);
+
+    /**
+     * 従業員が変更された
+     */
+    public function employeeChanged($employee_id)
+    {
+        $this->employee_id = $employee_id;
+        $this->Employee = modelEmployees::find($this->employee_id);
+        $this->clearSummary();
+    }
 
     /**
      * delete work time by employee id and work year and work month

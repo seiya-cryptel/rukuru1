@@ -153,3 +153,4 @@
         {{ $Employeeworks->links() }}
     </div>
 </div>
+<script src="{{ asset('js/enter2tab.js') }}"></script>

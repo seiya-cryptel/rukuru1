@@ -1,7 +1,7 @@
 <div>
     <div class="col-md-8 mb-2">
         @if(session()->has('success'))
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success" style="color: blue;" role="alert">
                 {{ session()->get('success') }}
             </div>
         @endif                
@@ -112,3 +112,4 @@
     </div>
     {{ $Employees->links() }}
 </div>
+<script src="{{ asset('js/enter2tab.js') }}"></script>

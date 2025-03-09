@@ -24,6 +24,8 @@ class applogs extends Model
     public const LOG_TYPE_MASTER_ALLOWDEDUCT = 15;
     public const LOG_TYPE_MASTER_EMPLOYEE = 16;
     public const LOG_TYPE_MASTER_EMPLOYEEPAY = 17;
+    public const LOG_TYPE_CLOSE_BILL = 31;
+    public const LOG_TYPE_CLOSE_PAYROLL = 32;
 
     public const LOG_ERROR = 127;
 
@@ -35,7 +37,8 @@ class applogs extends Model
         self::LOG_TYPE_MASTER_CLIENTWORKTYPE => '作業種類マスタ',
         self::LOG_TYPE_MASTER_ALLOWDEDUCT => '手当控除マスタ',
         self::LOG_TYPE_MASTER_EMPLOYEE => '従業員マスタ',
-        self::LOG_TYPE_MASTER_EMPLOYEEPAY => '従業員時給マスタ',
+        self::LOG_TYPE_CLOSE_BILL => '締め請求',
+        self::LOG_TYPE_CLOSE_PAYROLL => '締め給与',
 
         self::LOG_ERROR => 'エラー',
     ];
