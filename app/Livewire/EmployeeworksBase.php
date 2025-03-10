@@ -61,6 +61,11 @@ abstract class EmployeeworksBase extends Component
     public $KinmuTaikeies = [];
 
     /**
+     * 従業員選択用id
+     */
+    public $nextEmployeeId;
+
+    /**
      * timekeeping array
      */
     public $TimekeepingDays = [];   // 日にちごとの情報
@@ -213,6 +218,7 @@ abstract class EmployeeworksBase extends Component
         $this->client_id = $client_id;
         $this->clientplace_id = $clientplace_id;
         $this->employee_id = $employee_id;
+        $this->nextEmployeeId = $employee_id;
         $this->Client = modelClients::find($this->client_id);
         $this->ClientPlace = $this->clientplace_id ? modelClientPlaces::find($this->clientplace_id) : null;
         $this->Employee = modelEmployees::find($this->employee_id);
@@ -258,11 +264,20 @@ abstract class EmployeeworksBase extends Component
     /**
      * 従業員が変更された
      */
-    public function employeeChanged($employee_id)
+    public function employeeChanged($nextEmployeeId)
     {
-        $this->employee_id = $employee_id;
-        $this->Employee = modelEmployees::find($this->employee_id);
-        $this->clearSummary();
+        // 勤怠を保存する
+        $this->saveEmployeeWork();
+        // 新しい勤怠入力画面に移動する
+        $Client = modelClients::find($this->client_id);
+        $route = $Client->cl_kintai_style == 0 ? 'employeeworksone' : 'employeeworksslot';
+        return redirect()->route($route, [
+            'workYear' => $this->workYear, 
+            'workMonth' => $this->workMonth, 
+            'clientId' => $this->client_id, 
+            'clientPlaceId' => $this->clientplace_id, 
+            'employeeId' => $nextEmployeeId,
+        ]);
     }
 
     /**

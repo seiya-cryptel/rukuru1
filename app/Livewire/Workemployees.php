@@ -111,6 +111,12 @@ class Workemployees extends Component
         
         if(session()->has(AppConsts::SESS_CLIENT_ID)) {
             $this->client_id = session(AppConsts::SESS_CLIENT_ID);
+            $Client = modelClients::find($this->client_id);
+            if($Client)
+            {
+                $this->search = $Client->cl_name;
+                session([AppConsts::SESS_SEARCH => $this->search]);
+            }
         } else {
             $this->client_id = null;
         }if(session()->has(AppConsts::SESS_CLIENT_PLACE_ID)) {
@@ -163,14 +169,17 @@ class Workemployees extends Component
                     ->orWhere('clientplace.cl_pl_name', 'like', '%'.$this->search.'%');
             });
         }
+
+        // 2025/03/10 複数のパラメタはうまくSQLを構成できなかった
         // 入社日チェック
-        $Query->where('empl_hire_date', '<=', $lastDay);
+        // $Query->where('empl_hire_date', '<=', $lastDay);
         // 退職日チェック
-        $Query->where(function ($query) use ($firstDay) {
-            $query->where('empl_resign_date', '>=', $firstDay)
-            ->orWhere('empl_resign_date', null)
-            ->orWhere('empl_resign_date', '');
-        });
+        // $Query->where(function ($query) use ($firstDay) {
+        //     $query->where('empl_resign_date', '>=', $firstDay)
+        //     ->orWhere('empl_resign_date', null)
+        //     ->orWhere('empl_resign_date', '');
+        // });
+
         $Query->orderBy('empl_cd', 'asc');
 
         $Employees = $Query->paginate(AppConsts::PAGINATION);

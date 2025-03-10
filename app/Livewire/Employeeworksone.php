@@ -620,6 +620,29 @@ class Employeeworksone extends EmployeeworksBase
     }
 
     /**
+     * 1日の勤怠をクリアする
+     * @param int $day インデクス
+     */
+    public function deleteTimekeepingDay($dayIndex)
+    {
+        for($slotNo=1; $slotNo<=self::MAX_TIMESLOT; $slotNo++)
+        {
+            $this->TimekeepingSlots[$dayIndex][$slotNo] = [
+                'wrk_seq' => $slotNo,
+                'wt_cd' => '',
+                'wrk_log_start' => null,
+                'wrk_log_end' => null,
+                'wrk_work_start' => null,
+                'wrk_work_end' => null,
+                'wrk_work_hours' => null,
+                'class_bg_color' => '',
+                'readonly' => '',
+            ];
+            $this->calcSlot($dayIndex, $slotNo);
+        }
+    }
+
+    /**
      * save work time
      */
     protected function insertEmployeeWork()

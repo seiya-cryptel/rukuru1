@@ -328,6 +328,7 @@ class clientworktypes extends Model
         {
             $workTypes = modelClientworktypes::where('client_id', $client_id)
                 ->where('clientplace_id', $clientplace_id)
+                ->orderBy('wt_cd')
                 ->get();
             foreach ($workTypes as $workType) {
                 $workTypeRecords[$workType->wt_cd] = $workType;
@@ -338,6 +339,7 @@ class clientworktypes extends Model
         {
             $workTypes = modelClientworktypes::where('client_id', $client_id)
                 ->whereNull('clientplace_id')
+                ->orderBy('wt_cd')
                 ->get();
             foreach ($workTypes as $workType) {
                 if(! array_key_exists($workType->wt_cd, $workTypeRecords)) {

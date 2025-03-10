@@ -440,15 +440,6 @@ class Employeeworksslot extends EmployeeworksBase
         // 項目名
         $item = 'TimekeepingSlots.' . $day . '.' . $slot . '.wrk_log_start';
 
-        // 作業種別レコードを取得
-        $wt_cd = $this->TimekeepingTypes[$slot];
-        if($wt_cd == '')
-        {   // 作業種別が未設定の場合は時間計算しない
-            $this->addError($item, '作業種別');
-            return;
-        }
-        $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
-
         // チェックを実行
         try {
             // エラーメッセージをリセット
@@ -462,6 +453,14 @@ class Employeeworksslot extends EmployeeworksBase
         $this->TimekeepingSlots[$day][$slot]['wrk_log_start'] = $value;
         $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = '';
 
+        // 作業種別レコードを取得
+        $wt_cd = $this->TimekeepingTypes[$slot];
+        if($wt_cd == '')
+        {   // 作業種別が未設定の場合は時間計算しない
+            if($value != '')    $this->addError($item, '作業種別');
+            return;
+        }
+        $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
 
         // 時間計算用のクラスインスタンスを作成
         $Slot = new TimeSlotSlot(
@@ -480,6 +479,7 @@ class Employeeworksslot extends EmployeeworksBase
         $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
 
         // 集計作業
+        $this->calcSlot($day, $slot, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
     }
 
     /**
@@ -489,15 +489,6 @@ class Employeeworksslot extends EmployeeworksBase
     {
         // 項目名
         $item = 'TimekeepingSlots.' . $day . '.' . $slot . '.wrk_log_end';
-
-        // 作業種別レコードを取得
-        $wt_cd = $this->TimekeepingTypes[$slot];
-        if($wt_cd == '')
-        {   // 作業種別が未設定の場合は時間計算しない
-            $this->addError($item, '作業種別');
-            return;
-        }
-        $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
 
         // チェックを実行
         try {
@@ -511,6 +502,15 @@ class Employeeworksslot extends EmployeeworksBase
 
         $this->TimekeepingSlots[$day][$slot]['wrk_log_end'] = $value;
         $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = '';
+
+        // 作業種別レコードを取得
+        $wt_cd = $this->TimekeepingTypes[$slot];
+        if($wt_cd == '')
+        {   // 作業種別が未設定の場合は時間計算しない
+            if($value != '')    $this->addError($item, '作業種別');
+            return;
+        }
+        $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
         
         // 時間計算用のクラスインスタンスを作成
         $Slot = new TimeSlotSlot(

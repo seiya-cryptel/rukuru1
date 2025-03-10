@@ -15,8 +15,8 @@
     <div class="col-md-8 py-1">
         {{ $workYear }}年 {{ $workMonth }}月
         <select class="form-control py-1 px-1 text-sm" 
-            id="employee_id" 
-            wire:model="employee_id" 
+            id="nextEmployeeId" 
+            wire:model="nextEmployeeId" 
             wire:change="employeeChanged($event.target.value)"
             style="width: 16rem; padding: 0px;">
             @foreach($Employees as $key => $EmployeeRecord)
@@ -24,8 +24,7 @@
             @endforeach
         </select>
         {{ $Client['cl_name'] }} {{ $ClientPlace ? $ClientPlace['cl_pl_name'] : '' }}
-        <button wire:click.prevent="saveEmployeeWork" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold text-bold text-sm py-1 px-2 rounded" data-save="true">{{ __('Save') }}</button>
-        {{-- <button wire:click.prevent="selectAllowDeduct()" class="bg-green-500 hover:bg-green-700 text-white font-semibold text-sm py-1 px-2 rounded" data-cancel="true">{{ __('Salary Deduct') }}</button> --}}
+        <button wire:click.prevent="saveEmployeeWork" class="bg-blue-500 hover:bg-blue-700 text-white font-semibold text-bold text-sm py-1 px-2 rounded" data-save="true">{{ __('End') }}</button>
         <button wire:click.prevent="cancelEmployeepay()" class="bg-orange-500 hover:bg-orange-700 text-white font-semibold text-sm py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
     </div>
     <div class="col-md-8 py-1 text-sm">
@@ -63,12 +62,15 @@
                 </td>
                 <td> {{-- 3 有給 --}}
                     <input type="checkbox" 
+                        {{-- tabindex="{{ $dayIndex }}01" --}}
                         wire:model="TimekeepingDays.{{ $dayIndex }}.leave" 
                         wire:change="leaveChange($event.target.checked, {{$dayIndex}})" 
                         />
                 </td>
                 <td> {{-- 4 休日区分 0: 平日, 1: 法定外休日, 2: 法定休日 --}}
-                    <select class="form-control py-1 text-sm" 
+                    <select 
+                        {{-- tabindex="{{ $dayIndex }}02" --}}
+                        class="form-control py-1 text-sm" 
                         id="TimekeepingDays.{{$dayIndex}}.holiday_type" 
                         wire:model="TimekeepingDays.{{$dayIndex}}.holiday_type" 
                         wire:change="holidayTypeChange($event.target.value, {{$dayIndex}})"
@@ -82,7 +84,9 @@
                     @enderror
                 </td>
                 <td > {{-- 5 勤務体系 --}}
-                    <select class="form-control py-1 text-sm" 
+                    <select 
+                        {{-- tabindex="{{ $dayIndex }}03" --}}
+                        class="form-control py-1 text-sm" 
                         id="TimekeepingDays.{{$dayIndex}}.work_type" 
                         wire:model="TimekeepingDays.{{$dayIndex}}.work_type" 
                         wire:change="workTypeChange($event.target.value, {{$dayIndex}})"
@@ -98,6 +102,7 @@
                 @for($slotNo = 1; $slotNo <= self::MAX_TIMESLOT; $slotNo++)
                 <td style="width: 2.5rem; padding: 0px"> {{-- 就業時間 開始打刻 --}}
                     <input type="text" 
+                        tabindex="{{ $dayIndex }}{{ $slotNo }}1"
                         class="form-control py-1 text-xs text-right" 
                         id="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_start" 
                         wire:model="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_start" 
@@ -109,6 +114,7 @@
                 </td>
                 <td style="width: 2.5rem; padding: 0px"> {{-- 就業時間 終了打刻 --}}
                     <input type="text" 
+                        tabindex="{{ $dayIndex }}{{ $slotNo }}2"
                         class="form-control py-1 text-xs text-right" 
                         id="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_end" 
                         wire:model="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_end" 
@@ -126,6 +132,7 @@
                         class="form-control py-1 text-xs text-right" 
                         id="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_work_hours" 
                         wire:model="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_work_hours" 
+                        readonly="readonly"
                         style="width: 2.5rem; height: 22px; padding: 0px;{{($slotNo % 2) ? '' : ' background-color: #ffcc88;'}}" />
                 </td>
                 @endfor
@@ -139,6 +146,11 @@
                     @error('TimekeepingDays.'.$dayIndex.'.notes')
                         <span class="text-red-500" style="color: red;">{{ $message }}</span>
                     @enderror
+                </td>
+                <td>
+                    <button 
+                        wire:click.prevent="deleteTimekeepingDay({{ $dayIndex }})" 
+                        class="bg-orange-500 hover:bg-orange-700 text-white font-semibold text-sm px-2 rounded">X</button>
                 </td>
             </tr>
             @endforeach
@@ -165,7 +177,7 @@
                             <td class="form-control py-1" style="width: 4rem; text-align: center; background-color: #cc00cc; color: white;">法定<br>時間</td>
                             <td class="form-control py-1" style="width: 4rem; text-align: center; background-color: #cc00cc; color: white;">法定<br>深夜</td>
                             <td> </td>
-                            <td class="form-control py-1" style="width: 4rem; text-align: center; background-color: #cc00cc; color: white;">就業<br>時間計</td>
+                            <td class="form-control py-1" style="width: 5rem; text-align: center; background-color: #cc00cc; color: white;">就業<br>時間計</td>
                         </tr>
                         <tr> {{-- 勤怠日数、時間数 --}}
                             <td style="text-align: center;">{{ $SumDaysShukkin }}</td>
@@ -192,8 +204,7 @@
                             <td class="form-control py-1" style="width: 4rem; text-align: center; background-color:#aa8800; color: white;">法外深夜</td>
                             <td class="form-control py-1" style="width: 4rem; text-align: center; background-color:#aa8800; color: white;">法定休出</td>
                             <td class="form-control py-1" style="width: 4rem; text-align: center; background-color:#aa8800; color: white;">法定深夜</td>
-                            <td class="form-control py-1" style="width: 4rem; text-align: center; background-color:#aa8800; color: white;">交通費</td>
-                            <td style="width: 6rem;"></td>
+                            <td></td>
                             <td class="form-control py-1" style="width: 5rem; text-align: center; background-color:#aa8800; color: white;">支給合計</td>
                         </tr>
                         <tr>
@@ -201,7 +212,6 @@
                             @for($slotNo = 1; $slotNo <= 8; $slotNo++)
                                 <td style="text-align: right;">{{ number_format($SumWorkPays[$slotNo]) }}</td>
                             @endfor
-                            <td style="text-align: right;"></td>
                             <td></td>
                             <td style="text-align: right;">{{ number_format($SumWorkPayAll) }}</td>
                         </tr>
@@ -218,15 +228,13 @@
                             <td class="form-control py-1" style="width: 3.5rem; padding: 0px; text-align: center; background-color: #0000aa; color: white;">法定休出</td>
                             <td class="form-control py-1" style="width: 3.5rem; padding: 0px; text-align: center; background-color: #0000aa; color: white;">法定深夜</td>
                             <td></td>
-                            <td></td>
-                            <td class="form-control py-1" style="width: 3.5rem; padding: 0px; text-align: center; background-color: #0000aa; color: white;">請求合計</td>
+                            <td class="form-control py-1" style="width: 5rem; padding: 0px; text-align: center; background-color: #0000aa; color: white;">請求合計</td>
                         </tr>
                         <tr>
                             <td></td>
                             @for($slotNo = 1; $slotNo <= 8; $slotNo++)
                                 <td style="text-align: right;">{{ number_format($SumWorkBills[$slotNo]) }}</td>
                             @endfor
-                            <td></td>
                             <td></td>
                             <td style="text-align: right;">{{ number_format($SumWorkBillAll) }}</td>
                         </tr>
