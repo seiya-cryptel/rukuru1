@@ -57,9 +57,12 @@
         <table class="min-w-full table-auto">
             <thead class="bg-gray-200">
                 <tr>
-                    <th> </th>
                     <th>{{ __('Client') }}</th>
                     <th>{{ __('Work Place') }}</th>
+                    <th>{{ __('Bill Date') }}</th>
+                    <th>{{ __('Title') }}</th>
+                    <th>{{ __('Amount') }}</th>
+                    <th> </th>
                 </tr>
             </thead>
             <tbody>
@@ -67,13 +70,22 @@
                     @foreach ($Bills as $Bill)
                         <tr class="border-b">
                             <td>
-                                <button wire:click="showBillDetails({{ $Bill->id }})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Details') }}</button>
-                            </td>
-                            <td>
                                 {{$Bill->client->cl_cd}}:{{$Bill->client->cl_name}}
                             </td>
                             <td>
                                 {{$Bill->clientplace->cl_pl_cd}}:{{$Bill->clientplace->cl_pl_name}}
+                            </td>
+                            <td>
+                                {{$Bill->bill_date}}
+                            </td>
+                            <td>
+                                {{$Bill->bill_title}}
+                            </td>
+                            <td>
+                                {{number_format($Bill->bill_total)}}
+                            </td>
+                            <td>
+                                <button wire:click="showBillDetails({{ $Bill->id }})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Details') }}</button>
                             </td>
                         </tr>
                     @endforeach

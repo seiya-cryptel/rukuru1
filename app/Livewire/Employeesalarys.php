@@ -11,6 +11,7 @@ use App\Traits\rukuruUtilities;
 use App\Models\employees as modelEmployees;
 use App\Models\masterallowdeducts as modelMasterAllowDeducts;
 use App\Models\employeesalarys as modelEmployeeSalarys;
+use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
 use App\Models\salary as modelSalary;
 
@@ -33,7 +34,6 @@ class Employeesalarys extends Component
     public $refAllows;
     public $refDeducts;
     public $refEmployeeSalarys;
-    public $refClientWorkTypes;
 
     /**
      * allow/deduct array
@@ -57,7 +57,7 @@ class Employeesalarys extends Component
     public $boolReturnToWorkEntry = false;
 
     /**
-     * 支給額 給与計 + 交通費 + 手当計 - 控除計 を計算する
+     * 支給額 勤怠計 + 交通費 + 手当計 - 控除計 を計算する
      */
     protected function getPayAmount()
     {
@@ -71,8 +71,8 @@ class Employeesalarys extends Component
             $this->TotalDeduct += $amount ? $amount : 0;
         }
         $transport = $this->rukuruUtilMoneyValue($this->Transport);
-        $totalPay = $this->rukuruUtilMoneyValue($this->TotalPay);
-        $this->PayAmount = $totalPay + $transport + $this->TotalAllow - $this->TotalDeduct;
+        $this->totalPay = $this->rukuruUtilMoneyValue($this->TotalPay);
+        $this->PayAmount = $this->totalPay + $transport + $this->TotalAllow - $this->TotalDeduct;
         // 数値編集
         $this->TotalAllow = number_format($this->TotalAllow);
         $this->TotalDeduct = number_format($this->TotalDeduct);
@@ -98,29 +98,34 @@ class Employeesalarys extends Component
         // 従業員情報を取得
         $this->Employee = modelEmployees::find($this->employee_id);
 
+        // 勤怠の対象期間を設定
         $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
         $lastDate = date('Y-m-t', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
+
         // 支給詳細情報を取得
         $this->refEmployeeSalarys = modelEmployeeSalarys::where('employee_id', $employee_id)
             ->whereBetween('wrk_date', [$firstDate, $lastDate])
             ->orderBy('wrk_date')
             ->orderBy('wrk_work_start')
             ->get();
-        // 支給合計額を計算
-        $this->TotalPay = modelEmployeeSalarys::where('employee_id', $employee_id)
+
+        // 勤怠支給合計額を計算
+        $this->TotalPay = modelEmployeeWorks::where('employee_id', $employee_id)
             ->whereBetween('wrk_date', [$firstDate, $lastDate])
             ->sum('wrk_pay');
         $this->TotalPay = number_format($this->TotalPay);
+
         // 現状の支給額を設定
-        $this->PayAmount = preg_replace('/[^0-9.]/', '', $this->TotalPay);
+        $this->PayAmount = $this->rukuruUtilMoneyValue($this->TotalPay);
+
         // 交通費を加算
-        $this->PayAmount += preg_replace('/[^0-9.]/', '', $this->Transport);
+        $this->PayAmount += $this->rukuruUtilMoneyValue($this->Transport);
 
         $AllowTransport = modelMasterAllowDeducts::where('mad_allow', '1')
-            ->where('mad_cd', '=', '31')   // 交通費
+            ->where('mad_cd', '=', AppConsts::MAD_CD_TRANSPORT)   // 交通費
             ->first();
         $this->refAllows = modelMasterAllowDeducts::where('mad_allow', '1')
-            ->where('mad_cd', '<>', '31')   // 交通費を除く
+            ->where('mad_cd', '<>', AppConsts::MAD_CD_TRANSPORT)   // 交通費を除く
             ->orderBy('mad_cd')
             ->get();
         $this->refDeducts = modelMasterAllowDeducts::where('mad_deduct', '1')
@@ -153,7 +158,7 @@ class Employeesalarys extends Component
         $i = 0;
         foreach($Allows as $Allow)
         {
-            if($Allow->mad_cd == '31') {
+            if($Allow->mad_cd == AppConsts::MAD_CD_TRANSPORT) {
                 $this->Transport_masterallowdeduct_id = $Allow->id;
                 $this->Transport = number_format($Allow->amount);
                 continue;
@@ -167,7 +172,7 @@ class Employeesalarys extends Component
         foreach($Deducts as $Deduct)
         {
             $this->Deducts[$i++] = [
-                'id' => $Allow->masterallowdeduct_id,
+                'id' => $Deduct->masterallowdeduct_id,
                 'amount' => number_format($Deduct->amount),
             ];
         }   
@@ -271,7 +276,7 @@ class Employeesalarys extends Component
         $mad->work_year = $this->workYear;
         $mad->work_month = $this->workMonth;
         $mad->masterallowdeduct_id = $this->Transport_masterallowdeduct_id;
-        $mad->mad_cd = '31';
+        $mad->mad_cd = AppConsts::MAD_CD_TRANSPORT;
         $mad->mad_deduct = 0;
         $mad->mad_name = $master->mad_name;
         $mad->amount = $this->Transport;
@@ -296,6 +301,7 @@ class Employeesalarys extends Component
                 $mad->save();
             }
         }
+        // 控除登録
         for($i = 0; $i < 10; $i++)
         {
             if ($this->Deducts[$i]['id']) {
@@ -304,7 +310,7 @@ class Employeesalarys extends Component
                 $mad->employee_id = $this->employee_id;
                 $mad->work_year = $this->workYear;
                 $mad->work_month = $this->workMonth;
-                $mad->masterallowdeduct_id = $this->Allows[$i]['id'];
+                $mad->masterallowdeduct_id = $this->Deducts[$i]['id'];
                 $mad->mad_cd = $master->mad_cd;
                 $mad->mad_deduct = 1;
                 $mad->mad_name = $master->mad_name;

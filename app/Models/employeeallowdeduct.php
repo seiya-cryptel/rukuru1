@@ -48,7 +48,7 @@ class employeeallowdeduct extends Model
         return self::where('employee_id', $employee_id)
             ->where('work_year', $work_year)
             ->where('work_month', $work_month)
-            ->where('mad_allow', true)
+            ->where('mad_deduct', false)
             ->where('mad_cd', '!=', \App\Consts\AppConsts::MAD_CD_TRANSPORT)
             ->sum('amount');
     }
@@ -83,8 +83,8 @@ class employeeallowdeduct extends Model
             ->where('work_year', $work_year)
             ->where('work_month', $work_month)
             ->where('mad_cd', $mad_cd)
-            ->where('mad_allow', 1)
-            ->get();
+            ->where('mad_deduct', 0)
+            ->first();
         return $Mad ? $Mad->amount : 0;
     }
 
@@ -103,7 +103,7 @@ class employeeallowdeduct extends Model
             ->where('work_month', $work_month)
             ->where('mad_cd', $mad_cd)
             ->where('mad_deduct', 1)
-            ->get();
+            ->first();
         return $Mad ? $Mad->amount : 0;
     }
 }

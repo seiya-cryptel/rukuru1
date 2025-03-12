@@ -6,7 +6,9 @@ use Livewire\Component;
 
 use App\Consts\AppConsts;
 
+use App\Models\applogs;
 use App\Models\salary as modelSalary;
+use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeesalarys as modelEmployeeSalary;
 
 use App\Services\PhpSpreadsheetService;
@@ -25,7 +27,50 @@ class Closesalaries extends Component
         'workYear' => 'required',
         'workMonth' => 'required',
     ];
-    
+
+    /**
+     * 対象従業員一覧作成
+     */
+    protected function createEmployeeList()
+    {
+        // 対象年月に勤怠がある従業員
+        $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-01');
+        $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
+
+        try{
+            $Query = modelEmployeeWorks::with('employee')
+                // ->select('employeeworks.*', 'employees.*')
+                ->select ('employeeworks.employee_id', 'employees.empl_cd')
+                ->join('employees', 'employeeworks.employee_id', '=', 'employees.id')
+                ->whereBetween('employeeworks.wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+                ->orderByRaw('employees.empl_cd')
+                ->distinct();
+                $EmployeeWorks = $Query->get();
+        } catch (\Exception $e) {
+            $EmployeeWorks = [];
+        }
+
+        $Employees = [];
+        foreach($EmployeeWorks as $EmployeeWork) {
+            $employee_id = $EmployeeWork->employee_id;
+            $salary = modelSalary::where('employee_id', $employee_id)
+                ->where('work_year', $this->workYear)
+                ->where('work_month', $this->workMonth)
+                ->first();
+            $Employees[$employee_id] = [
+                'empl_cd' => $EmployeeWork->employee->empl_cd,
+                'empl_name' => $EmployeeWork->employee->empl_name_last . ' ' . $EmployeeWork->employee->empl_name_first,
+                'work_amount' => $salary ? $salary->work_amount : 0,
+                'transport' => $salary ? $salary->transport : 0,
+                'allow_amount' => $salary ? $salary->allow_amount : 0,
+                'deduct_amount' => $salary ? $salary->deduct_amount : 0,
+                'pay_amount' => $salary ? $salary->pay_amount : 0,
+            ];
+        }   
+
+        return $Employees;
+    }
+
     /**
      * mount function
      */
@@ -57,7 +102,11 @@ class Closesalaries extends Component
      */
     public function render()
     {
-        return view('livewire.closesalaries');
+
+        // 各顧客、部門について、work_year, work_month に該当する従業員給与レコードを取得
+        $Employees = $this->createEmployeeList();
+
+        return view('livewire.closesalaries', compact('Employees'));
     }
 
     /**

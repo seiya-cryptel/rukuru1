@@ -15,32 +15,22 @@ use App\Consts\AppConsts;
 
 use App\Traits\rukuruUtilities;
 
+use App\Models\applogs;
 use App\Models\closepayrolls as modelClosePayrolls;
-use App\Models\clients as modelClients;
-use App\Models\clientplaces as modelClientPlaces;
-use App\Models\clientworktypes as modelClientWorkTypes;
-
-use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
-use App\Models\EmployeeWork as modelEmployeeWork;
 use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
-
-use App\Models\bills as modelBills;
-use App\Models\billdetails as modelBillDetails;
-
-use App\Models\salarys as modelSalarys;
-
-use App\Models\masterallowdeducts as modelMasterAllowDeducts;
+use App\Models\salary as modelSalary;
 
 /**
- * 勤怠締め処理
+ * 給与締め処理
  * 
- * 従業員勤怠を元に、各種マスタを参照して、給与と請求の計算を行う
+ * 従業員勤怠を元に、各種マスタを参照して、給与支給額の計算を行う
  * 入力テーブル: Empoyeeworks
  * 出力テーブル: Salarys
  */
 class Closepayrolls extends Component
 {
+    use WithPagination;
     use rukuruUtilities;
 
     /**
@@ -71,7 +61,6 @@ class Closepayrolls extends Component
     protected $saveTitle = null;      // 請求項目名
     protected $saveUnitPrice = 0;   // 請求単価
     protected $saveQuantity = 0;    // 請求数量
-    protected $saveAmount = 0;      // 請求金額
 	protected $saveWtCd = null;   // 作業種別コード
 	protected $cdHoliday = false; // 休日種別 rukuruUtilIsHoliday で設定
     protected $saveBillId = null;   // 請求ID
@@ -84,23 +73,6 @@ class Closepayrolls extends Component
     protected $curClientWorkType = null;
 
     /**
-     * 従業員給与レコードを削除
-     * @param integer $client_id 顧客ID
-     */
-    protected function deleteEmployeeSalary()
-    {
-        // work_year, work_month, client_id に該当する従業員給与を削除
-        // $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-' .  ($this->Client->cl_close_day + 1));
-        $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
-        $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));        
-        $sStartDay = date('Y-m-d', $dtFirstDate);
-        $sEndDay = date('Y-m-d', $dtLastDate);
-        modelEmployeeWork::where('client_id', $this->Client->id)
-            ->whereBetween('wrk_date', [$sStartDay, $sEndDay])
-            ->delete();
-    }
-
-    /**
      * 請求と請求明細レコードを削除
      */
     protected function deleteSalary()
@@ -109,15 +81,18 @@ class Closepayrolls extends Component
             ->where('work_month', $this->workMonth)
             ->delete();
     }
-
     
     /**
      * 給与レコード作成
      */
     protected function createSalary()
     {
-        // 請求明細レコードを作成
-        $Salary = new modelSalarys();
+        $this->transport = modelEmployeeAllowDeduct::getAllowAmount($this->saveEmployeeId, $this->workYear, $this->workMonth, AppConsts::MAD_CD_TRANSPORT);    // 交通費
+        $this->allowAmount = modelEmployeeAllowDeduct::getAllowTotal($this->saveEmployeeId, $this->workYear, $this->workMonth);    // 手当金額
+        $this->deductAmount = modelEmployeeAllowDeduct::getDeductTotal($this->saveEmployeeId, $this->workYear, $this->workMonth);    // 控除金額
+
+        // 給与レコードを作成
+        $Salary = new modelSalary();
         $Salary->employee_id = $this->saveEmployeeId;
         $Salary->work_year = $this->workYear;
         $Salary->work_month = $this->workMonth;
@@ -131,7 +106,8 @@ class Closepayrolls extends Component
         $this->saveEmployeeId = null;
         $this->kintaiAmount = 0;
         $this->transport = 0;
-        $this->saveAmount = 0;
+        $this->allowAmount = 0;
+        $this->deductAmount = 0;
     }
 
     /**
@@ -144,7 +120,7 @@ class Closepayrolls extends Component
         // work_year, work_month に該当する従業員勤怠レコードを取得
         $sStartDay = $this->workYear . '-' . $this->workMonth . '-01';
         $sEndDay = $this->workYear . '-' . $this->workMonth . '-' . date('t', strtotime($sStartDay));
-        $EmployeeWorks = modelEmployeeWork::whereBetween('wrk_date', [$sStartDay, $sEndDay])
+        $EmployeeWorks = modelEmployeeWorks::whereBetween('wrk_date', [$sStartDay, $sEndDay])
             ->orderByRaw('employee_id, wrk_date, wrk_seq')
             ->get();
 
@@ -163,7 +139,7 @@ class Closepayrolls extends Component
             // 従業員が変わった場合
             if ($this->saveEmployeeId != $EmployeeWork->employee_id) {
                 // 未出力の請求明細情報があるなら、請求明細レコードを作成
-                if($this->bMustWrite)
+                if($bMustWrite)
                 {
                     $this->createSalary();
                 }
@@ -176,9 +152,6 @@ class Closepayrolls extends Component
                 $bMustWrite = false;    // 給与レコードを作成するかどうか
             }
             $this->kintaiAmount += $EmployeeWork->wrk_pay;    // 勤怠金額
-            $this->transport += modelEmployeeAllowDeduct::getAllowAmount($EmployeeWork->employee_id, $this->work_year, $this->work_month, AppConsts::MAD_CD_TRANSPORT);    // 交通費
-            $this->allowAmount += modelEmployeeAllowDeduct::getAllowAmount($EmployeeWork->employee_id, $this->work_year, $this->work_month);    // 手当金額
-            $this->deductAmount += modelEmployeeAllowDeduct::getDeductAmount($EmployeeWork->employee_id, $this->work_year, $this->work_month);    // 控除金額
             $bMustWrite = true;
         }
 
@@ -187,6 +160,49 @@ class Closepayrolls extends Component
         {
             $this->createSalary();
         }
+    }
+
+    /**
+     * 対象従業員一覧作成
+     */
+    protected function createEmployeeList()
+    {
+        // 対象年月に勤怠がある従業員
+        $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-01');
+        $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
+
+        try{
+            $Query = modelEmployeeWorks::with('employee')
+                // ->select('employeeworks.*', 'employees.*')
+                ->select ('employeeworks.employee_id', 'employees.empl_cd')
+                ->join('employees', 'employeeworks.employee_id', '=', 'employees.id')
+                ->whereBetween('employeeworks.wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+                ->orderByRaw('employees.empl_cd')
+                ->distinct();
+                $EmployeeWorks = $Query->get();
+        } catch (\Exception $e) {
+            $EmployeeWorks = [];
+        }
+
+        $Employees = [];
+        foreach($EmployeeWorks as $EmployeeWork) {
+            $employee_id = $EmployeeWork->employee_id;
+            $salary = modelSalary::where('employee_id', $employee_id)
+                ->where('work_year', $this->workYear)
+                ->where('work_month', $this->workMonth)
+                ->first();
+            $Employees[$employee_id] = [
+                'empl_cd' => $EmployeeWork->employee->empl_cd,
+                'empl_name' => $EmployeeWork->employee->empl_name_last . ' ' . $EmployeeWork->employee->empl_name_first,
+                'work_amount' => $salary ? $salary->work_amount : 0,
+                'transport' => $salary ? $salary->transport : 0,
+                'allow_amount' => $salary ? $salary->allow_amount : 0,
+                'deduct_amount' => $salary ? $salary->deduct_amount : 0,
+                'pay_amount' => $salary ? $salary->pay_amount : 0,
+            ];
+        }   
+
+        return $Employees;
     }
 
     /**
@@ -230,7 +246,10 @@ class Closepayrolls extends Component
 
         $this->isClosed = $ClosePayroll && $ClosePayroll->closed;
 
-        return view('livewire.closepayrolls');
+        // 各顧客、部門について、work_year, work_month に該当する従業員給与レコードを取得
+        $Employees = $this->createEmployeeList();
+
+        return view('livewire.closepayrolls', compact('Employees'));
     }
 
     /**
@@ -239,7 +258,7 @@ class Closepayrolls extends Component
     public function changeWorkYear($value)
     {
         $this->validate();
-        session([AppConsts::WORK_YEAR => $this->workYear]);
+        session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
     }
 
     /**
@@ -248,7 +267,7 @@ class Closepayrolls extends Component
     public function changeWorkMonth()
     {
         $this->validate();
-        session([AppConsts::WORK_MONTH => $this->workMonth]);
+        session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
     }
 
     /**
@@ -269,11 +288,7 @@ class Closepayrolls extends Component
             // 給与を集計
             $this->summarySalary();
             // 勤怠締めレコードを更新する
-            $ClosePayroll = new modelClosePayrolls();
-            $ClosePayroll->updateOrCreate(
-                ['work_year' => $this->workYear, 'work_month' => $this->workMonth],
-                ['closed' => true, 'operation_date' => date('Y-m-d H:i:s')]
-            );
+            modelClosePayrolls::closePayroll($this->workYear, $this->workMonth);
             DB::commit();
             $logMessage = '給与締め処理: ' . $this->workYear . '年' . $this->workMonth . '月';
             logger($logMessage);
@@ -295,16 +310,19 @@ class Closepayrolls extends Component
      */
     public function reopenPayroll()
     {
-        $ClosePayroll = new modelClosePayrolls();
-        $ClosePayroll->updateOrCreate(
-            ['work_year' => $this->workYear, 'work_month' => $this->workMonth],
-            ['closed' => false, 'operation_date' => date('Y-m-d H:i:s')]
-        );
-        $this->setisClosed();
-
-        $logMessage = '給与締め解除: ' . $this->workYear . '年' . $this->workMonth . '月';
-        logger($logMessage);
-        applogs::insertLog(applogs::LOG_TYPE_CLOSE_PAYROLL, $logMessage);
-        Session::flash('success', '解除処理が完了しました。');
+        try {
+            modelClosePayrolls::openPayroll($this->workYear, $this->workMonth);
+            $logMessage = '給与締め解除: ' . $this->workYear . '年' . $this->workMonth . '月';
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_CLOSE_PAYROLL, $logMessage);
+            Session::flash('success', '解除処理が完了しました。');
+        }
+        catch (\Exception $e) {
+            $logMessage = '給与締め解除エラー: ' . $this->workYear . '年' . $this->workMonth . '月'
+                . ' ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_CLOSE_PAYROLL, $logMessage);
+            session()->flash('error', '解除処理に失敗しました。');
+        }
     }
 }

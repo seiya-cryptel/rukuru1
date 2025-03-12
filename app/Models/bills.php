@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\billdetails as modelBillDetails;
@@ -51,6 +52,17 @@ class bills extends Model
         'bill_total',
         'notes',
     ];
+
+    /**
+     * Accessor/Mutator for bill_date
+     */
+    public function billDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null) ? '' : date('Y-m-d', strtotime($value)),
+            set: fn ($value) => $this->attributes['bill_date'] = $value === '' ? null : $value, 
+        );
+    }
 
     /**
      * 顧客ID、部門IDと作業年月から請求書情報を作成または再作成

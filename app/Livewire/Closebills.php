@@ -75,6 +75,7 @@ class Closebills extends Component
     protected $sumBill = 0;  // 請求金額
     protected $sumDisplayOrder = 1;  // 表示順
     protected $sumAmount = 0;      // 請求金額
+    protected $taxRate = 0;        // 消費税率
 
     /**
      * 請求と請求明細レコードを削除
@@ -105,15 +106,18 @@ class Closebills extends Component
         $BillDetail->display_order = $this->sumDisplayOrder++;
         $BillDetail->title = $this->saveSummaryName;          // 請求項目名
         $BillDetail->unit_price = $this->saveUnitPrice; // 請求単価
+        $BillDetail->quantity = 0;
         $BillDetail->quantity_string = $this->rukuruUtilDateIntervalFormat($this->sumWorkHours);    // 請求数量
         $BillDetail->unit = '時間';                     // 単位
-        $BillDetail->amount = $this->sumBill;        // 請求金額
-        $BillDetail->tax = floor($this->sumBill * 0.1);  // 消費税
-        $BillDetail->total = floor($this->sumBill * 1.1);     // 集計前
+        $BillDetail->amount = $this->sumAmount;        // 請求金額
+        $BillDetail->tax = floor($this->sumAmount * $this->taxRate);  // 消費税
+        $BillDetail->total = $BillDetail->amount + $BillDetail->tax;     // 税込額
         $BillDetail->save();
 
+        $this->sumTotal += $this->sumAmount;  // 請求金額合計
+
         $this->sumWorkHours = new DateInterval('PT0S');    // DateInterval 勤務時間
-        $this->sumBill = 0;   // 請求金額
+        $this->sumAmount = 0;   // 請求金額
     }
 
     /**
@@ -127,7 +131,10 @@ class Closebills extends Component
         $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
         $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
 
-        $EmployeeWorks = modelEmployeeworks::where('client_id')
+        // 勤怠締日で消費税率を取得
+        $this->taxRate = 0.1;
+
+        $EmployeeWorks = modelEmployeeworks::where('client_id', $this->Client->id)
             ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
             ->where('wrk_bill', '>', 0)
             ->orderByRaw('clientplace_id, summary_index, billhour') // 部門、作業種別、単価でソート
@@ -147,7 +154,7 @@ class Closebills extends Component
 
         foreach($EmployeeWorks as $EmployeeWork) {
             // 部門が変わった場合
-            if ($this->saveClientPlaceId != $this->EmployeeWork->clientplace_id)
+            if ($this->saveClientPlaceId != $EmployeeWork->clientplace_id)
             {
                 // 未出力の請求明細情報があるなら、請求明細レコードを作成
                 if($bMustWrite)
@@ -173,6 +180,8 @@ class Closebills extends Component
                 $this->saveSummaryName = $EmployeeWork->summary_name;
                 $this->saveUnitPrice = $EmployeeWork->billhour;
                 $this->saveDisplayOrder = 1;
+
+                $this->sumTotal = 0;
                 $bMustWrite = false;    // 請求明細レコードを作成するかどうか
             }
 
@@ -205,10 +214,10 @@ class Closebills extends Component
         // 請求明細の合計金額を計算
         if($this->sumBillId)
         {
-            $Bills = modelBills::find($this->saveBillId);
-            $Bill->bill_amount = $BillSummary->amount;
-            $Bill->bill_tax = $BillSummary->tax;
-            $Bill->bill_total = $BillSummary->total;
+            $Bills = modelBills::find($this->sumBillId);
+            $Bill->bill_amount = $this->sumTotal;
+            $Bill->bill_tax = floor($this->sumTotal * $this->taxRate);
+            $Bill->bill_total = $Bill->bill_amount + $Bill->bill_tax;
             $Bill->save();
         }
     }
@@ -276,8 +285,10 @@ class Closebills extends Component
         foreach($Clients as $Client) {
             $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $Client->cl_close_day);
             $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));        
-            $EmployeeWorks = modelEmployeeWorks::where('client_id', $Client->id)
+            $EmployeeWorks = modelEmployeeWorks::select('employee_id')
+                ->where('client_id', $Client->id)
                 ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+                ->distinct()
                 ->get();
             $employeeCount[$Client->id] = count($EmployeeWorks);
         }
@@ -322,11 +333,7 @@ class Closebills extends Component
             // 請求の明細を集計
             $this->summaryBill();
             // 勤怠締めレコードを更新する
-            $ClosePayroll = new modelClosePayrolls();
-            $ClosePayroll->updateOrCreate(
-                ['work_year' => $this->workYear, 'work_month' => $this->workMonth],
-                ['closed' => true, 'operation_date' => date('Y-m-d H:i:s')]
-            );
+            modelClosePayrolls::closePayroll($this->workYear, $this->workMonth, $this->Client->id);
             DB::commit();
             $logMessage = '請求締め処理: ' . $this->workYear . '年' . $this->workMonth . '月 ' . $this->Client->cl_cd . ' ' . $this->Client->cl_name;
             logger($logMessage);
@@ -346,19 +353,27 @@ class Closebills extends Component
     /**
      * reopen button click event
      */
-    public function reopenBill()
+    public function reopenBill($client_id)
     {
-        // 勤怠締めレコードを更新する
-        $ClosePayroll = new modelClosePayrolls();
-        $ClosePayroll->updateOrCreate(
-            ['work_year' => $this->workYear, 'work_month' => $this->workMonth],
-            ['closed' => false, 'operation_date' => date('Y-m-d H:i:s')]
-        );
-        $this->setisClosed();
+        $this->Client = modelClients::find($client_id);
 
-        $logMessage = '請求締め解除: ' . $this->workYear . '年' . $this->workMonth . '月 ' . $this->Client->cl_cd . ' ' . $this->Client->cl_name;
-        logger($logMessage);
-        applogs::insertLog(applogs::LOG_TYPE_CLOSE_BILL, $logMessage);
-        Session::flash('success', '解除処理が完了しました。');
+        // 勤怠締めレコードを更新する
+        try {
+            modelClosePayrolls::openPayroll($this->workYear, $this->workMonth, $this->Client->id);
+            
+            $logMessage = '請求締め解除: ' . $this->workYear . '年' . $this->workMonth . '月 ' . $this->Client->cl_cd . ' ' . $this->Client->cl_name;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_CLOSE_BILL, $logMessage);
+            Session::flash('success', '解除処理が完了しました。');
+            }
+        catch (\Exception $e) {
+            $logMessage = '請求締め解除エラー: ' . $this->workYear . '年' . $this->workMonth . '月 ' . $this->Client->cl_cd . ' ' . $this->Client->cl_name
+                . ' ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_CLOSE_BILL, $logMessage);
+            session()->flash('error', '解除処理に失敗しました。');
+            return;
+        }
+
     }
 }

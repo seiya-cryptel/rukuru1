@@ -38,4 +38,47 @@
         </tr>
         </table>
     </div>
+    <div>
+        <table class="min-w-full table-auto text-sm">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th style="width: 4rem;">{{ __('Code') }}</th>
+                    <th style="width: 12rem;">{{ __('Employee') }}{{ __('Name') }}</th>
+                    <th style="width: 8rem;">{{ __('勤怠支給額') }}</th>
+                    <th style="width: 8rem;">{{ __('交通費') }}</th>
+                    <th style="width: 8rem;">{{ __('手当') }}</th>
+                    <th style="width: 8rem;">{{ __('控除') }}</th>
+                    <th style="width: 8rem;">{{ __('総支給額') }}</th>
+                    <th> </th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach ($Employees as $Employee)
+                <tr class="border-b">
+                    <td>
+                        {{$Employee['empl_cd']}}
+                    </td>
+                    <td>
+                        {{$Employee['empl_name']}}
+                    </td>
+                    <td class="text-right px-2">
+                        {{number_format($Employee['work_amount'])}}
+                    </td>
+                    <td class="text-right px-2">
+                        {{number_format($Employee['transport'])}}
+                    </td>
+                    <td class="text-right px-2">
+                        {{number_format($Employee['allow_amount'])}}
+                    </td>
+                    <td class="text-right px-2">
+                        {{number_format($Employee['deduct_amount'])}}
+                    </td>
+                    <td class="text-right px-2">
+                        {{number_format($Employee['pay_amount'])}}
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>

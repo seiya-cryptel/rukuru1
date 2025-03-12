@@ -95,13 +95,8 @@ class PhpSpreadsheetService
         }
         // create writer object
         $writer = new XlsxWriter($spreadsheet);
-        // save file
         $writer->save('/var/www/html/storage/data/bill.xlsx');
-        $fileName = '請求書' . $billData['bill_no'] . '.xlsx';
-        // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        // header('Content-Disposition: attachment;filename="' . $fileName . '"');
-        // header('Cache-Control: max-age=0');
-        // $writer->save('php://output');
+        $fileName = '請求書' . $billData['cl_name'] . date('Y-m-d H:i') . '.xlsx';
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
          ];
@@ -112,36 +107,35 @@ class PhpSpreadsheetService
      * 請求明細エクスポート
      * @param $templateFile
      * @param $clientInfo
-     * @param $employeeSalarys
+     * @param $billDetails
      * @return response
      */
-    public function exportBillDetails($templateFile, $clientInfo, $employeeSalarys)
+    public function exportBillDetails($templateFile, $clientInfo, $billDetails)
     {
         // load template file
         $spreadsheet = (new XlsxReader())->load($templateFile);
         // get first sheet
         $sheet = $spreadsheet->getSheet(0);
-        $sheet->getcell('A1')->setValue($clientInfo['cl_name']);
-        $sheet->getcell('A2')->setValue($clientInfo['cl_place_name']);
+        $sheet->getcell('B1')->setValue($clientInfo['cl_name']);
+        $sheet->getcell('B2')->setValue($clientInfo['cl_place_name']);
+        $sheet->getcell('B3')->setValue($clientInfo['work_year'] . '年' . $clientInfo['work_month'] . '月');
+        $sheet->getcell('B4')->setValue($clientInfo['first_date'] . '〜' . $clientInfo['last_date']);
 
         $no = 1;
-        foreach($employeeSalarys as $employeeSalary) {
-            $nRow = $no + 4;
-            $sheet->getcell('A' . $nRow)->setValue($employeeSalary->wrk_date);
-            $sheet->getcell('B' . $nRow)->setValue($employeeSalary->employee->empl_name_last . ' ' . $employeeSalary->employee->empl_name_first);
-            $sheet->getcell('C' . $nRow)->setValue($employeeSalary->wrk_work_start);
-            $sheet->getcell('D' . $nRow)->setValue($employeeSalary->wrk_work_end);
-            $sheet->getcell('E' . $nRow)->setValue($employeeSalary->wrk_work_hours);
-            $sheet->getcell('F' . $nRow)->setValue($employeeSalary->billhour);
-            $sheet->getcell('G' . $nRow)->setValue($employeeSalary->wrk_bill);
-            $sheet->getcell('H' . $nRow)->setValue($employeeSalary->wt_bill_item_name);
+        foreach($billDetails as $billDetail) {
+            $nRow = $no + 6;
+            $sheet->getcell('A' . $nRow)->setValue($billDetail['bill_date']);
+            $sheet->getcell('B' . $nRow)->setValue($billDetail['summary_name']);
+            $sheet->getcell('C' . $nRow)->setValue($billDetail['billhour']);
+            $sheet->getcell('D' . $nRow)->setValue(number_format($billDetail['unit_price']));
+            $sheet->getcell('E' . $nRow)->setValue(number_format($billDetail['bill_amount']));
             $no++;
         }
         // create writer object
         $writer = new XlsxWriter($spreadsheet);
         // save file
         $writer->save('/var/www/html/storage/data/billdetail.xlsx');
-        $fileName = '請求明細.xlsx';
+        $fileName = '請求明細 ' . $clientInfo['cl_name'] . date('Y-m-d H_i') . '.xlsx';
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
          ];
@@ -157,10 +151,17 @@ class PhpSpreadsheetService
      */
     public function exportSalaries($templateFile, $SalaryInfo, $Salaries)
     {
+        // 手当控除マスタを取得
+        $MasterAllowDeducts = modelMasterAllowDeducts::orderBy('mad_deduct')->orderBy('mad_cd')->get();
+
         // load template file
         $spreadsheet = (new XlsxReader())->load($templateFile);
         // get first sheet
         $sheet = $spreadsheet->getSheet(0);
+
+        // ヘッダー
+        $nCols = 11;
+        $sheet->getcell('A' . $nCols)->setValue('これ');
 
         $nRow = 2;
         foreach($Salaries as $Salary) {
@@ -169,9 +170,9 @@ class PhpSpreadsheetService
             $sheet->getcell('C' . $nRow)->setValue($Salary->employee->empl_cd);
             $sheet->getcell('D' . $nRow)->setValue($Salary->employee->empl_name_last . ' ' . $Salary->employee->empl_name_first);
             $sheet->getcell('E' . $nRow)->setValue($Salary->work_amount);
-            $sheet->getcell('F' . $nRow)->setValue($Salary->allow_amount);
-            $sheet->getcell('G' . $nRow)->setValue($Salary->deduct_amount);
-            $sheet->getcell('H' . $nRow)->setValue($Salary->transport);
+            $sheet->getcell('F' . $nRow)->setValue($Salary->transport);
+            $sheet->getcell('G' . $nRow)->setValue($Salary->allow_amount);
+            $sheet->getcell('H' . $nRow)->setValue($Salary->deduct_amount);
             $sheet->getcell('I' . $nRow)->setValue($Salary->pay_amount);
             $nRow++;
         }

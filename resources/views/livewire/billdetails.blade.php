@@ -37,7 +37,7 @@
                 <td class="text-center">{{ $BillDetail->display_order }}</td> 
                 <td>{{ $BillDetail->title }}</td> 
                 <td class="text-right">{{ number_format($BillDetail->unit_price) }}</td> 
-                <td class="text-center">{{ number_format($BillDetail->quantity, 2) }}</td> 
+                <td class="text-center">{{ $BillDetail->quantity_string }}</td> 
                 <td class="text-center">{{ $BillDetail->unit }}</td> 
                 <td class="text-right">{{ number_format($BillDetail->amount) }}</td> 
                 <td class="text-right">{{ number_format($BillDetail->tax) }}</td> 
@@ -45,8 +45,5 @@
             @endforeach
             </tbody>
         </table>
-        <button wire:click.prevent="downloadBill()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Bill Export') }}</button>
-        <button wire:click.prevent="downloadBillDetails()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Bill Detail Export') }}</button>
-        <button wire:click.prevent="cancelBillDetails()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Cancel') }}</button>
     </div>
 </div>

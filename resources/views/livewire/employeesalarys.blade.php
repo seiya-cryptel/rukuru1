@@ -14,14 +14,14 @@
     <div class="col-md-8 py-1">
         {{ $workYear }}年 {{ $workMonth }}月 {{ $Employee->empl_cd }}:{{ $Employee->empl_name_last }} {{ $Employee->empl_name_first }} さん
 
-        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" wire:click.prevent="saveEmployeeSalary" data-save="true">{{ __('Save') }}</button>
-        <button wire:click.prevent="cancelEmployeeSalary()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">
-            @if($boolReturnToWorkEntry)
-            {{ __('Return to Work Entry') }}
-            @else
-            {{ __('Cancel') }}
-            @endif
-        </button>
+        <button 
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" 
+            wire:click.prevent="saveEmployeeSalary" 
+            data-save="true">{{ __('Save') }}</button>
+        <button 
+            class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 text-sm rounded" 
+            wire:click.prevent="cancelEmployeeSalary()" 
+            data-cancel="true">{{ __('Cancel') }}</button>
     </div>
     <div class="col-md-8 py-1 text-sm">
         <table>
@@ -70,32 +70,57 @@
             </tr><tr>
             @endif
         @endfor
-        </tr>            
+        </tr>
         </table>
         <table>
         <tr>
+            <td style="width: 4rem; font-weight: bold; text-align: right;">勤怠計</td>
+            <td>
+                <input type="text" 
+                    class="form-control py-1 text-sm text-right" 
+                    id="TotalPay" 
+                    wire:model="TotalPay" 
+                    style="width: 5rem; background-color: lightblue;"  
+                    readonly="readonly" />
+            </td>
             <td style="width: 4rem; font-weight: bold; text-align: right;">+交通費</td>
             <td>
-                <input type="text" class="form-control py-1 text-sm text-right" id="Transport" wire:model="Transport" wire:change="transportChange($event.target.value)" style="width: 5rem;" />
+                <input type="text" 
+                    class="form-control py-1 text-sm text-right" 
+                    id="Transport" 
+                    wire:model="Transport" 
+                    wire:change="transportChange($event.target.value)" 
+                    style="width: 5rem;" />
                 @error('Transport')
                     <span class="text-red-500" style="color: red;">{{ $message }}</span>
                 @enderror
             </td>
             <td style="width: 5rem; font-weight: bold; text-align: right;">+手当計</td>
             <td>
-                <input type="text" class="form-control py-1 text-sm text-right" id="TotalAllow" wire:model="TotalAllow" style="width: 5rem; background-color: lightblue;" readonly="readonly" />
+                <input type="text" 
+                    class="form-control py-1 text-sm text-right" 
+                    id="TotalAllow" 
+                    wire:model="TotalAllow" 
+                    style="width: 5rem; background-color: lightblue;" 
+                    readonly="readonly" />
             </td>
             <td style="width: 4rem; font-weight: bold; text-align: right;">-控除計</td>
             <td>
-                <input type="text" class="form-control py-1 text-sm text-right" id="TotalDeduct" wire:model="TotalDeduct" style="width: 5rem; background-color: orange;"  readonly="readonly" />
-            </td>
-            <td style="width: 4rem; font-weight: bold; text-align: right;">+給与計</td>
-            <td>
-                <input type="text" class="form-control py-1 text-sm text-right" id="TotalPay" wire:model="TotalPay" style="width: 5rem; background-color: lightblue;"  readonly="readonly" />
+                <input type="text" 
+                    class="form-control py-1 text-sm text-right" 
+                    id="TotalDeduct" 
+                    wire:model="TotalDeduct" 
+                    style="width: 5rem; background-color: orange;"  
+                    readonly="readonly" />
             </td>
             <td style="width: 4rem; font-weight: bold; text-align: right;">=支給額</td>
             <td>
-                <input type="text" class="form-control py-1 text-sm text-right" id="PayAmount" wire:model="PayAmount" style="width: 5rem; background-color: yellow;" />
+                <input type="text" 
+                    class="form-control py-1 text-sm text-right" 
+                    id="PayAmount" 
+                    wire:model="PayAmount" 
+                    style="width: 5rem; background-color: yellow;"
+                    readonly="readonly" />
             </td>
         </tr>
         </table>
@@ -126,7 +151,5 @@
         </tr>
         @endforeach
         </table>
-        <button type="button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" wire:click.prevent="saveEmployeeSalary" data-save="true">{{ __('Save') }}</button>
-        <button wire:click.prevent="cancelEmployeeSalary()" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-1 px-2 rounded" data-cancel="true">{{ __('Cancel') }}</button>
     </div>
 </div>
