@@ -5,9 +5,15 @@ namespace App\Services;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as XlsxReader;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
+use App\Consts\AppConsts;
+use App\Traits\rukuruUtilities;
+
 use App\Models\masterallowdeducts as modelMasterAllowDeducts;
+use App\Models\clientworktypes as modelClientWorkTypes;
+use App\Models\employeeworks as modelEmployeeWorks;
+use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
 
 use App\Models\clients;
 use App\Models\clientplaces;
@@ -15,6 +21,7 @@ use App\Models\employees;
 
 class PhpSpreadsheetService
 {
+    use rukuruUtilities;
 
     /**
      * テンプレートシート中のタグを置き換える
@@ -84,13 +91,26 @@ class PhpSpreadsheetService
         foreach($billDetails as $billDetail) {
             $nRow = $nStartRow + $no - 1;
             $sheet->insertNewRowBefore($nStartRow + $no); // 最初に行を挿入
-            $sheet->getcell('B' . $nRow)->setValue($no);
-            $sheet->getcell('C' . $nRow)->setValue($billDetail->title);
-            $sheet->getcell('E' . $nRow)->setValue(number_format($billDetail->unit_price));
-            $sheet->getcell('F' . $nRow)->setValue(number_format($billDetail->quantity, 2));
-            $sheet->getcell('G' . $nRow)->setValue($billDetail->unit);
-            $sheet->getcell('H' . $nRow)->setValue(number_format($billDetail->amount));
-            $sheet->getcell('I' . $nRow)->setValue(number_format($billDetail->tax));
+
+            $nCol = 2;
+            $sheet->getcell([$nCol++, $nRow])->setValue($no);
+
+            $sheet->mergeCells('C' .  $nRow . ':' . 'D' . $nRow);
+            $sheet->getcell([$nCol, $nRow])->setValue($billDetail->title);
+            $nCol += 2;
+
+            $sheet->getStyle([$nCol, $nRow])->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail->unit_price);
+
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail->quantity_string);
+
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail->unit);
+
+            $sheet->getStyle([$nCol, $nRow])->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail->amount);
+
+            $sheet->getStyle([$nCol, $nRow])->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail->tax);
             $no++;
         }
         // create writer object
@@ -115,22 +135,27 @@ class PhpSpreadsheetService
         // load template file
         $spreadsheet = (new XlsxReader())->load($templateFile);
         // get first sheet
+        $nCol = 2;
+        $nRow = 1;
         $sheet = $spreadsheet->getSheet(0);
-        $sheet->getcell('B1')->setValue($clientInfo['cl_name']);
-        $sheet->getcell('B2')->setValue($clientInfo['cl_place_name']);
-        $sheet->getcell('B3')->setValue($clientInfo['work_year'] . '年' . $clientInfo['work_month'] . '月');
-        $sheet->getcell('B4')->setValue($clientInfo['first_date'] . '〜' . $clientInfo['last_date']);
+        $sheet->getcell([$nCol, $nRow++])->setValue($clientInfo['cl_name']);
+        $sheet->getcell([$nCol, $nRow++])->setValue($clientInfo['cl_place_name']);
+        $sheet->getcell([$nCol, $nRow++])->setValue($clientInfo['work_year'] . '年' . $clientInfo['work_month'] . '月');
+        $sheet->getcell([$nCol, $nRow++])->setValue($clientInfo['first_date'] . '〜' . $clientInfo['last_date']);
 
-        $no = 1;
+        $nRow = 7;
         foreach($billDetails as $billDetail) {
-            $nRow = $no + 6;
-            $sheet->getcell('A' . $nRow)->setValue($billDetail['bill_date']);
-            $sheet->getcell('B' . $nRow)->setValue($billDetail['summary_name']);
-            $sheet->getcell('C' . $nRow)->setValue($billDetail['billhour']);
-            $sheet->getcell('D' . $nRow)->setValue(number_format($billDetail['unit_price']));
-            $sheet->getcell('E' . $nRow)->setValue(number_format($billDetail['bill_amount']));
-            $no++;
+            $nCol = 1;
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail['empl_name']);
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail['summary_name']);
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail['billhour']);
+            $sheet->getStyle([$nCol, $nRow])->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail['unit_price']);
+            $sheet->getStyle([$nCol, $nRow])->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getcell([$nCol++, $nRow])->setValue($billDetail['bill_amount']);
+            $nRow++;
         }
+
         // create writer object
         $writer = new XlsxWriter($spreadsheet);
         // save file
@@ -151,36 +176,63 @@ class PhpSpreadsheetService
      */
     public function exportSalaries($templateFile, $SalaryInfo, $Salaries)
     {
-        // 手当控除マスタを取得
-        $MasterAllowDeducts = modelMasterAllowDeducts::orderBy('mad_deduct')->orderBy('mad_cd')->get();
-
         // load template file
         $spreadsheet = (new XlsxReader())->load($templateFile);
         // get first sheet
         $sheet = $spreadsheet->getSheet(0);
 
-        // ヘッダー
-        $nCols = 11;
-        $sheet->getcell('A' . $nCols)->setValue('これ');
-
-        $nRow = 2;
+        $nRow = 1;
         foreach($Salaries as $Salary) {
-            $sheet->getcell('A' . $nRow)->setValue($Salary->work_year);
-            $sheet->getcell('B' . $nRow)->setValue($Salary->work_month);
-            $sheet->getcell('C' . $nRow)->setValue($Salary->employee->empl_cd);
-            $sheet->getcell('D' . $nRow)->setValue($Salary->employee->empl_name_last . ' ' . $Salary->employee->empl_name_first);
-            $sheet->getcell('E' . $nRow)->setValue($Salary->work_amount);
-            $sheet->getcell('F' . $nRow)->setValue($Salary->transport);
-            $sheet->getcell('G' . $nRow)->setValue($Salary->allow_amount);
-            $sheet->getcell('H' . $nRow)->setValue($Salary->deduct_amount);
-            $sheet->getcell('I' . $nRow)->setValue($Salary->pay_amount);
-            $nRow++;
+            $nCol = 1;
+            $sheet->getcell([$nCol++, $nRow])->setValue('年');
+            $sheet->getcell([$nCol++, $nRow])->setValue('月');
+            $sheet->getcell([$nCol++, $nRow])->setValue('従業員コード');
+            $sheet->getcell([$nCol++, $nRow])->setValue('氏名');
+            $sheet->getcell([$nCol++, $nRow])->setValue('勤怠');
+            $sheet->getcell([$nCol++, $nRow])->setValue('交通費');
+            $sheet->getcell([$nCol++, $nRow])->setValue('手当');
+            $sheet->getcell([$nCol++, $nRow])->setValue('控除');
+            $sheet->getcell([$nCol++, $nRow])->setValue('支給額');
+
+            $nCol = 1;
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->work_year);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->work_month);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->employee->empl_cd);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->employee->empl_name_last . ' ' . $Salary->employee->empl_name_first);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->work_amount);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->transport);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->allow_amount);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->deduct_amount * -1);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->pay_amount);
+
+            // 手当控除
+            $employee_id = $Salary->employee_id;
+            $EmployeeAllowDeducts = modelEmployeeAllowDeduct::where('employee_id', $employee_id)
+                ->where('work_year', $Salary->work_year)
+                ->where('work_month', $Salary->work_month)
+                ->orderBy('mad_deduct')
+                ->orderBy('mad_cd')
+                ->get();
+
+            $nCol++;
+            foreach($EmployeeAllowDeducts as $AllowDeduct)
+            {
+                // 交通費は除外
+                if($AllowDeduct->mad_cd == AppConsts::MAD_CD_TRANSPORT) {
+                    continue;
+                }
+                $sheet->getcell([$nCol, $nRow])->setValue($AllowDeduct->mad_name);
+                $amount = $AllowDeduct->mad_deduct ? ($AllowDeduct->amount * -1) : $AllowDeduct->amount;
+                $sheet->getcell([$nCol, ($nRow + 1)])->setValue($amount);
+                $nCol++;
+            }
+            $nRow += 3;
         }
         // create writer object
         $writer = new XlsxWriter($spreadsheet);
         // save file
         $writer->save(storage_path('data/salary.xlsx'));
-        $fileName = '給与' . $SalaryInfo['work_year'] . substr('00' . $SalaryInfo['work_month'], -2) . '.xlsx';
+        $fileName = '給与' . $SalaryInfo['work_year'] . substr('00' . $SalaryInfo['work_month'], -2) . '_' . date('YmdHi') . '.xlsx';
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
          ];
@@ -192,86 +244,107 @@ class PhpSpreadsheetService
      * @param $templateFile
      * @param $SalaryInfo
      * @param $Salaries
-     * @param $SalaryDetails
      * @return response
      */
-    public function exportSalaryDetails($templateFile, $SalaryInfo, $Salaries, $SalaryDetails)
+    public function exportSalaryDetails($templateFile, $SalaryInfo, $Salaries)
     {
         // load template file
         $spreadsheet = (new XlsxReader())->load($templateFile);
         // get first sheet
         $sheet = $spreadsheet->getSheet(0);
-        // ヘッダー
-        $sheet->getcell('A1')->setValue($SalaryInfo['work_year'].'年'.$SalaryInfo['work_year'].'月');
 
-        $saveEmployeeId = null;
-        $noSalary = 0;
-        $nRow = 2;
-        foreach($SalaryDetails as $SalaryDetail)
-        {
-            if($SalaryDetail->employee_id != $saveEmployeeId)
+        // 対象期間
+        $dtFirstDate = strtotime($SalaryInfo['work_year'] . '-' . $SalaryInfo['work_month'] . '-01');
+        $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
+        $workDateFirst = date('Y-m-d', $dtFirstDate);
+        $workDateLast = date('Y-m-d', $dtLastDate);
+
+        $nRow = 1;
+        foreach($Salaries as $Salary) {
+            $nCol = 1;
+            $sheet->getcell([$nCol++, $nRow])->setValue('年');
+            $sheet->getcell([$nCol++, $nRow])->setValue('月');
+            $sheet->getcell([$nCol++, $nRow])->setValue('従業員コード');
+            $sheet->getcell([$nCol++, $nRow])->setValue('氏名');
+            $sheet->getcell([$nCol++, $nRow])->setValue('勤怠');
+            $sheet->getcell([$nCol++, $nRow])->setValue('交通費');
+            $sheet->getcell([$nCol++, $nRow])->setValue('手当');
+            $sheet->getcell([$nCol++, $nRow])->setValue('控除');
+            $sheet->getcell([$nCol++, $nRow])->setValue('支給額');
+
+            $nCol = 1;
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->work_year);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->work_month);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->employee->empl_cd);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->employee->empl_name_last . ' ' . $Salary->employee->empl_name_first);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->work_amount);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->transport);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->allow_amount);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->deduct_amount * -1);
+            $sheet->getcell([$nCol++, ($nRow + 1)])->setValue($Salary->pay_amount);
+
+            // 手当控除
+            $employee_id = $Salary->employee_id;
+            $EmployeeAllowDeducts = modelEmployeeAllowDeduct::where('employee_id', $employee_id)
+                ->where('work_year', $Salary->work_year)
+                ->where('work_month', $Salary->work_month)
+                ->orderBy('mad_deduct')
+                ->orderBy('mad_cd')
+                ->get();
+
+            $nCol++;
+            foreach($EmployeeAllowDeducts as $AllowDeduct)
             {
-                // 従業員情報
-                $Salary = $Salaries->get($noSalary++);
-                if((! $Salary) || ($Salary->employee_id != $SalaryDetail->employee_id))
-                {
-                    throw new \Exception('給与情報が不正です。');
+                // 交通費は除外
+                if($AllowDeduct->mad_cd == AppConsts::MAD_CD_TRANSPORT) {
+                    continue;
                 }
-                // 従業員の手当控除情報
-                $EmployeeAllowDeducts = modelEmployeeAllowDeduct::with('masterallowdeduct')
-                    ->where('employee_id', $SalaryDetail->employee_id)
-                    ->where('work_year', $SalaryInfo['work_year'])
-                    ->where('work_month', $SalaryInfo['work_month'])
-                    ->orderBy('mad_deduct')
-                    ->orderBy('mad_cd')
-                    ->get();
-
-                $sheet->getcell('A' . $nRow)->setValue('従業員番号');
-                $sheet->getcell('A' . $nRow + 1)->setValue($Salary->employee->empl_cd);
-
-                $sheet->getcell('B' . $nRow)->setValue('氏名');
-                $sheet->getcell('B' . $nRow + 1)->setValue($Salary->employee->empl_name_last . ' ' . $Salary->employee->empl_name_first);
-
-                $sheet->getcell('C' . $nRow)->setValue('勤怠額');
-                $sheet->getcell('C' . $nRow + 1)->setValue($Salary->work_amount);
-                $sheet->getcell('D' . $nRow)->setValue('交通費');
-                $sheet->getcell('D' . $nRow + 1)->setValue($Salary->transport);
-
-                $colNo = 5;
-                foreach($EmployeeAllowDeducts as $AllowDeduct)
-                {
-                    $sheet->getcell([$colNo, $nRow])->setValue($AllowDeduct->mad_name);
-                    $sheet->getcell([$colNo, $nRow + 1])->setValue($AllowDeduct->amount);
-                    $colNo++;
-                }
-
-                $sheet->getcell([$colNo, $nRow])->setValue('支給額');
-                $sheet->getcell([$colNo, $nRow + 1])->setValue($Salary->pay_amount);
-                $colNo++;
-
-                $nRow += 2;
-
-                $sheet->getcell('A' . $nRow)->setValue('日付');
-                $sheet->getcell('B' . $nRow)->setValue('有給');
-                $sheet->getcell('C' . $nRow)->setValue('開始');
-                $sheet->getcell('D' . $nRow)->setValue('終了');
-                $sheet->getcell('E' . $nRow)->setValue('勤務時間');
-                $sheet->getcell('F' . $nRow)->setValue('時給');
-                $sheet->getcell('G' . $nRow)->setValue('金額');
-                $sheet->getcell('H' . $nRow)->setValue('作業種別');
-                $nRow++;
-
-                $saveEmployeeId = $SalaryDetail->employee_id;
+                $sheet->getcell([$nCol, $nRow])->setValue($AllowDeduct->mad_name);
+                $amount = $AllowDeduct->mad_deduct ? ($AllowDeduct->amount * -1) : $AllowDeduct->amount;
+                $sheet->getcell([$nCol, ($nRow + 1)])->setValue($amount);
+                $nCol++;
             }
-            
-            $sheet->getcell('A' . $nRow)->setValue($SalaryDetail->wrk_date);
-            $sheet->getcell('B' . $nRow)->setValue($SalaryDetail->leave ? '有給': '');
-            $sheet->getcell('C' . $nRow)->setValue($SalaryDetail->wrk_work_start);
-            $sheet->getcell('D' . $nRow)->setValue($SalaryDetail->wrk_work_end);
-            $sheet->getcell('E' . $nRow)->setValue($SalaryDetail->wrk_work_hours);
-            $sheet->getcell('F' . $nRow)->setValue($SalaryDetail->payhour);
-            $sheet->getcell('G' . $nRow)->setValue($SalaryDetail->wrk_pay);
-            $sheet->getcell('H' . $nRow)->setValue($SalaryDetail->wt_bill_item_name);
+            $nRow += 2;
+
+            // 項目名
+            $nCol = 1;
+            $sheet->getcell([$nCol++, $nRow])->setValue('日付');
+            $sheet->getcell([$nCol++, $nRow])->setValue('作業名');
+            $sheet->getcell([$nCol++, $nRow])->setValue('打刻開始');
+            $sheet->getcell([$nCol++, $nRow])->setValue('打刻終了');
+            $sheet->getcell([$nCol++, $nRow])->setValue('勤務開始');
+            $sheet->getcell([$nCol++, $nRow])->setValue('勤務終了');
+            $sheet->getcell([$nCol++, $nRow])->setValue('休憩時間');
+            $sheet->getcell([$nCol++, $nRow])->setValue('勤務時間');
+            $sheet->getcell([$nCol++, $nRow])->setValue('時給');
+            $sheet->getcell([$nCol++, $nRow])->setValue('金額');
+            $nRow++;
+
+            $employeeWorks = modelEmployeeWorks::where('employee_id', $employee_id)
+                ->whereBetween('wrk_date', [$workDateFirst, $workDateLast])
+                ->orderBy('wrk_date')
+                ->orderBy('wrk_seq')
+                ->get();
+            foreach($employeeWorks as $employeeWork)
+            {
+                $clientWorkType = modelClientWorkTypes::where('client_id', $employeeWork->client_id)
+                    ->where('clientplace_id', $employeeWork->clientplace_id)
+                    ->where('wt_cd', $employeeWork->wt_cd)
+                    ->first();
+
+                $nCol = 1;
+                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_date);
+                $sheet->getcell([$nCol++, $nRow])->setValue($clientWorkType->wt_name);
+                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_log_start);
+                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_log_end);
+                $sheet->getcell([$nCol++, $nRow])->setValue(date('md Hi', strtotime($employeeWork->wrk_work_start)));
+                $sheet->getcell([$nCol++, $nRow])->setValue(date('md Hi', strtotime($employeeWork->wrk_work_end)));
+                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_break);
+                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_work_hours);
+                $sheet->getcell([$nCol++, $nRow])->setValue($this->rukuruUtilMoneyValue($employeeWork->payhour, 0));
+                $sheet->getcell([$nCol++, $nRow])->setValue($this->rukuruUtilMoneyValue($employeeWork->wrk_pay, 0));
+                $nRow++;
+            }
             $nRow++;
         }
 
@@ -279,7 +352,7 @@ class PhpSpreadsheetService
         $writer = new XlsxWriter($spreadsheet);
         // save file
         $writer->save(storage_path('data/salary_detail.xlsx'));
-        $fileName = '給与明細' . $SalaryInfo['work_year'] . substr('00' . $SalaryInfo['work_month'], -2) . '.xlsx';
+        $fileName = '給与明細' . $SalaryInfo['work_year'] . substr('00' . $SalaryInfo['work_month'], -2) . '_' . date('YmdHi') . '.xlsx';
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
          ];

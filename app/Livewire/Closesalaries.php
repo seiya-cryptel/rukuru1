@@ -115,7 +115,7 @@ class Closesalaries extends Component
     public function changeWorkYear($value)
     {
         $this->validate();
-        session([AppConsts::WORK_YEAR => $this->workYear]);
+        session([AppConsts::SESS_WORK_YEAR => $this->workYear]);
     }
 
     /**
@@ -124,7 +124,7 @@ class Closesalaries extends Component
     public function changeWorkMonth()
     {
         $this->validate();
-        session([AppConsts::WORK_MONTH => $this->workMonth]);
+        session([AppConsts::SESS_WORK_MONTH => $this->workMonth]);
     }
 
     /**
@@ -169,26 +169,13 @@ class Closesalaries extends Component
             ->orderBy('employee.empl_cd')
             ->get();
 
-        // work_year, work_month に該当する給与明細レコードを取得
-        $workYear = $this->workYear;
-        $workMonth = $this->workMonth;
-        $sStartDay = $workYear . '-' . $workMonth . '-01';
-        $sEndDay = $workYear . '-' . $workMonth . '-' . date('t', strtotime($sStartDay));
-        $SalaryDetails = modelEmployeeSalary::with('employee')
-        ->join('employees as employee', 'employeesalary.employee_id', '=', 'employee.id')
-        ->whereBetween('wrk_date', [$sStartDay, $sEndDay])
-        ->orderBy('employee.empl_cd')
-        ->orderByRaw('wrk_date, wrk_work_start')
-        ->get();
-
         return $service->exportSalaryDetails(
             storage_path('data/salary_template.xlsx'),
             [
                 'work_year' => $this->workYear,
                 'work_month' => $this->workMonth,
             ],
-            $Salaries,
-            $SalaryDetails
+            $Salaries
         );
     }
 }

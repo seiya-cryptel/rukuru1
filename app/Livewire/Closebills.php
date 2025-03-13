@@ -12,7 +12,6 @@ use Livewire\WithPagination;
 use Livewire\Component;
 
 use App\Consts\AppConsts;
-
 use App\Traits\rukuruUtilities;
 
 use App\Models\applogs;
@@ -20,10 +19,8 @@ use App\Models\applogs;
 use App\Models\closepayrolls as modelClosePayrolls;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
-
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
-
 use App\Models\bills as modelBills;
 use App\Models\billdetails as modelBillDetails;
 

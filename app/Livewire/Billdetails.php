@@ -100,15 +100,19 @@ class Billdetails extends Component
      */
     private function aggregateBillDetails($dtFirstDate, $dtLastDate)
     {
-        $Query = modelEmployeeWorks::where('client_id', $this->Bill->client_id)
+        $Query = modelEmployeeWorks::with('employee')
+            ->select('employees.*', 'employeeworks.*')
+            ->join('employees', 'employees.id', '=', 'employeeworks.employee_id')
+            ->where('client_id', $this->Bill->client_id)
             ->where('clientplace_id', $this->Bill->clientplace_id)
             ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
             ->where('wrk_bill', '>' , 0)
-            ->orderByRaw('wrk_date, summary_index, billhour');
+            ->orderByRaw('employees.empl_cd, summary_index, billhour');
         $EmployeeWorks = $Query->get();
 
         // 集計キー
-        $saveWrkDate = null;
+        $saveEmployeeId = null;
+        $saveEmployeeName = null;
         $saveSummaryIndex = null;
         $saveSummaryName = null;
         $saveBillHour = null;
@@ -118,13 +122,13 @@ class Billdetails extends Component
         $sumUnitPrice = 0;
         $sumBillAmount = 0;
 
-        $bWrite = false;    // 集計結果を書き込むかどうか
-
         $BillDetails = [];  // 請求詳細集計結果
+
+        $bWrite = false;    // 集計結果を書き込むかどうか
 
         foreach($EmployeeWorks as $EmployeeWork)
         {
-            if($saveWrkDate != $EmployeeWork->wrk_date
+            if($saveEmployeeId != $EmployeeWork->employee_id
             || $saveSummaryIndex != $EmployeeWork->summary_index
             || $saveBillHour != $EmployeeWork->billhour)
             {
@@ -132,7 +136,8 @@ class Billdetails extends Component
                 if($bWrite)
                 {
                     $BillDetails[] = [
-                        'bill_date' => $saveWrkDate,
+                        'employee_id' => $saveEmployeeId,
+                        'empl_name' => $saveEmployeeName,
                         'summary_index' => $saveSummaryIndex,
                         'summary_name' => $saveSummaryName,
                         'billhour' => $this->rukuruUtilDateIntervalFormat($sumWorkHours),
@@ -147,7 +152,8 @@ class Billdetails extends Component
                 $sumBillAmount = 0;
 
                 // 集計キーを更新
-                $saveWrkDate = $EmployeeWork->wrk_date;
+                $saveEmployeeId = $EmployeeWork->employee_id;
+                $saveEmployeeName = $EmployeeWork->employee->empl_name_last . ' ' . $EmployeeWork->employee->empl_name_first;
                 $saveSummaryIndex = $EmployeeWork->summary_index;
                 $saveSummaryName = $EmployeeWork->summary_name;
                 $saveBillHour = $EmployeeWork->billhour;
@@ -165,7 +171,8 @@ class Billdetails extends Component
         if($bWrite)
         {
             $BillDetails[] = [
-                'bill_date' => $saveWrkDate,
+                'employee_id' => $saveEmployeeId,
+                'empl_name' => $saveEmployeeName,
                 'summary_index' => $saveSummaryIndex,
                 'summary_name' => $saveSummaryName,
                 'billhour' => $this->rukuruUtilDateIntervalFormat($sumWorkHours),

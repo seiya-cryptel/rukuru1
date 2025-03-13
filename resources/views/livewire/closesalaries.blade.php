@@ -30,9 +30,7 @@
             </td>
             <td>
                 <button wire:click.prevent="downloaSalaries()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Export Salary') }}</button>
-                {{--
                 <button wire:click.prevent="downloadSalaryDetails()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" data-cancel="true">{{ __('Export Salary Detail') }}</button>
-                --}}
             </td>
         </tr>
         </table>
