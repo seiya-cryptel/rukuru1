@@ -115,12 +115,12 @@ class PhpSpreadsheetService
         }
         // create writer object
         $writer = new XlsxWriter($spreadsheet);
-        $writer->save('/var/www/html/storage/data/bill.xlsx');
+        $writer->save(storage_path('data/bill.xlsx'));
         $fileName = '請求書' . $billData['cl_name'] . date('Y-m-d H:i') . '.xlsx';
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
          ];
-        return response()->download('/var/www/html/storage/data/bill.xlsx', $fileName, $headers);
+        return response()->download(storage_path('data/bill.xlsx'), $fileName, $headers);
     }
 
     /**
@@ -159,12 +159,12 @@ class PhpSpreadsheetService
         // create writer object
         $writer = new XlsxWriter($spreadsheet);
         // save file
-        $writer->save('/var/www/html/storage/data/billdetail.xlsx');
+        $writer->save(storage_path('data/billdetail.xlsx'));
         $fileName = '請求明細 ' . $clientInfo['cl_name'] . date('Y-m-d H_i') . '.xlsx';
         $headers = [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
          ];
-        return response()->download('/var/www/html/storage/data/billdetail.xlsx', $fileName, $headers);
+        return response()->download(storage_path('data/billdetail.xlsx'), $fileName, $headers);
     }
 
     /**
