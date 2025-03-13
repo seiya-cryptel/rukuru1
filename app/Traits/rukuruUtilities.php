@@ -162,7 +162,7 @@ trait rukuruUtilities
     public function rukuruUtilTimeToDateInterval($time) : DateInterval
     {
         // 時刻を DateInterval に変換する
-        if(empty($time))
+        if(empty($time) || $time == ':')
         {
             return new DateInterval('PT0S');
         }
