@@ -118,6 +118,10 @@ abstract class HourlywageBase extends Component
     {
         $this->employeepay_id = $employeepay_id;
         $this->Employee = modelEmployee::find($employee_id);
+        if (!$this->Employee) {
+            session()->flash('error', __('Employee') . ' ' . __('Not Found'));
+            return redirect()->route('employee');
+        }
         $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
         $this->refClientPlaces = modelClientPlaces::orderBy('cl_pl_name', 'asc')->get();
         $this->updateClientWorkTypeList();
@@ -159,7 +163,7 @@ abstract class HourlywageBase extends Component
     /**
      * clientplace_id change event
      */
-    public function updateClientPlaceId()
+    public function updateClientplaceId()
     {
         $this->updateClientWorkTypeList();
     }

@@ -14,6 +14,10 @@ class Clientupdate extends ClientBase
     public function loadClient($id)
     {
         $client = modelClients::find($id);
+        if (!$client) {
+            session()->flash('error', __('Client') . ' ' . __('Not Found'));
+            return redirect()->route('client');
+        }
         $this->cl_cd = $client->cl_cd;
         $this->cl_full_name = $client->cl_full_name;
         $this->cl_name = $client->cl_name;

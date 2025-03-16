@@ -31,7 +31,7 @@
                         @enderror
 
                         <label class="px-4" for="clientplace_id">{{ __('Work Place') }}</label>
-                        <select class="form-control @error('clientplace_id') is-invalid @enderror text-sm py-1" id="clientplace_id" wire:model="clientplace_id" wire:change="updateClientPlaceId($event.target.value)">
+                        <select class="form-control @error('clientplace_id') is-invalid @enderror text-sm py-1" id="clientplace_id" wire:model="clientplace_id" wire:change="updateClientplaceId($event.target.value)">
                             <option value="">{{ __('Select Work Place') }}</option>
                             @foreach ($ClientPlaces as $ClientPlace)
                                 <option value="{{$ClientPlace->id}}">{{$ClientPlace->cl_pl_cd}} {{$ClientPlace->cl_pl_name}}</option>

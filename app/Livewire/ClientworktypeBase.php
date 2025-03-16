@@ -112,7 +112,7 @@ abstract class ClientworktypeBase extends component
      * @return void
      * 参照部門を設定する
      */
-    public function updateClientPlaceId($clientplace_id)
+    public function updateClientplaceId($clientplace_id)
     {
         if($clientplace_id)
         {

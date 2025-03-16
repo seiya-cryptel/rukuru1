@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\WithPagination;
 use Livewire\Component;
 
+use App\Consts\AppConsts;
+
 use App\Models\applogs;
 use App\Models\masterallowdeducts as modelMad;
 
@@ -43,7 +45,7 @@ class Masterallowdeducts extends Component
     public function render()
     {
         $Mads = modelMad::orderBy('mad_cd')
-            ->paginate(15);
+            ->paginate(AppConsts::PAGINATE_SIZE);
         return view('livewire.masterallowdeducts', compact('Mads'));
     }
 

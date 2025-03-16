@@ -7,7 +7,7 @@
             </div>
         @endif                
         @if(session()->has('error'))
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" style="color: red;" role="alert">
                 {{ session()->get('error') }}
             </div>
         @endif
@@ -142,7 +142,7 @@
                         tabindex="{{ $dayIndex }}{{ $slotNo }}1"
                         class="form-control py-1 text-xs text-right" 
                         id="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_start" 
-                        wire:model="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_start" 
+                        wire:model.lazy="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_start" 
                         wire:change="logStartTimeChange($event.target.value, {{$dayIndex}}, {{$slotNo}})" 
                         style="width: 2.5rem; height: 22px; padding: 0px;{{ $SlotBGColors[$slotNo] ? ' background-color: #ffcc88;' : '' }}" />
                     @error('TimekeepingSlots.'.$dayIndex.'.'.$slotNo.'.wrk_log_start')
@@ -154,7 +154,7 @@
                         tabindex="{{ $dayIndex }}{{ $slotNo }}2"
                         class="form-control py-1 text-xs text-right" 
                         id="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_end" 
-                        wire:model="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_end" 
+                        wire:model.lazy="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_log_end" 
                         wire:change="logEndTimeChange($event.target.value, {{$dayIndex}}, {{$slotNo}})" 
                         style="width: 2.5rem; height: 22px; padding: 0px;{{ $SlotBGColors[$slotNo] ? ' background-color: #ffcc88;' : '' }}" />
                     @error('TimekeepingSlots.'.$dayIndex.'.'.$slotNo.'.wrk_log_end')
@@ -172,9 +172,6 @@
                         wire:model="TimekeepingSlots.{{$dayIndex}}.{{$slotNo}}.wrk_work_hours" 
                         readonly="readonly"
                         style="width: 2.5rem; height: 22px; padding: 0px;{{ $SlotBGColors[$slotNo] ? ' background-color: #ffcc88;' : '' }}" />
-                    @error('TimekeepingSlots.'.$dayIndex.'.'.$slotNo.'.wrk_log_end')
-                        <span class="text-red-500" style="color: red;">{{ $message }}</span>
-                    @enderror
                 </td>
                 @endfor
                 <td>

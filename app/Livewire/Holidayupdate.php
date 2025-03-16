@@ -40,6 +40,10 @@ class Holidayupdate extends Component
     {
         $this->refClients = clients::orderBy('cl_name', 'asc')->get();
         $holiday = holiday::find($id);
+        if (!$holiday) {
+            session()->flash('error', __('Holiday') . ' ' . __('Not Found'));
+            return redirect()->route('holiday');
+        }
         $this->holidayId = $id;
         $this->holiday_date = $holiday->holiday_date;
         $this->client_id = $holiday->client_id;

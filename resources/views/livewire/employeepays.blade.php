@@ -47,7 +47,7 @@
                         @enderror
                     </td>
                     <td>
-                        <select class="form-control @error('vEmployeepays'.$key.'clientplace_id') is-invalid @enderror" id="vEmployeepays.{{ $key }}.clientplace_id" wire:model="vEmployeepays.{{ $key }}.clientplace_id" wire:change="updateClientPlaceId($event.target.value,{{ $key }})">
+                        <select class="form-control @error('vEmployeepays'.$key.'clientplace_id') is-invalid @enderror" id="vEmployeepays.{{ $key }}.clientplace_id" wire:model="vEmployeepays.{{ $key }}.clientplace_id" wire:change="updateClientplaceId($event.target.value,{{ $key }})">
                             <option value="">{{ __('Work Place') . __('Not Selected') }}</option>
                             @if(isset($vrefClientPlaces[$key]))
                             @foreach($vrefClientPlaces[$key] as $clientplace)

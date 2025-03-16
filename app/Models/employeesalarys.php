@@ -94,7 +94,7 @@ class employeesalarys extends Model
     public function wrkWorkStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_work_start'] = $value === '' ? null : $value, 
         );
     }
@@ -102,7 +102,7 @@ class employeesalarys extends Model
     public function wrkWorkEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_work_end'] = $value === '' ? null : $value, 
         );
     }

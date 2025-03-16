@@ -73,12 +73,13 @@ class employeeworks extends Model
     protected function casts(): array
     {
         return [
-            'wrk_log_start' => 'datetime',
-            'wrk_log_end' => 'datetime',
+            'wrk_date' => 'datetime',
+            // 'wrk_log_start' => 'datetime',
+            // 'wrk_log_end' => 'datetime',
             'wrk_work_start' => 'datetime',
             'wrk_work_end' => 'datetime',
-            'work_break' => 'datetime',
-            'wrk_work_hours' => 'datetime',
+            // 'work_break' => 'datetime',
+            // 'wrk_work_hours' => 'datetime',
         ];
     }
 
@@ -136,14 +137,14 @@ class employeeworks extends Model
     public function wrkLogStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => ($value === null) ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_log_start'] = $value === '' ? null : $value, 
         );
     }
     public function wrkLogEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => ($value === null) ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_log_end'] = $value === '' ? null : $value, 
         );
     }
@@ -164,14 +165,14 @@ class employeeworks extends Model
     public function wrkBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => ($value === null) ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_break'] = $value === '' ? null : $value, 
         );
     }
     public function wrkWorkHours(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => ($value === null) ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => ($value === null) ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wrk_work_hours'] = $value === '' ? null : $value, 
         );
     }

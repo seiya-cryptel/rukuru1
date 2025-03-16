@@ -44,10 +44,9 @@ class Employees extends Component
     public function render()
     {
         $Query = modelEmployees::with('client')->with('clientplace')
-        // ->select('*')
-        ->leftJoin('clients as client', 'client.id', '=', 'empl_main_client_id')
-        ->leftJoin('clientplaces as clientplace', 'clientplace.id', '=', 'empl_main_clientplace_id')
-        ->select('employees.id as employee_id', 'client.*', 'clientplace.*', 'employees.*');
+            ->leftJoin('clients as client', 'client.id', '=', 'empl_main_client_id')
+            ->leftJoin('clientplaces as clientplace', 'clientplace.id', '=', 'empl_main_clientplace_id')
+            ->select('employees.id as employee_id', 'client.*', 'clientplace.*', 'employees.*');
         // 退職者非表示
         if (! $this->retire) {
             $Query->whereNull('empl_resign_date');

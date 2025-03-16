@@ -40,7 +40,6 @@ class Clientplaces extends Component
     public function render()
     {
         $ClientPlaces = modelClientPlaces::with('client')
-            ->select('*')
             ->join('clients as client', 'client.id', '=', 'clientplaces.client_id')
             ->select('clientplaces.id as clientplace_id', 'client.*', 'clientplaces.*')
             ->orderBy('client.cl_cd', 'asc')

@@ -32,10 +32,16 @@ class TimeSlotSlot extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start);
-        if($this->Client->cl_round_start)
+        try {
+            $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start);
+            if($this->Client->cl_round_start)
+            {
+                $this->rukuruUtilTimeRoundUp($this->work_start, $this->Client->cl_round_start);
+            }
+        }
+        catch(Exception $e)
         {
-            $this->rukuruUtilTimeRoundUp($this->work_start, $this->Client->cl_round_start);
+            throw new \Exception('開始時刻が不正です');
         }
     }
 
@@ -51,18 +57,24 @@ class TimeSlotSlot extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end);
-        // work_start よりも後の日時となるよう日にちを加算
-        if($this->work_start)
-        {
-            while($this->work_end < $this->work_start)
+        try {
+            $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end);
+            // work_start よりも後の日時となるよう日にちを加算
+            if($this->work_start)
             {
-                $this->work_end->add(new DateInterval('P1D'));
+                while($this->work_end < $this->work_start)
+                {
+                    $this->work_end->add(new DateInterval('P1D'));
+                }
+            }
+            if($this->Client->cl_round_end)
+            {
+                $this->rukuruUtilTimeRoundDown($this->work_end, $this->Client->cl_round_end);
             }
         }
-        if($this->Client->cl_round_end)
+        catch(Exception $e)
         {
-            $this->rukuruUtilTimeRoundDown($this->work_end, $this->Client->cl_round_end);
+            throw new \Exception('終了時刻が不正です');
         }
     }
 
@@ -109,6 +121,12 @@ class TimeSlotSlot extends TimeSlotBase
      */
     public function setClientWorkType(modelClientworktypes $ClientWorkType) : void
     {
+        // 作業種別レコードが空なら例外を投げる
+        if(!$ClientWorkType)
+        {
+            throw new \Exception('作業種別が空です');
+        }
+        // 作業種別レコードを設定
         $this->ClientWorkType = $ClientWorkType;
         $this->setStartTime();
         $this->setEndTime();

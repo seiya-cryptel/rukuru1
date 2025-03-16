@@ -64,7 +64,7 @@ trait rukuruUtilities
     {
         $hours = $interval->h + ($interval->d * 24);
         $minutes = $interval->i;
-        return $hours * $unit_price + round($minutes * $unit_price / 60, 0);
+        return ($hours * $unit_price) + round($minutes * $unit_price / 60, 0);
     }
 
     /**
@@ -128,7 +128,7 @@ trait rukuruUtilities
         }
 
         // 時間と分を結合して返す
-        return sprintf('%02d:%02d', $hour, $minute);
+        return sprintf('%d:%02d', $hour, $minute);
     }
 
     /**
@@ -139,9 +139,21 @@ trait rukuruUtilities
      * @return DateTime
      * 開始時より前の場合は翌日として扱う
      * 時刻は正規化されているものとする
+     * throw Exception
      */
     public function rukuruUtilTimeToDateTime($date, $time, $beginHourOfDay = 5) : DateTime
     {
+        // $time が空文字の場合は例外をスローする
+        if(empty($time))
+        {
+            throw new \Exception('時刻が空です');
+        }
+        // $time が正規化されていない場合は例外をスローする
+        if(!preg_match('/^[0-9]{1,2}:[0-9]{2}$/', $time))
+        {
+            throw new \Exception('時刻が正規化されていません');
+        }
+
         // 時刻を DateTime オブジェクトに変換する
         $datetime = new DateTime($date->format('Y-m-d') . ' ' . $time);
 

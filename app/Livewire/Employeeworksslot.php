@@ -325,7 +325,8 @@ class Employeeworksslot extends EmployeeworksBase
                     'wrk_log_end' => $Slot->wrk_log_end,
                     'wrk_work_start' => $Slot->wrk_work_start,
                     'wrk_work_end' => $Slot->wrk_work_end,
-                    'wrk_work_hours' => substr($Slot->wrk_work_hours, 0, 2) . ':' . substr($Slot->wrk_work_hours, 3, 2),
+                    'wrk_work_hours' => $Slot->wrk_work_hours,
+                    // 'wrk_work_hours' => substr($Slot->wrk_work_hours, 0, 2) . ':' . substr($Slot->wrk_work_hours, 3, 2),
                 ];
                 if(!empty($this->PossibleWorkTypeRecords[$Slot->wt_cd]))
                 {
@@ -340,12 +341,16 @@ class Employeeworksslot extends EmployeeworksBase
     /**
      * mount function
      * */
-    // public function mount()
     public function mount($workYear, $workMonth, $client_id, $clientplace_id, $employee_id)
     {
         parent::mount($workYear, $workMonth, $client_id, $clientplace_id, $employee_id);
         
         $this->PossibleWorkTypeRecords = modelClientWorktypes::possibleWorkTypeRecords($this->client_id, $this->clientplace_id);
+        if(count($this->PossibleWorkTypeRecords) < 1)
+        {
+            session()->flash('error', __('Work Type') . ' ' . __('Not Found'));
+            return redirect()->route('workemployee');
+        }
 
         $this->clearData(self::MAX_SLOTS);         // 勤怠データ変数をクリアする
         $this->clearSummary();      // 集計をクリアする
@@ -463,23 +468,29 @@ class Employeeworksslot extends EmployeeworksBase
         $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
 
         // 時間計算用のクラスインスタンスを作成
-        $Slot = new TimeSlotSlot(
-            $this->TimekeepingDays[$day]['DateTime'],
-            "05:00", 
-            intval($slot),
-            $this->Client, 
-            $clientworktype, 
-            $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
-            $this->TimekeepingSlots[$day][$slot]['wrk_log_end']
-        );
-
-        // 作業時間を計算
-        $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $Slot->getWorkStart();
-        $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $Slot->getWorkEnd();
-        $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
-
-        // 集計作業
-        $this->calcSlot($day, $slot, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
+        try {
+            $Slot = new TimeSlotSlot(
+                $this->TimekeepingDays[$day]['DateTime'],
+                "05:00", 
+                intval($slot),
+                $this->Client, 
+                $clientworktype, 
+                $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
+                $this->TimekeepingSlots[$day][$slot]['wrk_log_end']
+            );
+    
+            // 作業時間を計算
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $Slot->getWorkStart();
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $Slot->getWorkEnd();
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
+    
+            // 集計作業
+            $this->calcSlot($day, $slot, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
+        }
+        catch(\Exception $e)
+        {
+            $this->addError($item, '計算');
+        }
     }
 
     /**
@@ -513,23 +524,29 @@ class Employeeworksslot extends EmployeeworksBase
         $clientworktype = $this->PossibleWorkTypeRecords[$wt_cd];
         
         // 時間計算用のクラスインスタンスを作成
-        $Slot = new TimeSlotSlot(
-            $this->TimekeepingDays[$day]['DateTime'],
-            "05:00", 
-            intval($slot),
-            $this->Client, 
-            $clientworktype, 
-            $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
-            $this->TimekeepingSlots[$day][$slot]['wrk_log_end']
-        );
-
-        // 作業時間を計算
-        $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $Slot->getWorkStart();
-        $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $Slot->getWorkEnd();
-        $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
-
-        // 集計作業
-        $this->calcSlot($day, $slot, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
+        try {
+            $Slot = new TimeSlotSlot(
+                $this->TimekeepingDays[$day]['DateTime'],
+                "05:00", 
+                intval($slot),
+                $this->Client, 
+                $clientworktype, 
+                $this->TimekeepingSlots[$day][$slot]['wrk_log_start'],
+                $this->TimekeepingSlots[$day][$slot]['wrk_log_end']
+            );
+    
+            // 作業時間を計算
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_start'] = $Slot->getWorkStart();
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_end'] = $Slot->getWorkEnd();
+            $this->TimekeepingSlots[$day][$slot]['wrk_work_hours'] = $Slot->getWorkHours();
+    
+            // 集計作業
+            $this->calcSlot($day, $slot, $clientworktype->wt_pay_std, $clientworktype->wt_bill_std);
+        }
+        catch(\Exception $e)
+        {
+            $this->addError($item, '計算');
+        }
     }
 
     /**

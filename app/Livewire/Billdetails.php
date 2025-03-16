@@ -39,12 +39,34 @@ class Billdetails extends Component
      */
     public function mount($bill_id)
     {
-        $this->bill_id = $bill_id;
-        // 関連レコードを取得
         $this->Bill = modelBill::with('client', 'clientplace')
             ->find($this->bill_id);
+        if(!$this->Bill)
+        {
+            session()->flash('error', __('Bill') . ' ' . __('Not Found'));
+            return redirect()->route('bills');
+        }
+        $this->bill_id = $bill_id;
+
+        // 関連レコードを取得
         $this->Client = $this->Bill->client;
+        if(!$this->Client)
+        {
+            session()->flash('error', __('Client') . ' ' . __('Not Found'));
+            return redirect()->route('bills');
+        }
+        $this->ClientPlace = null;
+        if($this->Bill->clientplace_id)
+        {
+            $this->ClientPlace = modelClientPlace::find($this->Bill->clientplace_id);
+            if(!$this->ClientPlace)
+            {
+                session()->flash('error', __('Client work place') . ' ' . __('Not Found'));
+                return redirect()->route('bills');
+            }
+        }
         $this->ClientPlace = $this->Bill->clientplace;
+
         // 請求明細情報を取得
         $this->BillDetails = modelBillDetails::where('bill_id', $this->bill_id)->get();
     }

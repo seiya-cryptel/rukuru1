@@ -15,6 +15,10 @@ class Clientplaceupdate extends ClientplaceBase
     public function loadClientPlace($id)
     {
         $clientPlace = modelClientPlaces::find($id);
+        if (!$clientPlace) {
+            session()->flash('error', __('Client work place') . ' ' . __('Not Found'));
+            return redirect()->route('clientplace');
+        }
         $this->clientPlaceId = $id;
         $this->client_id = $clientPlace->client_id;
         $this->cl_pl_cd = $clientPlace->cl_pl_cd;

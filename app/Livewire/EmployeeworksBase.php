@@ -11,8 +11,10 @@ use Illuminate\Support\Facades\DB;
 use App\Consts\AppConsts;
 use App\Traits\rukuruUtilities;
 
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
+use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\worktype as modelWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
@@ -118,8 +120,17 @@ abstract class EmployeeworksBase extends Component
         {
             if(!empty($this->TimekeepingSlots[$dayIndex][$slotNo]['wrk_work_hours']))
             {
-                $workHours = $this->rukuruUtilTimeToDateInterval($this->TimekeepingSlots[$dayIndex][$slotNo]['wrk_work_hours']);
-                $dayWorkHours = $this->rukuruUtilDateIntervalAdd($dayWorkHours, $workHours);
+                try {
+                    $workHours = $this->rukuruUtilTimeToDateInterval($this->TimekeepingSlots[$dayIndex][$slotNo]['wrk_work_hours']);
+                    $dayWorkHours = $this->rukuruUtilDateIntervalAdd($dayWorkHours, $workHours);
+                }
+                catch(\Exception $e)
+                {
+                    // 作業時間が不正な場合は加算しないでログを出力する
+                    $logMessage = $this->workYear . '/' . $this->workMonth . ' 顧客: ' . $this->client_id . ' 従業員: ' . $this->employee_id . ' sumDayWorkHours(' . $dayIndex . ',' .$slotMax . ') ' . $e->getMessage();
+                    logger($logMessage);
+                    applogs::insertLog(applogs::LOG_TYPE_KINTAI_ENTRY, $logMessage);
+                }
             }
         }
         return $dayWorkHours;
@@ -220,8 +231,29 @@ abstract class EmployeeworksBase extends Component
         $this->employee_id = $employee_id;
         $this->nextEmployeeId = $employee_id;
         $this->Client = modelClients::find($this->client_id);
+        if(empty($this->Client))
+        {
+            session()->flash('error', __('Client') . ' ' . __('Not Found'));
+            return redirect()->route('workemployee');
+        }
         $this->ClientPlace = $this->clientplace_id ? modelClientPlaces::find($this->clientplace_id) : null;
+
+        // 作業種別
+        $ClientWorkTypes = modelClientWorktypes::where('client_id', $this->client_id)
+            ->where('clientplace_id', $this->clientplace_id)
+            ->get();
+        if(count($ClientWorkTypes) < 1)
+        {
+            session()->flash('error', __('Work Type') . ' ' . __('Not Found'));
+            return redirect()->route('workemployee');
+        }
+
         $this->Employee = modelEmployees::find($this->employee_id);
+        if(empty($this->Employee))
+        {
+            session()->flash('error', __('Employee') . ' ' . __('Not Found'));
+            return redirect()->route('workemployee');
+        }
         $this->Employees = modelEmployees::orderBy('empl_cd')
             ->get();
 
@@ -324,12 +356,19 @@ abstract class EmployeeworksBase extends Component
             $this->insertEmployeeWork();
             // $this->makeSalary();
             DB::commit();
+            $logMessage = '勤怠書込: ' . $this->workYear . '/' . $this->workMonth . '月 ' . $this->client_id . ' ' . $this->employee_id;
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_KINTAI_ENTRY, $logMessage);
+            session()->flash('success', '勤怠を保存しました。');
+            return redirect()->route('workemployee');
         } catch (\Exception $e) {
             DB::rollBack();
-            throw $e;
+            $logMessage = '勤怠書込エラー: ' . $this->workYear . '/' . $this->workMonth . '月 ' . $this->client_id . ' ' . $this->employee_id
+                . ' ' . $e->getMessage();
+            logger($logMessage);
+            applogs::insertLog(applogs::LOG_TYPE_KINTAI_ENTRY, $logMessage);
+            session()->flash('error', '勤怠保存に失敗しました。');
         }
-        session()->flash('success', __('Timekeeping') . ' ' . __('Saved.'));
-        return $this->cancelEmployeepay();
     }
 
     /**

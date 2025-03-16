@@ -18,7 +18,7 @@
             {{-- 作業場所選択 --}}
             <td class="px-4" style="width: 8rem;"><label for="clientplace_id">{{ __('Work Place') }}</label></td>
             <td style="width: 12rem;">
-                <select tabindex="1" class="form-control @error('clientplace_id') is-invalid @enderror text-sm py-1" id="clientplace_id" wire:model="clientplace_id" wire:change="updateClientPlaceId($event.target.value)">
+                <select tabindex="1" class="form-control @error('clientplace_id') is-invalid @enderror text-sm py-1" id="clientplace_id" wire:model="clientplace_id" wire:change="updateClientplaceId($event.target.value)">
                     <option value="">{{ __('Select Work Place') }}</option>
                     @foreach($refClientPlaces as $clientplace)
                         <option value="{{ $clientplace->id }}">{{ $clientplace->cl_pl_cd }}:{{ $clientplace->cl_pl_name }}</option>

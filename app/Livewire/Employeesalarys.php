@@ -88,6 +88,7 @@ class Employeesalarys extends Component
         $this->workYear = $workYear;
         $this->workMonth = $workMonth;
         if(!$this->employee_id || !$this->workYear || !$this->workMonth) {
+            session()->flash('error', __('Employee') . ' ' . __('Not Found'));
             return redirect()->route('salaryemployee');
         }
 
@@ -97,6 +98,10 @@ class Employeesalarys extends Component
 
         // 従業員情報を取得
         $this->Employee = modelEmployees::find($this->employee_id);
+        if(!$this->Employee) {
+            session()->flash('error', __('Employee') . ' ' . __('Not Found'));
+            return redirect()->route('salaryemployee');
+        }
 
         // 勤怠の対象期間を設定
         $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
@@ -271,6 +276,10 @@ class Employeesalarys extends Component
 
         // 交通費を手当として登録
         $master = modelMasterAllowDeducts::find($this->Transport_masterallowdeduct_id);
+        if(!$master) {
+            session()->flash('error', 'プログラムエラー 手当控除マスタの交通費を検索できません。');
+            return;
+        }
         $mad = new modelEmployeeAllowDeduct();
         $mad->employee_id = $this->employee_id;
         $mad->work_year = $this->workYear;
@@ -288,6 +297,10 @@ class Employeesalarys extends Component
         {
             if ($this->Allows[$i]['id']) {
                 $master = modelMasterAllowDeducts::find($this->Allows[$i]['id']);
+                if(!$master) {
+                    session()->flash('error', 'プログラムエラー 手当控除マスタの手当を検索できません。');
+                    return;
+                }
                 $mad = new modelEmployeeAllowDeduct();
                 $mad->employee_id = $this->employee_id;
                 $mad->work_year = $this->workYear;
@@ -306,6 +319,10 @@ class Employeesalarys extends Component
         {
             if ($this->Deducts[$i]['id']) {
                 $master = modelMasterAllowDeducts::find($this->Deducts[$i]['id']);
+                if(!$master) {
+                    session()->flash('error', 'プログラムエラー 手当控除マスタの控除を検索できません。');
+                    return;
+                }
                 $mad = new modelEmployeeAllowDeduct();
                 $mad->employee_id = $this->employee_id;
                 $mad->work_year = $this->workYear;

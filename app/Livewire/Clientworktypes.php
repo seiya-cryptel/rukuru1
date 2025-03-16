@@ -115,7 +115,7 @@ class Clientworktypes extends Component
     /**
      * clientplace_id change event
      */
-    public function updateClientPlaceId($clientplace_id)
+    public function updateClientplaceId($clientplace_id)
     {
         $this->clientplace_id = $clientplace_id;
         session([

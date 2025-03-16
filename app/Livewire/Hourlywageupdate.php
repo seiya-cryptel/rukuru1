@@ -19,6 +19,10 @@ class Hourlywageupdate extends HourlywageBase
     public function mount($employee_id, $employeepay_id = null)
     {
         $employeePay = modelEmployeePays::find($employeepay_id);
+        if (empty($employeePay)) {
+            session()->flash('error', __('Hourly Wage') . ' ' . __('Not Found'));
+            return redirect()->route('employee');
+        }
 
         parent::mount($employee_id, $employeepay_id);
 

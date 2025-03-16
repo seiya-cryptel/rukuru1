@@ -100,63 +100,63 @@ class clientworktypes extends Model
     public function wtWorkStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_work_start'] = $value === '' ? null : $value, 
         );
     }
     public function wtWorkEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_work_end'] = $value === '' ? null : $value, 
         );
     }
     public function wtLunchBreakStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_lunch_break_start'] = $value === '' ? null : $value, 
         );
     }
     public function wtLunchBreakEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_lunch_break_end'] = $value === '' ? null : $value, 
         );
     }
     public function wtLunchBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_lunch_break'] = $value === '' ? null : $value, 
         );
     }
     public function wtEveningBreakStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_evening_break_start'] = $value === '' ? null : $value,
         );
     }
     public function wtEveningBreakEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_evening_break_end'] = $value === '' ? null : $value, 
         );
     }
     public function wtEveningBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_evening_break'] = $value === '' ? null : $value, 
         );
     }
     public function wtNightBreakStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             // set: fn ($value) => $this->attributes['wt_night_break_start'] = $value === '' ? null : $value, 
             set: fn ($value) => empty($value) ? null : $value, 
         );
@@ -164,35 +164,35 @@ class clientworktypes extends Model
     public function wtNightBreakEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_night_break_end'] = $value === '' ? null : $value, 
         );
     }
     public function wtNightBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_night_break'] = $value === '' ? null : $value, 
         );
     }
     public function wtMidnightBreakStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_midnight_break_start'] = $value === '' ? null : $value, 
         );
     }
     public function wtMidnightBreakEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_midnight_break_end'] = $value === '' ? null : $value, 
         );
     }
     public function wtMidnightBreak(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['wt_midnight_break'] = $value === '' ? null : $value, 
         );
     }

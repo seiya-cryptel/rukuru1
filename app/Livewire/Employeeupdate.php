@@ -20,6 +20,10 @@ class Employeeupdate extends EmployeeBase
         parent::mount($id);
 
         $Employee = modelEmployees::find($id);
+        if (!$Employee) {
+            session()->flash('error', __('Employee') . ' ' . __('Not Found'));
+            return redirect()->route('employee');
+        }
         $this->employeeId = $id;
         $this->empl_cd = $Employee->empl_cd;
         $this->empl_name_last = $Employee->empl_name_last;

@@ -26,6 +26,7 @@ class applogs extends Model
     public const LOG_TYPE_MASTER_EMPLOYEEPAY = 17;
     public const LOG_TYPE_CLOSE_BILL = 31;
     public const LOG_TYPE_CLOSE_PAYROLL = 32;
+    public const LOG_TYPE_KINTAI_ENTRY = 41;
 
     public const LOG_ERROR = 127;
 
@@ -39,6 +40,7 @@ class applogs extends Model
         self::LOG_TYPE_MASTER_EMPLOYEE => '従業員マスタ',
         self::LOG_TYPE_CLOSE_BILL => '締め請求',
         self::LOG_TYPE_CLOSE_PAYROLL => '締め給与',
+        self::LOG_TYPE_KINTAI_ENTRY => '勤怠入力',
 
         self::LOG_ERROR => 'エラー',
     ];

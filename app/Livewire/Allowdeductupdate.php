@@ -16,6 +16,10 @@ class Allowdeductupdate extends AllowdeductBase
     public function mount($id)
     {
         $mad = modelMad::find($id);
+        if(!$mad) {
+            session()->flash('error', __('Allow Deduct Items') . ' ' . __('Not Found'));
+            return redirect()->route('masterallowdeduct');
+        }
         $this->madId = $id;
         $this->mad_cd = $mad->mad_cd;
         $this->mad_allow = $mad->mad_allow;

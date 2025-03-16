@@ -46,9 +46,7 @@ class Clientcreate extends ClientBase
     public function render()
     {
         $this->resetFields();
-        return view('livewire.clientcreate', [
-            'dayOfWeek' => $this->dayOfWeek,
-        ]);
+        return view('livewire.clientcreate');
     }
 
     /**

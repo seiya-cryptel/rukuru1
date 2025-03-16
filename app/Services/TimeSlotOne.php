@@ -32,10 +32,16 @@ class TimeSlotOne extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start, $this->beginHourOfDay);
-        if($this->Client->cl_round_start)
+        try {
+            $this->work_start = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_start, $this->beginHourOfDay);
+            if($this->Client->cl_round_start)
+            {
+                $this->rukuruUtilTimeRoundUp($this->work_start, $this->Client->cl_round_start);
+            }
+        }
+        catch(Exception $e)
         {
-            $this->rukuruUtilTimeRoundUp($this->work_start, $this->Client->cl_round_start);
+            throw new \Exception('開始時刻が不正です');
         }
     }
 
@@ -51,18 +57,24 @@ class TimeSlotOne extends TimeSlotBase
             return;
         }
         // 文字列の時刻をDateTimeオブジェクトに変換
-        $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end, $this->beginHourOfDay);
-        // work_start よりも後の日時となるよう日にちを加算
-        if($this->work_start)
-        {
-            while($this->work_end < $this->work_start)
+        try {
+            $this->work_end = $this->rukuruUtilTimeToDateTime($this->currentDate, $this->log_end, $this->beginHourOfDay);
+            // work_start よりも後の日時となるよう日にちを加算
+            if($this->work_start)
             {
-                $this->work_end->add(new DateInterval('P1D'));
+                while($this->work_end < $this->work_start)
+                {
+                    $this->work_end->add(new DateInterval('P1D'));
+                }
+            }
+            if($this->Client->cl_round_end)
+            {
+                $this->rukuruUtilTimeRoundDown($this->work_end, $this->Client->cl_round_end);
             }
         }
-        if($this->Client->cl_round_end)
+        catch(Exception $e)
         {
-            $this->rukuruUtilTimeRoundDown($this->work_end, $this->Client->cl_round_end);
+            throw new \Exception('終了時刻が不正です');
         }
     }
 
@@ -80,7 +92,7 @@ class TimeSlotOne extends TimeSlotBase
         // 終業時刻が開始時刻より前の場合はエラー
         if($this->work_end < $this->work_start)
         {
-            throw new Exception('終業時刻が開始時刻より前です');
+            throw new \Exception('終業時刻が開始時刻より前です');
         }
         // 休憩時間
         $sBreak = '';
@@ -105,11 +117,17 @@ class TimeSlotOne extends TimeSlotBase
         {
             $sBreak = '00:00';
         }
-        $diBreak = $this->rukuruUtilTimeToDateInterval($sBreak);
-        // 休憩時間差し引き前の就業時間
-        $this->work_hours = $this->rukuruUtilWorkHours($this->currentDate, $this->work_start, $this->work_end, $this->ClientWorkType);
-        // 休憩時間差し引き後の就業時間
-        $this->work_hours = $this->rukuruUtilDateIntervalSub($this->work_hours, $diBreak);
+        try {
+            $diBreak = $this->rukuruUtilTimeToDateInterval($sBreak);
+            // 休憩時間差し引き前の就業時間
+            $this->work_hours = $this->rukuruUtilWorkHours($this->currentDate, $this->work_start, $this->work_end, $this->ClientWorkType);
+            // 休憩時間差し引き後の就業時間
+            $this->work_hours = $this->rukuruUtilDateIntervalSub($this->work_hours, $diBreak);
+        }
+        catch(Exception $e)
+        {
+            throw new \Exception('作業時間の計算に失敗しました');
+        }
     }
 
     /**
@@ -135,6 +153,12 @@ class TimeSlotOne extends TimeSlotBase
      */
     public function setClientWorkType(modelClientworktypes $ClientWorkType) : void
     {
+        // 作業種別レコードが空なら例外を投げる
+        if(!$ClientWorkType)
+        {
+            throw new \Exception('作業種別が空です');
+        }
+        // 作業種別レコードを設定
         $this->ClientWorkType = $ClientWorkType;
         $this->setStartTime();
         $this->setEndTime();

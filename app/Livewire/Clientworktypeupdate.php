@@ -21,6 +21,11 @@ class Clientworktypeupdate extends ClientworktypeBase
     public function loadClientWorktype($id)
     {
         $clientWorktype = modelClientWorktypes::find($id);
+        if(!$clientWorktype)
+        {
+            session()->flash('error', __('Client work type') . ' ' . __('Not Found'));
+            return redirect()->route('clientworktype');
+        }
         $this->clientWorktypeId = $id;
         $this->client_id = $clientWorktype->client_id;
         $this->clientplace_id = $clientWorktype->clientplace_id;

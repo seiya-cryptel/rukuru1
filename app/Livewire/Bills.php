@@ -129,6 +129,24 @@ class Bills extends Component
     }
 
     /**
+     * 部門IDが変更されたときに呼び出される
+     * @param int $clientplace_id
+     * @return void
+     * 参照部門を設定する
+     */
+    public function updateClientplaceId($clientplace_id)
+    {
+        if($clientplace_id)
+        {
+            $this->selectedClientPlace = modelClientPlaces::find($clientplace_id);
+        }
+        else
+        {
+            $this->selectedClientPlace = null;
+        }
+    }
+
+    /**
      * redirect to bill details page 
      * */
     public function showBillDetails($billId)

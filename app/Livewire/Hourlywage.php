@@ -36,6 +36,10 @@ class Hourlywage extends Component
     {
         $this->employee_id = $employee_id;
         $this->Employee = modelEmployees::find($employee_id);
+        if (!$this->Employee) {
+            session()->flash('error', __('Employee') . ' ' . __('Not Found'));
+            return redirect()->route('employee');
+        }
     }
 
     public function render()

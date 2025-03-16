@@ -43,14 +43,14 @@ class worktype extends Model
     public function worktypeTimeStart(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['worktype_time_start'] = $value === '' ? null : $value, 
         );
     }
     public function worktypeTimeEnd(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value === null ? '' : date('H:i', strtotime($value)),
+            get: fn ($value) => $value === null ? '' : Date('G:i', strtotime($value)),
             set: fn ($value) => $this->attributes['worktype_time_end'] = $value === '' ? null : $value, 
         );
     }
