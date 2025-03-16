@@ -12,13 +12,13 @@ use App\Consts\AppConsts;
 use App\Traits\rukuruUtilities;
 use App\Services\TimeSlotOne;
 
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\worktype as modelWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
-use App\Models\employeesalarys as modelEmployeeSalarys;
 use App\Models\salary as modelSalary;
 
 /**
@@ -308,6 +308,39 @@ class Employeeworksone extends EmployeeworksBase
     protected function clearData($maxSlot)
     {
         parent::clearData($maxSlot);
+    }
+
+    /**
+     * 従業員給与を更新する
+     */
+    protected function updateSalary()
+    {
+        $Salary = modelSalary::where('employee_id', $this->employee_id)
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->first();
+        if(empty($Salary))
+        {
+            $Salary = new modelSalary();
+            $Salary->employee_id = $this->employee_id;
+            $Salary->work_year = $this->workYear;
+            $Salary->work_month = $this->workMonth;
+            $Salary->paid_leave_pay = 0;    // 有給日当
+            $Salary->non_statutory_days = 0;    // 法定外休日
+            $Salary->statutory_days = 0;    // 法定休日
+            $Salary->work_amount = 0;    // 作業金額
+            $Salary->allow_amount = 0;    // 手当金額
+            $Salary->deduct_amount = 0;    // 控除金額
+            $Salary->transport = 0;    // 交通費
+            $Salary->pay_amount = 0;    // 支給金額
+        }
+
+        $Salary->working_regular_days = $this->SumDaysShukkin;
+        $Salary->non_statutory_days = $this->SumDaysKyujitsu;
+        $Salary->statutory_days = $this->SumDaysHoutei;
+        $Salary->paid_leave_days = $this->SumDaysYukyu;
+        $Salary->working_days = $this->SumDaysShukkin + $this->SumDaysKyujitsu + $this->SumDaysHoutei + $this->SumDaysYukyu;
+        $Salary->save();
     }
 
     /**
@@ -744,5 +777,6 @@ class Employeeworksone extends EmployeeworksBase
                 $Work->save();
             }
         }
+        $this->updateSalary();
     }
 }

@@ -356,14 +356,14 @@ abstract class EmployeeworksBase extends Component
             $this->insertEmployeeWork();
             // $this->makeSalary();
             DB::commit();
-            $logMessage = '勤怠書込: ' . $this->workYear . '/' . $this->workMonth . '月 ' . $this->client_id . ' ' . $this->employee_id;
+            $logMessage = '勤怠書込: ' . $this->workYear . '/' . $this->workMonth . ' ' . $this->client_id . ' ' . $this->employee_id;
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_KINTAI_ENTRY, $logMessage);
             session()->flash('success', '勤怠を保存しました。');
             return redirect()->route('workemployee');
         } catch (\Exception $e) {
             DB::rollBack();
-            $logMessage = '勤怠書込エラー: ' . $this->workYear . '/' . $this->workMonth . '月 ' . $this->client_id . ' ' . $this->employee_id
+            $logMessage = '勤怠書込エラー: ' . $this->workYear . '/' . $this->workMonth . ' ' . $this->client_id . ' ' . $this->employee_id
                 . ' ' . $e->getMessage();
             logger($logMessage);
             applogs::insertLog(applogs::LOG_TYPE_KINTAI_ENTRY, $logMessage);

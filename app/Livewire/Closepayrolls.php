@@ -72,6 +72,99 @@ class Closepayrolls extends Component
 	protected $curClientPlace = null;
     protected $curClientWorkType = null;
 
+    // 勤怠のエラー表示用
+    public $KintaiErrors = [];
+
+    /**
+     * 勤怠チェック
+     * @return void
+     * @throws \Exception
+     * 
+     * エラー条件
+     * 　開始時刻か終了時刻が空
+     */
+    protected function checkKintai()
+    {
+        $this->KintaiErrors = [];
+
+        // 勤怠の対象期間を設定
+        $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
+        $lastDate = date('Y-m-t', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
+
+        $EmployeeWorks = modelEmployeeworks::where('client_id', $this->Client->id)
+            ->whereBetween('wrk_date', [$firstDate, $lastDate])
+            ->orderByRaw('wrk_date, wrk_work_start') // 日付と勤務開始時間でソート
+            ->get();
+
+        $svEmployeeId = null;
+        $svWorkEnd = null;
+        $Employee = null;
+        foreach($EmployeeWorks as $EmployeeWork) {
+            if ($svEmployeeId != $EmployeeWork->employee_id) {
+                $Employee = modelEmployees::find($EmployeeWork->employee_id);
+                $svEmployeeId = $EmployeeWork->employee_id;
+                if (!$Employee) {
+                    $this->KintaiErrors[] = [
+                        'empl_cd' => $EmployeeWork->employee_id,
+                        'empl_name' => '未登録',
+                        'wrk_date' => $EmployeeWork->wrk_date,
+                        'message' => '従業員が見つかりません。',
+                        'url' => '',
+                    ];
+                    continue;
+                }
+            }
+            // 従業員が見つからない場合はスキップ
+            if (!$Employee) {
+                continue;
+            }
+            // 有給ならスキップ
+            if ($EmployeeWork->wrk_paid_holiday > 0) {
+                continue;
+            }
+            if (empty($EmployeeWork->wrk_log_start) || empty($EmployeeWork->wrk_log_end)) {
+                $route = ($this->Client->cl_kintai_style == 1) ? 'employeeworksslot' : 'employeeworksone';
+                $url = route($route, [
+                    'workYear' => $this->workYear, 
+                    'workMonth' => $this->workMonth, 
+                    'clientId' => $this->Client->id, 
+                    'clientPlaceId' => $EmployeeWork->clientplace_id, 
+                    'employeeId' => $Employee->id,
+                ]);
+
+                $this->KintaiErrors[] = [
+                    'empl_cd' => $Employee->empl_cd,
+                    'empl_name' => $Employee->empl_name_last . ' ' . $Employee->empl_name_first,
+                    'wrk_date' => $EmployeeWork->wrk_date,
+                    'message' => '勤怠時刻が未入力です。',
+                    'url' => $url,
+                ];
+            }
+            if($svWorkEnd && $svWorkEnd > $EmployeeWork->wrk_work_start) {
+                $route = ($this->Client->cl_kintai_style == 1) ? 'employeeworksslot' : 'employeeworksone';
+                $url = route($route, [
+                    'workYear' => $this->workYear, 
+                    'workMonth' => $this->workMonth, 
+                    'clientId' => $this->Client->id, 
+                    'clientPlaceId' => $EmployeeWork->clientplace_id, 
+                    'employeeId' => $Employee->id,
+                ]);
+
+                $this->KintaiErrors[] = [
+                    'empl_cd' => $Employee->empl_cd,
+                    'empl_name' => $Employee->empl_name_last . ' ' . $Employee->empl_name_first,
+                    'wrk_date' => $EmployeeWork->wrk_date,
+                    'message' => '勤怠時刻が重複しています。',
+                    'url' => $url,
+                ];
+            }
+            $svWorkEnd = $EmployeeWork->wrk_work_end;
+        }
+        if(count($this->KintaiErrors) > 0) {
+            throw new \Exception('勤怠エラーがあります。');
+        }
+    }
+
     /**
      * 請求と請求明細レコードを削除
      */
@@ -85,17 +178,21 @@ class Closepayrolls extends Component
     /**
      * 給与レコード作成
      */
-    protected function createSalary()
+    protected function updateSalary()
     {
         $this->transport = modelEmployeeAllowDeduct::getAllowAmount($this->saveEmployeeId, $this->workYear, $this->workMonth, AppConsts::MAD_CD_TRANSPORT);    // 交通費
         $this->allowAmount = modelEmployeeAllowDeduct::getAllowTotal($this->saveEmployeeId, $this->workYear, $this->workMonth);    // 手当金額
         $this->deductAmount = modelEmployeeAllowDeduct::getDeductTotal($this->saveEmployeeId, $this->workYear, $this->workMonth);    // 控除金額
 
-        // 給与レコードを作成
-        $Salary = new modelSalary();
-        $Salary->employee_id = $this->saveEmployeeId;
-        $Salary->work_year = $this->workYear;
-        $Salary->work_month = $this->workMonth;
+        $Salary = modelSalary::where('employee_id', $this->saveEmployeeId)
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->first();
+
+        if (!$Salary)
+        {
+            throw new \Exception('給与レコードが見つかりません。');
+        }
         $Salary->work_amount = $this->kintaiAmount;
         $Salary->transport = $this->transport;
         $Salary->allow_amount = $this->allowAmount;
@@ -141,7 +238,7 @@ class Closepayrolls extends Component
                 // 未出力の請求明細情報があるなら、請求明細レコードを作成
                 if($bMustWrite)
                 {
-                    $this->createSalary();
+                    $this->updateSalary();
                 }
                 $this->saveEmployeeId = $EmployeeWork->employee_id;
 
@@ -158,7 +255,7 @@ class Closepayrolls extends Component
         // 未出力の請求明細情報があるなら、請求明細レコードを作成
         if($bMustWrite)
         {
-            $this->createSalary();
+            $this->updateSalary();
         }
     }
 
@@ -173,7 +270,6 @@ class Closepayrolls extends Component
 
         try{
             $Query = modelEmployeeWorks::with('employee')
-                // ->select('employeeworks.*', 'employees.*')
                 ->select ('employeeworks.employee_id', 'employees.empl_cd')
                 ->join('employees', 'employeeworks.employee_id', '=', 'employees.id')
                 ->whereBetween('employeeworks.wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
@@ -283,8 +379,10 @@ class Closepayrolls extends Component
     {
         DB::beginTransaction();
         try {
+            // 勤怠チェック
+            $this->checkKintai();
             // 従業員支給額レコードを削除
-            $this->deleteSalary();
+            // $this->deleteSalary();
             // 給与を集計
             $this->summarySalary();
             // 勤怠締めレコードを更新する

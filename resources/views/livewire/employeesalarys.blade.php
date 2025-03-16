@@ -1,12 +1,12 @@
 <div>
     <div class="col-md-8 mb-2">
         @if(session()->has('success'))
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success" style="color: blue;" role="alert">
                 {{ session()->get('success') }}
             </div>
         @endif                
         @if(session()->has('error'))
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" style="color: red;" role="alert">
                 {{ session()->get('error') }}
             </div>
         @endif
@@ -26,19 +26,35 @@
     <div class="col-md-8 py-1 text-sm">
         <table>
         <tr>
-        @for($i = 0; $i < 10; $i++)
+        @for($i = 0; $i < $maxItems; $i++)
             @if($i == 0)
             <th rowspan="2" style="color: blue; width: 4rem;">手当</th>
             @endif
             <td>
-                <select class="form-control py-1 text-sm" id="Allows.{{$i}}.id" wire:model="Allows.{{$i}}.id" style="width: 8rem;">
+                <select 
+                    tabindex="{{ $i * 2 + 11 }}"
+                    class="form-control py-1 text-sm" 
+                    id="Allows.{{$i}}.id" 
+                    wire:model="Allows.{{$i}}.id" 
+                    wire:change="allowChange($event.target.value, {{$i}})"
+                    style="width: 8rem;">
                 <option value=""></option>
                 @foreach($refAllows as $refAllow)
                     <option value="{{ $refAllow->id }}">{{ $refAllow->mad_name }}</option>
                 @endforeach
                 </select>
 
-                <input type="text" class="form-control py-1 text-sm text-right" id="Allows.{{$i}}.amount" wire:model="Allows.{{$i}}.amount" wire:change="moneyChange($event.target.value, 'Allows', {{$i}})" style="width: 5rem;" />
+                @php
+                $readonly = $this->Allows[$i]['readonly'];
+                @endphp
+                <input type="text" 
+                    tabindex="{{ $i * 2 + 12 }}"
+                    class="form-control py-1 text-sm text-right" 
+                    id="Allows.{{$i}}.amount" 
+                    wire:model.lazy="Allows.{{$i}}.amount" 
+                    wire:change="moneyChange($event.target.value, 'Allows', {{$i}})" 
+                    {{$readonly}}
+                    style="width: 5rem;" />
                 @error('Allows.'.$i.'.amount')
                     <span class="text-red-500" style="color: red;">{{ $message }}</span>
                 @enderror
@@ -49,19 +65,35 @@
         @endfor
         </tr>
         <tr>
-        @for($i = 0; $i < 10; $i++)
+        @for($i = 0; $i < $maxItems; $i++)
             @if($i == 0)
             <th rowspan="2" style="color: darkred;">控除</th>
             @endif
             <td>
-                <select class="form-control py-1 text-sm" id="Deducts.{{$i}}.id" wire:model="Deducts.{{$i}}.id" style="width: 8rem;">
+                <select 
+                    tabindex="{{ $i * 2 + 31 }}"
+                    class="form-control py-1 text-sm" 
+                    id="Deducts.{{$i}}.id" 
+                    wire:model="Deducts.{{$i}}.id" 
+                    wire:change="deductChange($event.target.value, {{$i}})"
+                    style="width: 8rem;">
                 <option value=""></option>
                 @foreach($refDeducts as $refDeduct)
                     <option value="{{ $refDeduct->id }}">{{ $refDeduct->mad_name }}</option>
                 @endforeach
                 </select>
 
-                <input type="text" class="form-control py-1 text-sm text-right" id="Deducts.{{$i}}.amount" wire:model="Deducts.{{$i}}.amount" wire:change="moneyChange($event.target.value, 'Deducts', {{$i}})" style="width: 5rem;" />
+                @php
+                $readonly = $this->Deducts[$i]['readonly'];
+                @endphp
+                <input type="text" 
+                    tabindex="{{ $i * 2 + 32 }}"
+                    class="form-control py-1 text-sm text-right" 
+                    id="Deducts.{{$i}}.amount" 
+                    wire:model.lazy="Deducts.{{$i}}.amount" 
+                    wire:change="moneyChange($event.target.value, 'Deducts', {{$i}})" 
+                    {{$readonly}}
+                    style="width: 5rem;" />
                 @error('Deducts.'.$i.'.amount')
                     <span class="text-red-500" style="color: red;">{{ $message }}</span>
                 @enderror
@@ -86,9 +118,10 @@
             <td style="width: 4rem; font-weight: bold; text-align: right;">+交通費</td>
             <td>
                 <input type="text" 
+                    tabindex="51"
                     class="form-control py-1 text-sm text-right" 
                     id="Transport" 
-                    wire:model="Transport" 
+                    wire:model.lazy="Transport" 
                     wire:change="transportChange($event.target.value)" 
                     style="width: 5rem;" />
                 @error('Transport')
@@ -153,3 +186,5 @@
         </table>
     </div>
 </div>
+<script src="{{ asset('js/dirtycheck.js') }}"></script>
+<script src="{{ asset('js/enter2tab.js') }}"></script>

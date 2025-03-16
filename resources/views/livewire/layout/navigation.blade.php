@@ -114,6 +114,9 @@ new class extends Component
                         </x-slot>
 
                         <x-slot name="content">
+                            <x-dropdown-link :href="route('pl', ['locale' => $locale])" wire:navigate>
+                                {{ __('Paid Leave Calc') }}
+                            </x-dropdown-link>
                             <x-dropdown-link :href="route('salaryemployee', ['locale' => $locale])" wire:navigate>
                                 {{ __('Salary Deduct') }}
                             </x-dropdown-link>

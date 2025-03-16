@@ -1,12 +1,12 @@
 <div>
     <div class="col-md-8 mb-2">
         @if(session()->has('success'))
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success" style="color: blue;" role="alert">
                 {{ session()->get('success') }}
             </div>
         @endif                
         @if(session()->has('error'))
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" style="color: red;" role="alert">
                 {{ session()->get('error') }}
             </div>
         @endif
@@ -86,5 +86,35 @@
         </table>
     </div>
     {{ $Clients->links() }}
+
+    <div>{{-- 勤怠エラー --}}
+        <table class="min-w-full table-auto text-sm">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th style="width: 12rem;">{{ __('Employee') }}</th>
+                    <th style="width: 6rem;">{{ __('Date') }}</th>
+                    <th> </th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach ($KintaiErrors as $KintaiError)
+                @php
+                    $url = $KintaiError['url'];
+                @endphp
+                <tr class="border-b">
+                    <td>
+                        <a href="{{$url}}">{{$KintaiError['empl_cd']}} {{$KintaiError['empl_name']}}</a>
+                    </td>
+                    <td>
+                        <a href="{{$url}}">{{$KintaiError['wrk_date']}}</a>
+                    </td>
+                    <td>
+                        <a href="{{$url}}">{{$KintaiError['message']}}</a>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
 <script src="{{ asset('js/enter2tab.js') }}"></script>

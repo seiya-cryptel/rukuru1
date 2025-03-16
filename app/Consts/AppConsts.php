@@ -29,6 +29,11 @@ class AppConsts
     const PAGINATION = 15;
 
     /**
+     * 手当控除項目数の上限
+     */
+    const MAX_ALLOW_DEDUCTS = 10;
+
+    /**
      * 交通費の手当控除コード
      */
     const MAD_CD_TRANSPORT = '31';

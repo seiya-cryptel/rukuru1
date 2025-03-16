@@ -15,6 +15,9 @@ use App\Models\employeeworks as modelEmployeeWorks;
 use App\Models\employeeallowdeduct as modelEmployeeAllowDeduct;
 use App\Models\salary as modelSalary;
 
+/**
+ * 手当控除入力クラス
+ */
 class Employeesalarys extends Component
 {
     use rukuruUtilities;
@@ -34,6 +37,11 @@ class Employeesalarys extends Component
     public $refAllows;
     public $refDeducts;
     public $refEmployeeSalarys;
+    
+    /**
+     * 項目数の最大
+     */
+    public $maxItems = AppConsts::MAX_ALLOW_DEDUCTS;
 
     /**
      * allow/deduct array
@@ -42,7 +50,7 @@ class Employeesalarys extends Component
     public $Deducts = [];
     public $Transport = 0;
     public $Transport_masterallowdeduct_id = 0;
-    
+
     /**
      * 合計額
      */
@@ -63,7 +71,7 @@ class Employeesalarys extends Component
     {
         $this->TotalAllow = 0;
         $this->TotalDeduct = 0;
-        for($i = 0; $i < 10; $i++)
+        for($i = 0; $i < $this->maxItems; $i++)
         {
             $amount = $this->rukuruUtilMoneyValue($this->Allows[$i]['amount']);
             $this->TotalAllow += $amount ? $amount : 0;
@@ -102,6 +110,11 @@ class Employeesalarys extends Component
             session()->flash('error', __('Employee') . ' ' . __('Not Found'));
             return redirect()->route('salaryemployee');
         }
+        // 給与レコード
+        $this->Salarys = modelSalary::where('employee_id', $this->employee_id)
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->first();
 
         // 勤怠の対象期間を設定
         $firstDate = date('Y-m-d', strtotime($this->workYear . '-' . $this->workMonth . '-01'));
@@ -139,15 +152,17 @@ class Employeesalarys extends Component
 
         $this->Transport_masterallowdeduct_id = $AllowTransport->id;
         $this->Transport = 0;
-        for($i = 0; $i < 10; $i++)
+        for($i = 0; $i < $this->maxItems; $i++)
         {
             $this->Allows[$i] = [
                 'id' => null,
-                'amount' => 0,
+                'amount' => '',
+                'readonly' => 'readonly="readonly"',
             ];
             $this->Deducts[$i] = [
                 'id' => null,
-                'amount' => 0,
+                'amount' => '',
+                'readonly' => 'readonly="readonly"',
             ];
         }
         $Allows = modelEmployeeAllowDeduct::where('employee_id', $this->employee_id)
@@ -164,13 +179,13 @@ class Employeesalarys extends Component
         foreach($Allows as $Allow)
         {
             if($Allow->mad_cd == AppConsts::MAD_CD_TRANSPORT) {
-                $this->Transport_masterallowdeduct_id = $Allow->id;
                 $this->Transport = number_format($Allow->amount);
                 continue;
             }
             $this->Allows[$i++] = [
                 'id' => $Allow->masterallowdeduct_id,
                 'amount' => number_format($Allow->amount),
+                'readonly' => ($Allow->masterallowdeduct_id) ? '' : 'readonly="readonly"',
             ];
         }
         $i = 0;
@@ -179,12 +194,9 @@ class Employeesalarys extends Component
             $this->Deducts[$i++] = [
                 'id' => $Deduct->masterallowdeduct_id,
                 'amount' => number_format($Deduct->amount),
+                'readonly' => ($Deduct->masterallowdeduct_id) ? '' : 'readonly="readonly"',
             ];
         }   
-        $this->Salarys = modelSalary::where('employee_id', $this->employee_id)
-            ->where('work_year', $this->workYear)
-            ->where('work_month', $this->workMonth)
-            ->first();
 
         // 数値編集して表示
         $this->getPayAmount();
@@ -208,23 +220,46 @@ class Employeesalarys extends Component
      */
     public function moneyChange($money, $field, $index)
     {
-        $money = preg_replace('/[^0-9.]/', '', $money);
-        $money = empty($money) ? 0 : $money;
+        $money = $this->rukuruUtilMoneyValue($money, 0);
         $this->$field[$index]['amount'] = $money=='' ? '' : number_format($money);
         $this->getPayAmount();
     }
 
     /**
-     * 金額項目が変更されたときに呼び出される
+     * 交通費が変更されたときに呼び出される
      * @param string $money, string $field
      * @return void
      * 交通費
      */
     public function transportChange($money)
     {
-        $money = preg_replace('/[^0-9.]/', '', $money);
-        $this->Transport = empty($money) ? '' : number_format($money);
+        $money = $this->rukuruUtilMoneyValue($money, 0);
+        $this->Transport = number_format($money);
         $this->getPayAmount();
+    }
+
+    /**
+     * 手当項目が変更されたとき
+     */
+    public function allowChange($id, $index)
+    {
+        $this->Allows[$index]['id'] = $id;
+        if(!$id) {
+            $this->Allows[$index]['amount'] = 0;
+        }
+        $this->Allows[$index]['readonly'] = $id ? '' : 'readonly="readonly"';        
+    }
+
+    /**
+     * 控除項目が変更されたとき
+     */
+    public function deductChange($id, $index)
+    {
+        $this->Deducts[$index]['id'] = $id;
+        if(!$id) {
+            $this->Deducts[$index]['amount'] = 0;
+        }
+        $this->Deducts[$index]['readonly'] = $id ? '' : 'readonly="readonly"';        
     }
 
     /**
@@ -233,7 +268,7 @@ class Employeesalarys extends Component
     public function saveEmployeeSalary()
     {
         // 手当・控除を数値化
-        for($i = 0; $i < 10; $i++)
+        for($i = 0; $i < $this->maxItems; $i++)
         {
             if ($this->Allows[$i]['id']) {
                 $this->Allows[$i]['amount'] = $this->rukuruUtilMoneyValue($this->Allows[$i]['amount']);
@@ -266,6 +301,8 @@ class Employeesalarys extends Component
         $salary->work_amount = modelEmployeeSalarys::where('employee_id', $this->employee_id)
             ->whereBetween('wrk_date', [$firstDate, $lastDate])
             ->sum('wrk_pay');
+        $salary->allow_amount = 0;
+        $salary->deduct_amount = 0;
         $salary->notes = '';
 
         // 給与情報の手当・控除を更新
@@ -293,7 +330,7 @@ class Employeesalarys extends Component
         $mad->save();
 
         // 手当登録
-        for($i = 0; $i < 10; $i++)
+        for($i = 0; $i < $this->maxItems; $i++)
         {
             if ($this->Allows[$i]['id']) {
                 $master = modelMasterAllowDeducts::find($this->Allows[$i]['id']);
@@ -315,7 +352,7 @@ class Employeesalarys extends Component
             }
         }
         // 控除登録
-        for($i = 0; $i < 10; $i++)
+        for($i = 0; $i < $this->maxItems; $i++)
         {
             if ($this->Deducts[$i]['id']) {
                 $master = modelMasterAllowDeducts::find($this->Deducts[$i]['id']);

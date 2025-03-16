@@ -12,12 +12,14 @@ use App\Consts\AppConsts;
 use App\Traits\rukuruUtilities;
 use App\Services\TimeSlotSlot;
 
+use App\Models\applogs;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
 use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\worktype as modelWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
+use App\Models\salary as modelSalary;
 
 /**
  * スロットごと勤怠入力画面
@@ -58,7 +60,6 @@ class Employeeworksslot extends EmployeeworksBase
      */
     public $SumDays;            // 日数
     public $SumDaysYukyu;       // 有給日数
-    public $SumWorkPayYukyu;        // 有給支給額
 
     /**
      * validation rules
@@ -115,8 +116,7 @@ class Employeeworksslot extends EmployeeworksBase
     {
         $this->SumDays = 0;            // 日数
         $this->SumDaysYukyu = 0;       // 有給日数
-        $this->SumWorkPayYukyu = 0;    // 有給支給額
-
+ 
         $this->SumWorkHours = array_fill(1, self::MAX_SLOTS, null);  // 作業時間合計
         $this->SumWorkHoursAll = '0:00';  // 1ヶ月の作業時間合計
         $this->SumWorkPays = array_fill(1, self::MAX_SLOTS, 0);  // 支給額合計
@@ -204,11 +204,10 @@ class Employeeworksslot extends EmployeeworksBase
         $this->DayHasWork[$day] = ($hhmmDayWorkHours == '00:00') ? 0 : 1;   // 作業がある日は1、ない日は0
         $this->SumDays = array_sum($this->DayHasWork);
 
-        // 有給日数と支給額を再計算
+        // 有給日数を再計算
         if($this->TimekeepingDays[$day]['leave'])
         {
             $this->SumDaysYukyu++;
-            $this->SumWorkPayYukyu += $this->rukuruUtilMoneyValue($this->Employee->empl_paid_leave_pay, 0);
         }
 
         // スロットの作業時間合計
@@ -236,7 +235,7 @@ class Employeeworksslot extends EmployeeworksBase
         $this->SumWorkBills[$slot] = array_sum($this->BillSlotDay[$slot]);
 
         // 1ヶ月全スロットの支給額合計
-        $this->SumWorkPayAll = array_sum($this->SumWorkPays) + $this->SumWorkPayYukyu;
+        $this->SumWorkPayAll = array_sum($this->SumWorkPays);
         // 1ヶ月全スロットの請求額合計
         $this->SumWorkBillAll = array_sum($this->SumWorkBills);
     }
@@ -256,6 +255,37 @@ class Employeeworksslot extends EmployeeworksBase
         {
             $this->TimekeepingTypes[$slotNo] = '';
         }
+    }
+
+    /**
+     * 従業員給与を更新する
+     */
+    protected function updateSalary()
+    {
+        $Salary = modelSalary::where('employee_id', $this->employee_id)
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->first();
+        if(empty($Salary))
+        {
+            $Salary = new modelSalary();
+            $Salary->employee_id = $this->employee_id;
+            $Salary->work_year = $this->workYear;
+            $Salary->work_month = $this->workMonth;
+            $Salary->paid_leave_pay = 0;    // 有給日当
+            $Salary->non_statutory_days = 0;    // 法定外休日
+            $Salary->statutory_days = 0;    // 法定休日
+            $Salary->work_amount = 0;    // 作業金額
+            $Salary->allow_amount = 0;    // 手当金額
+            $Salary->deduct_amount = 0;    // 控除金額
+            $Salary->transport = 0;    // 交通費
+            $Salary->pay_amount = 0;    // 支給金額
+        }
+
+        $Salary->working_regular_days = $this->SumDays;
+        $Salary->paid_leave_days = $this->SumDaysYukyu;
+        $Salary->working_days = $this->SumDays - $this->SumDaysYukyu;
+        $Salary->save();
     }
     
     /**
@@ -654,10 +684,9 @@ class Employeeworksslot extends EmployeeworksBase
 
                 $Work->notes = $this->TimekeepingDays[$day]['notes'];
 
-                // 有給の項目設定
-
                 $Work->save();
             }
         }
+        $this->updateSalary();
     }
 }

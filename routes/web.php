@@ -221,6 +221,12 @@ function () {
         Route::view('billdetails/{billId}', 'billdetails')
             ->middleware(['auth', 'verified'])
             ->name('billdetails');
+        /**
+         * Routes for the 給与　有給日当計算
+         */
+        Route::view('pl', 'pl')
+            ->middleware(['auth', 'verified'])
+            ->name('pl');
 
         /**
          * Routes for the 給与　手当控除入力

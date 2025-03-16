@@ -74,6 +74,79 @@ class Closebills extends Component
     protected $sumAmount = 0;      // 請求金額
     protected $taxRate = 0;        // 消費税率
 
+    // 勤怠のエラー表示用
+    public $KintaiErrors = [];
+
+    /**
+     * 勤怠チェック
+     * @return void
+     * @throws \Exception
+     * 
+     * エラー条件
+     * 　開始時刻か終了時刻が空
+     */
+    protected function checkKintai()
+    {
+        $this->KintaiErrors = [];
+
+        // 請求対象の初日と最終日を取得
+        $dtFirstDate = $this->rukuruUtilGetStartDate($this->workYear, $this->workMonth, $this->Client->cl_close_day);
+        $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
+
+        $EmployeeWorks = modelEmployeeworks::where('client_id', $this->Client->id)
+            ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+            ->orderByRaw('clientplace_id, summary_index, billhour') // 部門、作業種別、単価でソート
+            ->get();
+
+        $svEmployeeId = null;
+        $Employee = null;
+        foreach($EmployeeWorks as $EmployeeWork) {
+            if ($svEmployeeId != $EmployeeWork->employee_id) {
+                $Employee = modelEmployees::find($EmployeeWork->employee_id);
+                $svEmployeeId = $EmployeeWork->employee_id;
+                if (!$Employee) {
+                    $this->KintaiErrors[] = [
+                        'empl_cd' => $EmployeeWork->employee_id,
+                        'empl_name' => '未登録',
+                        'wrk_date' => $EmployeeWork->wrk_date,
+                        'message' => '従業員が見つかりません。',
+                        'url' => '',
+                    ];
+                    continue;
+                }
+            }
+            // 従業員が見つからない場合はスキップ
+            if (!$Employee) {
+                continue;
+            }
+            // 有給ならスキップ
+            if ($EmployeeWork->wrk_paid_holiday > 0) {
+                continue;
+            }
+            if (empty($EmployeeWork->wrk_log_start) || empty($EmployeeWork->wrk_log_end)) {
+                $route = ($this->Client->cl_kintai_style == 1) ? 'employeeworksslot' : 'employeeworksone';
+                $url = route($route, [
+                    'workYear' => $this->workYear, 
+                    'workMonth' => $this->workMonth, 
+                    'clientId' => $this->Client->id, 
+                    'clientPlaceId' => $EmployeeWork->clientplace_id, 
+                    'employeeId' => $Employee->id,
+                ]);
+
+                $this->KintaiErrors[] = [
+                    'empl_cd' => $Employee->empl_cd,
+                    'empl_name' => $Employee->empl_name_last . ' ' . $Employee->empl_name_first,
+                    'wrk_date' => $EmployeeWork->wrk_date,
+                    'message' => '勤怠時刻が未入力です。',
+                    'url' => $url,
+                ];
+            }
+        }
+        if(count($this->KintaiErrors) > 0) {
+            throw new \Exception('勤怠エラーがあります。');
+        }
+    }
+
     /**
      * 請求と請求明細レコードを削除
      * @return void
@@ -325,6 +398,8 @@ class Closebills extends Component
 
         DB::beginTransaction();
         try {
+            // 勤怠チェック
+            $this->checkKintai();
             // 請求と請求明細を削除
             $this->deleteBill();
             // 請求の明細を集計
