@@ -56,7 +56,7 @@
                                     {{$Employee->empl_resign_date}}
                                 <td>
                                     <button wire:click="editEmployee({{$Employee->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
-                                    <button wire:click="hourlywageEmployee({{$Employee->id}})" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">{{ __('Hourly Wage') }}</button>
+                                    {{-- <button wire:click="hourlywageEmployee({{$Employee->id}})" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded">{{ __('Hourly Wage') }}</button> --}}
                                     <button onclick="deleteEmployee({{$Employee->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
                                 </td>
                             </tr>

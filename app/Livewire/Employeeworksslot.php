@@ -366,6 +366,21 @@ class Employeeworksslot extends EmployeeworksBase
             }
             $dayIndex++;
         }
+
+        // スロットデータがない場合は作業種別の初期値を設定する
+        if(empty($this->SumWorkTypes[1]['wt_cd']))
+        {
+            $empl_wt_cd_list = explode(';', $this->Employee->empl_wt_cd_list);
+            for($slotNo = 1; $slotNo <= self::MAX_SLOTS; $slotNo++)
+            {
+                if(empty($empl_wt_cd_list[$slotNo - 1]))
+                {
+                    break;
+                }
+                $this->TimekeepingTypes[$slotNo] = $empl_wt_cd_list[$slotNo - 1];
+                $this->setWorkType($slotNo, $empl_wt_cd_list[$slotNo - 1]);
+            }
+        }
     }
 
     /**

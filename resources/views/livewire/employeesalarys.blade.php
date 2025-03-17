@@ -12,8 +12,16 @@
         @endif
     </div>
     <div class="col-md-8 py-1">
-        {{ $workYear }}年 {{ $workMonth }}月 {{ $Employee->empl_cd }}:{{ $Employee->empl_name_last }} {{ $Employee->empl_name_first }} さん
-
+        {{ $workYear }}年 {{ $workMonth }}月
+        <select class="form-control py-1 px-1 text-sm" 
+            id="nextEmployeeId" 
+            wire:model="nextEmployeeId" 
+            wire:change="employeeChanged($event.target.value)"
+            style="width: 16rem; padding: 0px;">
+            @foreach($Employees as $key => $EmployeeRecord)
+                <option value="{{ $EmployeeRecord->id }}">{{ $EmployeeRecord->empl_cd }} {{ $EmployeeRecord->empl_name_last }} {{ $EmployeeRecord->empl_name_first }}</option>
+            @endforeach
+        </select>
         <button 
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 text-sm rounded" 
             wire:click.prevent="saveEmployeeSalary" 

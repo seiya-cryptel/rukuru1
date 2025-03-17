@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Livewire;
-use App\Models\employees as modelEmployees;
 
 use Livewire\Component;
 
+use App\Models\employees as modelEmployees;
 use App\Models\clients as modelClients;
 use App\Models\clientplaces as modelClientPlaces;
+use App\Models\clientworktypes;
 
 use App\Traits\rukuruUtilities;
 
@@ -15,10 +16,16 @@ abstract class EmployeeBase extends Component
     use rukuruUtilities;
 
     /**
+     * プリセット作業種別の最大数
+     */
+    public const MAX_SLOTS = 7;
+
+    /**
      * record set of table clients and client places
      * */
     public $refClients;
     public $refClientPlaces;
+    public $refWtCdList;
 
     /**
      * fields
@@ -32,6 +39,7 @@ abstract class EmployeeBase extends Component
         $empl_hire_date, $empl_resign_date,
         $empl_paid_leave_pay, $empl_main_client_id, $empl_main_clientplace_id,
         $empl_notes;
+    public $wt_cd_list = [];
 
     /**
      * id value
@@ -72,6 +80,9 @@ abstract class EmployeeBase extends Component
     public function mount($id = null)
     {
         $this->refClients = modelClients::orderBy('cl_cd', 'asc')->get();
+        $this->refWtCdList = clientworktypes::where('client_id', 3)
+            ->orderBy('wt_cd', 'asc')
+            ->get();
     }
 
     abstract public function render();

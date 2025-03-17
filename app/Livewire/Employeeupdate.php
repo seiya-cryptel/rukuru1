@@ -35,7 +35,7 @@ class Employeeupdate extends EmployeeBase
         $this->empl_alpha_last = $Employee->empl_alpha_last;
         $this->empl_alpha_middle = $Employee->empl_alpha_middle;
         $this->empl_alpha_first = $Employee->empl_alpha_first;
-        $this->empl_sex = $Employee->sex;
+        $this->empl_sex = $Employee->empl_sex;
         $this->empl_email = $Employee->empl_email;
         $this->empl_mobile = $Employee->empl_mobile;
         $this->empl_hire_date = $Employee->empl_hire_date;
@@ -43,6 +43,7 @@ class Employeeupdate extends EmployeeBase
         $this->empl_paid_leave_pay = $Employee->empl_paid_leave_pay;
         $this->empl_main_client_id = $Employee->empl_main_client_id;
         $this->empl_main_clientplace_id = $Employee->empl_main_clientplace_id;
+        $this->wt_cd_list = explode(';',$Employee->empl_wt_cd_list);
         $this->empl_notes = $Employee->empl_notes;
         
         $this->updateMainClientPlaceList();
@@ -51,6 +52,15 @@ class Employeeupdate extends EmployeeBase
     public function render()
     {
         return view('livewire.employeeupdate');
+    }
+
+    /**
+     * Open Hourly Wage form
+     * @return void
+     */
+    public function hourlywageEmployee()
+    {
+        return redirect()->route('hourlywage', ['locale' => app()->getLocale(), 'id' => $this->employeeId]);
     }
 
     /**
@@ -79,6 +89,7 @@ class Employeeupdate extends EmployeeBase
                 'empl_paid_leave_pay' => $this->rukuruUtilMoneyValue($this->empl_paid_leave_pay),
                 'empl_main_client_id' => $this->empl_main_client_id,
                 'empl_main_clientplace_id' => $this->empl_main_clientplace_id,
+                'empl_wt_cd_list' => implode(';', $this->wt_cd_list),
                 'empl_notes' => $this->empl_notes,
             ]);
             $logMessage = '従業員 更新: ' . $this->empl_cd . ' ' . $this->empl_name_last . ' ' . $this->empl_name_first;

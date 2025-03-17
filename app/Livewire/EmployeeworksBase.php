@@ -254,8 +254,17 @@ abstract class EmployeeworksBase extends Component
             session()->flash('error', __('Employee') . ' ' . __('Not Found'));
             return redirect()->route('workemployee');
         }
-        $this->Employees = modelEmployees::orderBy('empl_cd')
-            ->get();
+        if($this->Employee->empl_main_client_id)
+        {
+            $this->Employees = modelEmployees::where('empl_main_client_id', $this->Employee->empl_main_client_id)
+                ->orderBy('empl_cd')
+                ->get();
+        }
+        else
+        {
+            $this->Employees = modelEmployees::orderBy('empl_cd')
+                ->get();
+        }
 
         // 勤務体系の配列を作る
         $workTypeRecords = modelWorktypes::where('worktype_kintai', $this->worktypeKintai())

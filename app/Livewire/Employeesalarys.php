@@ -60,6 +60,11 @@ class Employeesalarys extends Component
     public $PayAmount = 0;      // 支給額
 
     /**
+     * 従業員選択用id
+     */
+    public $nextEmployeeId;
+
+    /**
      * 勤怠入力に戻る
      */
     public $boolReturnToWorkEntry = false;
@@ -95,6 +100,7 @@ class Employeesalarys extends Component
         $this->employee_id = $employee_id;
         $this->workYear = $workYear;
         $this->workMonth = $workMonth;
+        $this->nextEmployeeId = $employee_id;
         if(!$this->employee_id || !$this->workYear || !$this->workMonth) {
             session()->flash('error', __('Employee') . ' ' . __('Not Found'));
             return redirect()->route('salaryemployee');
@@ -207,7 +213,25 @@ class Employeesalarys extends Component
       */
     public function render()
     {
-        return view('livewire.employeesalarys');
+        $Employees = modelEmployees::orderBy('empl_cd')
+            ->get();
+
+        return view('livewire.employeesalarys', compact('Employees'));
+    }
+
+    /**
+     * 従業員が変更された
+     */
+    public function employeeChanged($nextEmployeeId)
+    {
+        // 手当控除を保存する
+        $this->saveEmployeeSalary();
+        // 新しい手当控除入力画面に移動する
+        return redirect()->route('employeesalary', [
+            'workYear' => $this->workYear, 
+            'workMonth' => $this->workMonth, 
+            'employeeId' => $nextEmployeeId,
+        ]);
     }
 
     /**

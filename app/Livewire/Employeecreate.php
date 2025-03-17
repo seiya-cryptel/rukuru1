@@ -37,6 +37,7 @@ class Employeecreate extends EmployeeBase
         $this->empl_paid_leave_pay = '';
         $this->empl_main_client_id = '';
         $this->empl_main_clientplace_id = '';
+        $this->wt_cd_list = [];
         $this->empl_notes = '';
     }
 
@@ -82,6 +83,7 @@ class Employeecreate extends EmployeeBase
                 'empl_paid_leave_pay' => $this->rukuruUtilMoneyValue($this->empl_paid_leave_pay),
                 'empl_main_client_id' => $this->empl_main_client_id,
                 'empl_main_clientplace_id' => $this->empl_main_clientplace_id,
+                'empl_wt_cd_list' => implode(';', $this->wt_cd_list),
                 'empl_notes' => $this->empl_notes,
             ]);
             $logMessage = '従業員 作成: ' . $this->empl_cd . ' ' . $this->empl_name_last . ' ' . $this->empl_name_first;

@@ -262,14 +262,6 @@ class Employeeworksone extends EmployeeworksBase
         // 時間スロットの1ヶ月の作業時間合計
         $diWorkHours = $this->calcMonthWorkHours();
 
-        // 有給金額の計算
-        // $di = $this->rukuruUtilTimeToDateInterval($this->SumWorkHours[9]);
-        // $unit_price = $this->rukuruUtilMoneyValue($this->Employee->empl_paid_leave_pay);
-        // $pay = $this->rukuruUtilDateIntervalToMoney($di, $unit_price);
-        // $di = $this->rukuruUtilTimeToDateInterval($this->SumWorkHours[10]);
-        // $unit_price = $this->rukuruUtilMoneyValue($this->Employee->empl_paid_leave_pay);  // ? 夜間有給金額単価は？
-        // $pay += $this->rukuruUtilDateIntervalToMoney($di, $unit_price);
-        // $this->SumWorksPayYukyu = $pay;
         // 支給合計
         $payAll = 0;
         // 支給額の計算
