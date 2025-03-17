@@ -176,4 +176,64 @@ class employeeworks extends Model
             set: fn ($value) => $this->attributes['wrk_work_hours'] = $value === '' ? null : $value, 
         );
     }
+
+    /**
+     * 各種日数合計
+     * @param int $employee_id
+     * @param int $targetYear
+     * @param int $targetMonth
+     */
+    // 平日勤務日数 スロット 1, 平日, 有休でない
+    static public function getWorkingRegularDays(int $employee_id, int $targetYear, int $targetMonth)
+    {
+        $dtFirstDate = strtotime($targetYear . '-' . $targetMonth . '-01');
+        $dtLastDate = strtotime(date('Y-m-t', $dtFirstDate));
+
+        $workData = employeeworks::where('employee_id', $employee_id)
+            ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+            ->where('wrk_seq', 1)
+            ->where('holiday_type', 0)
+            ->where('leave', 0)
+            ->get();
+        return count($workData);
+    }
+    // 法定外休日日数 スロット 1, 法定外休日
+    static public function getWorkingNonStatutoryDays(int $employee_id, int $targetYear, int $targetMonth)
+    {
+        $dtFirstDate = strtotime($targetYear . '-' . $targetMonth . '-01');
+        $dtLastDate = strtotime(date('Y-m-t', $dtFirstDate));
+
+        $workData = employeeworks::where('employee_id', $employee_id)
+            ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+            ->where('wrk_seq', 1)
+            ->where('holiday_type', 1)
+            ->get();
+        return count($workData);
+    }
+    // 法定休日日数 スロット 1, 法定休日
+    static public function getWorkingStatutoryDays(int $employee_id, int $targetYear, int $targetMonth)
+    {
+        $dtFirstDate = strtotime($targetYear . '-' . $targetMonth . '-01');
+        $dtLastDate = strtotime(date('Y-m-t', $dtFirstDate));
+
+        $workData = employeeworks::where('employee_id', $employee_id)
+            ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+            ->where('wrk_seq', 1)
+            ->where('holiday_type', 2)
+            ->get();
+        return count($workData);
+    }
+    // 有給日数 スロット 1, 有休
+    static public function getPaidLeaveDays(int $employee_id, int $targetYear, int $targetMonth)
+    {
+        $dtFirstDate = strtotime($targetYear . '-' . $targetMonth . '-01');
+        $dtLastDate = strtotime(date('Y-m-t', $dtFirstDate));
+
+        $workData = employeeworks::where('employee_id', $employee_id)
+            ->whereBetween('wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
+            ->where('wrk_seq', 1)
+            ->where('leave', '>', 0)
+            ->get();
+        return count($workData);
+    }
 }

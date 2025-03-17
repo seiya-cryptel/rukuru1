@@ -48,32 +48,39 @@ class Pl extends Component
      */
     protected function createEmployeeList()
     {
-        // 対象年月に勤怠がある従業員
+        // 対象年月に在籍の従業員
         $dtFirstDate = strtotime($this->workYear . '-' . $this->workMonth . '-01');
         $dtLastDate = strtotime('-1 day', strtotime('+1 month', $dtFirstDate));
 
-        try{
-            $Query = employeeworks::with('employee')
-                ->join('employees', 'employeeworks.employee_id', '=', 'employees.id')
-                ->select ('employeeworks.employee_id', 'employees.empl_cd')
-                ->whereBetween('employeeworks.wrk_date', [date('Y-m-d', $dtFirstDate), date('Y-m-d', $dtLastDate)])
-                ->orderByRaw('employees.empl_cd')
-                ->distinct();
-            $EmployeeWorks = $Query->get();
-        } catch (\Exception $e) {
-            $EmployeeWorks = [];
-        }
+        $strFirstDate = date('Y-m-d', $dtFirstDate);
+        $strLastDate = date('Y-m-d', $dtLastDate);
+        $Employees = employees::where('empl_resign_date', '>=', $strFirstDate)
+            ->orWhere('empl_resign_date', null)
+            ->get();
 
-        $Employees = [];
-        foreach($EmployeeWorks as $EmployeeWork) {
-            $employee_id = $EmployeeWork->employee_id;
-            $salary = salary::where('employee_id', $employee_id)
+        // 過去３ヶ月の期間
+        $dtFirst3MonthAgo = strtotime('-3 month', $dtFirstDate);
+        $dtLast3MonthAgo = strtotime('-1 day', $dtFirstDate);
+        $strFirst3MonthAgo = date('Y-m-d', $dtFirst3MonthAgo);
+        $strLast3MonthAgo = date('Y-m-d', $dtLast3MonthAgo);
+        $vEmployees = [];
+        foreach($Employees as $Employee) {
+            // 過去３ヶ月の勤怠データがあるか
+            $EmployeeWork = employeeworks::where('employee_id', $Employee->id)
+                ->where('wrk_date', '>=', $strFirst3MonthAgo)
+                ->where('wrk_date', '<=', $strLast3MonthAgo)
+                ->first();
+            if(!$EmployeeWork) {
+                continue;
+            }
+            // 給与レコード取得
+            $salary = salary::where('employee_id', $Employee->id)
                 ->where('work_year', $this->workYear)
                 ->where('work_month', $this->workMonth)
                 ->first();
-            $Employees[$employee_id] = [
-                'empl_cd' => $EmployeeWork->employee->empl_cd,
-                'empl_name' => $EmployeeWork->employee->empl_name_last . ' ' . $EmployeeWork->employee->empl_name_first,
+            $vEmployees[$Employee->id] = [
+                'empl_cd' => $Employee->empl_cd,
+                'empl_name' => $Employee->empl_name_last . ' ' . $Employee->empl_name_first,
                 'work_amount' => $salary ? $salary->work_amount : 0,
                 'transport' => $salary ? $salary->transport : 0,
                 'allow_amount' => $salary ? $salary->allow_amount : 0,
@@ -82,7 +89,7 @@ class Pl extends Component
             ];
         }   
 
-        return $Employees;
+        return $vEmployees;
     }
 
     /**
@@ -103,7 +110,12 @@ class Pl extends Component
             $Salary->employee_id = $employee_id;
             $Salary->work_year = $this->workYear;
             $Salary->work_month = $this->workMonth;
-            $Salary->pay_leave = $amount;
+            $Salary->paid_leave_pay = $amount;
+            $Salary->work_amount = 0;
+            $Salary->allow_amount = 0;
+            $Salary->deduct_amount = 0;
+            $Salary->transport = 0;
+            $Salary->pay_amount = 0;
             $Salary->save();
         }
     }
@@ -126,6 +138,7 @@ class Pl extends Component
         $pay_amount_total = 0;
         $working_days_total = 0;
         $days_total = 0;
+        $paidMonth = 0;
         $indexMonth = 0;
         for($nMonth = -3; $nMonth < 0; $nMonth++)
         {
@@ -152,6 +165,9 @@ class Pl extends Component
                 $PaidLeave[$indexMonth]['working_days'] = $Salary->working_days;
                 $pay_amount_total += $Salary->pay_amount;
                 $working_days_total += $Salary->working_days;
+                if($Salary->pay_amount > 0) {
+                    $paidMonth++;
+                }
             }
             else {
                 $PaidLeave[$indexMonth]['pay_amount'] = 0;
@@ -159,8 +175,15 @@ class Pl extends Component
             }
             $indexMonth++;
         }
-        $paidLeavePayByWorkDay = $working_days_total ? round($pay_amount_total / $working_days_total * 0.6, 0) : 0;
+        // 支給があった月数
+        if($paidMonth < 3) {
+            $paidLeavePayByWorkDay = 0;
+        }
+        else {
+            $paidLeavePayByWorkDay = $working_days_total ? round($pay_amount_total / $working_days_total * 0.6, 0) : 0;
+        }
         $paidLeavePayByDay = $days_total ? round($pay_amount_total / $days_total, 0) : 0;
+
         $Salaries['payLeave'] = $PaidLeave;
         $Salaries['pay_amount_total'] = $pay_amount_total;
         $Salaries['working_days_total'] = $working_days_total;
@@ -169,7 +192,7 @@ class Pl extends Component
         $this->Salaries[$employee_id] = $Salaries;
         // 有休日当を設定
         $this->savePayLeave($employee_id, $Salaries['paid_leave_pay']);
-}
+    }
 
     /**
      * mount 
@@ -227,7 +250,7 @@ class Pl extends Component
      */
     public function calcPayLeave()
     {
-        // 対象者
+        // 対象者 在籍かつ過去3ヶ月に勤怠がある
         $Employees = $this->createEmployeeList();
 
         try {
