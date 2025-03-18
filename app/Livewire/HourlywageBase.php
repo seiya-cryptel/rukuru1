@@ -122,8 +122,8 @@ abstract class HourlywageBase extends Component
             session()->flash('error', __('Employee') . ' ' . __('Not Found'));
             return redirect()->route('employee');
         }
-        $this->refClients = modelClients::orderBy('cl_name', 'asc')->get();
-        $this->refClientPlaces = modelClientPlaces::orderBy('cl_pl_name', 'asc')->get();
+        $this->refClients = modelClients::orderBy('cl_cd', 'asc')->get();
+        $this->refClientPlaces = modelClientPlaces::orderBy('cl_pl_cd', 'asc')->get();
         $this->updateClientWorkTypeList();
     }
 

@@ -50,6 +50,7 @@ abstract class ClientBase extends Component
     protected $rules = [
         'cl_cd' => 'required',
         'cl_name' => 'required',
+        'cl_full_name' => 'required',
     ];
 
     /**
@@ -60,6 +61,7 @@ abstract class ClientBase extends Component
         return [
             'cl_cd.required' => __('Required'),
             'cl_name.required' => __('Required'),
+            'cl_full_name.required' => __('Required'),
         ];
     }
 

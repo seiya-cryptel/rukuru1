@@ -34,10 +34,10 @@ trait rukuruUtilities
      */
     public function rukuruUtilDateIntervalAdd($a, $b) : DateInterval
     {
-        $date = new DateTime('00:00');
+        $date = new DateTime('0:00');
         $date->add($a);
         $date->add($b);
-        return (new DateTime('00:00'))->diff($date);
+        return (new DateTime('0:00'))->diff($date);
     }
 
     /**
@@ -48,10 +48,10 @@ trait rukuruUtilities
      */
     public function rukuruUtilDateIntervalSub($a, $b) : DateInterval
     {
-        $date = new DateTime('00:00');
+        $date = new DateTime('0:00');
         $date->add($a);
         $date->sub($b);
-        return (new DateTime('00:00'))->diff($date);
+        return (new DateTime('0:00'))->diff($date);
     }
 
     /**

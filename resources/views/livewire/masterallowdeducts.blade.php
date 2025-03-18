@@ -1,12 +1,12 @@
 <div>
     <div class="col-md-8 mb-2">
         @if(session()->has('success'))
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success" style="color: blue;" role="alert">
                 {{ session()->get('success') }}
             </div>
         @endif                
         @if(session()->has('error'))
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" style="color: red;" role="alert">
                 {{ session()->get('error') }}
             </div>
         @endif
@@ -19,16 +19,21 @@
             <table class="min-w-full table-auto text-sm">
                 <thead class="bg-gray-200">
                     <tr>
-                        <th>{{ __('Code') }}</th>
-                        <th>{{ __('Is Allow') }}{{ __('Is Deduct') }}</th>
-                        <th>{{ __('Item Name') }}</th>
-                        <th>{{ __('Notes') }}</th>
+                        <th style="width: 7rem;"> </th>
+                        <th style="width: 3rem;"></th>
+                        <th style="width: 6rem;">{{ __('Is Allow') }}{{ __('Is Deduct') }}</th>
+                        <th style="width: 8rem;">{{ __('Item Name') }}</th>
+                        <th> </th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (count($Mads) > 0)
                         @foreach ($Mads as $Mad)
                             <tr class="border-b">
+                                <td>
+                                    <button wire:click="editMad({{$Mad->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
+                                    <button onclick="deleteMad({{$Mad->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
+                                </td>
                                 <td>
                                     {{$Mad->mad_cd}}
                                 </td>
@@ -40,11 +45,6 @@
                                     {{$Mad->mad_name}}
                                 </td>
                                 <td>
-                                    {{$Mad->mad_notes}}
-                                </td>
-                                <td>
-                                    <button wire:click="editMad({{$Mad->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
-                                    <button onclick="deleteMad({{$Mad->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
                                 </td>
                             </tr>
                         @endforeach

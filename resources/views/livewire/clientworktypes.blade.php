@@ -1,12 +1,12 @@
 <div>
     <div class="col-md-8 mb-2">
         @if(session()->has('success'))
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success" style="color: blue;" role="alert">
                 {{ session()->get('success') }}
             </div>
         @endif                
         @if(session()->has('error'))
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" style="color: blue;" role="alert">
                 {{ session()->get('error') }}
             </div>
         @endif
@@ -51,10 +51,10 @@
             <table class="min-w-full table-auto text-sm">
                 <thead class="bg-gray-200">
                     <tr>
-                        <th>{{ __('Client') }}</th>
-                        <th>{{ __('Work Place') }}</th>
-                        <th>{{ __('Code') }}</th>
-                        <th>{{ __('Name') }}</th>
+                        <th style="width: 7rem;"> </th>
+                        <th style="width: 16rem;">{{ __('Client') }}</th>
+                        <th style="width: 16rem;">{{ __('Work Place') }}</th>
+                        <th style="width: 16rem;">{{ __('Work Type') }}</th>
                         <th>{{ __('Begin') }}-{{ __('End') }}</th>
                         <th> </th>
                     </tr>
@@ -63,6 +63,10 @@
                     @if (count($ClientWorktypes) > 0)
                         @foreach ($ClientWorktypes as $ClientWorktype)
                             <tr class="border-b">
+                                <td>
+                                    <button wire:click="editClientWorkType({{$ClientWorktype->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
+                                    <button onclick="deleteClientWorkType({{$ClientWorktype->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
+                                </td>
                                 <td>
                                     @if($ClientWorktype->client)
                                         {{$ClientWorktype->client->cl_cd}} {{$ClientWorktype->client->cl_name}}
@@ -74,17 +78,12 @@
                                     @endif
                                 </td>
                                 <td>
-                                    {{$ClientWorktype->wt_cd}}
-                                </td>
-                                <td>
-                                    {{$ClientWorktype->wt_name}}
+                                    {{$ClientWorktype->wt_cd}} {{$ClientWorktype->wt_name}}
                                 </td>
                                 <td>
                                     {{$ClientWorktype->wt_work_start}}-{{$ClientWorktype->wt_work_end}}
                                 </td>
                                 <td>
-                                    <button wire:click="editClientWorkType({{$ClientWorktype->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
-                                    <button onclick="deleteClientWorkType({{$ClientWorktype->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
                                 </td>
                             </tr>
                         @endforeach

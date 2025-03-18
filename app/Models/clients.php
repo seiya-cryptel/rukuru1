@@ -37,6 +37,7 @@ class clients extends Model
     protected $fillable = [
         'cl_cd',
         'cl_name',
+        'cl_full_name',
         'cl_kana',
         'cl_alpha',
         'cl_zip',
@@ -56,6 +57,7 @@ class clients extends Model
         'cl_round_start',
         'cl_round_end',
         'cl_close_day',
+        'cl_kintai_style',
         'cl_notes',
     ];
 

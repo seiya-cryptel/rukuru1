@@ -43,6 +43,7 @@ class clientworktypes extends Model
         'wt_day_night',
         'wt_work_start',
         'wt_work_end',
+
         'wt_lunch_break_start',
         'wt_lunch_break_end',
         'wt_lunch_break',
@@ -55,16 +56,19 @@ class clientworktypes extends Model
         'wt_midnight_break_start',
         'wt_midnight_break_end',
         'wt_midnight_break',
+
         'wt_pay_std',
         'wt_pay_ovr',
         'wt_pay_ovr_midnight',
         'wt_pay_holiday',
         'wt_pay_holiday_midnight',
+
         'wt_bill_std',
         'wt_bill_ovr',
         'wt_bill_ovr_midnight',
         'wt_bill_holiday',
         'wt_bill_holiday_midnight',
+
         'wt_notes',
     ];
 
@@ -78,6 +82,7 @@ class clientworktypes extends Model
         return [
             'wt_work_start' => 'datetime',
             'wt_work_end' => 'datetime',
+            
             'wt_lunch_break_start' => 'datetime',
             'wt_lunch_break_end' => 'datetime',
             'wt_lunch_break' => 'datetime',
@@ -299,17 +304,6 @@ class clientworktypes extends Model
                 }
             }
         }
-        // specific work types for general
-        /* 全顧客共通はなし
-        $workTypes = modelClientworktypes::whereNull('client_id')
-            ->whereNull('clientplace_id')
-            ->get();
-        foreach ($workTypes as $workType) {
-            if(! array_key_exists($workType->wt_cd, $workTypesArray)) {
-                $workTypesArray[$workType->wt_cd] = $workType->wt_name;
-            }
-        }
-        */
     
         return $workTypesArray;
     }
@@ -347,18 +341,6 @@ class clientworktypes extends Model
                 }
             }
         }
-
-        // specific work types for general
-        /* 全顧客共通はなし
-        $workTypes = modelClientworktypes::whereNull('client_id')
-            ->whereNull('clientplace_id')
-            ->get();
-        foreach ($workTypes as $workType) {
-            if(! array_key_exists($workType->wt_cd, $workTypeRecords)) {
-                $workTypeRecords[$workType->wt_cd] = $workType;
-            }
-        }
-        */
     
         return $workTypeRecords;
     }
@@ -414,22 +396,6 @@ class clientworktypes extends Model
             ->first();
             return $workType;
         }
-        /* 顧客共通の作業種別はなし
-        // 顧客、作業種別が一致するレコードを取得
-        if($workType === null) {
-            $workType = modelClientworktypes::where('client_id', $client_id)
-                ->whereNull('clientplace_id')
-                ->where('wt_cd', $wt_cd)
-                ->first();
-        }
-        // 作業種別が一致するレコードを取得
-        if($workType === null) {
-            $workType = modelClientworktypes::whereNull('client_id')
-                ->whereNull('clientplace_id')
-                ->where('wt_cd', $wt_cd)
-                ->first();
-        }
-        */
         return null;
     }
 }

@@ -115,7 +115,7 @@ class TimeSlotOne extends TimeSlotBase
         }
         if(empty($sBreak))
         {
-            $sBreak = '00:00';
+            $sBreak = '0:00';
         }
         try {
             $diBreak = $this->rukuruUtilTimeToDateInterval($sBreak);

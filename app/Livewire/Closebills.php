@@ -120,7 +120,7 @@ class Closebills extends Component
                 continue;
             }
             // 有給ならスキップ
-            if ($EmployeeWork->wrk_paid_holiday > 0) {
+            if ($EmployeeWork->leave) {
                 continue;
             }
             if (empty($EmployeeWork->wrk_log_start) || empty($EmployeeWork->wrk_log_end)) {

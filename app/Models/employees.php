@@ -74,7 +74,11 @@ class employees extends Model
         'empl_mobile',
         'empl_hire_date',
         'empl_resign_date',
+        'empl_paid_leave_pay',
+        'empl_main_client_id',
+        'empl_main_clientplace_id',
         'empl_main_client_name',
+        'empl_wt_cd_list',
         'empl_notes',
     ];
 

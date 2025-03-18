@@ -43,6 +43,7 @@ class Employeeupdate extends EmployeeBase
         $this->empl_paid_leave_pay = $Employee->empl_paid_leave_pay;
         $this->empl_main_client_id = $Employee->empl_main_client_id;
         $this->empl_main_clientplace_id = $Employee->empl_main_clientplace_id;
+        $this->empl_main_client_name = $Employee->empl_main_client_name;
         $this->wt_cd_list = explode(';',$Employee->empl_wt_cd_list);
         $this->empl_notes = $Employee->empl_notes;
         
@@ -86,9 +87,10 @@ class Employeeupdate extends EmployeeBase
                 'empl_mobile' => $this->empl_mobile,
                 'empl_hire_date' => $this->rukuruUtilEmptyToNull($this->empl_hire_date),
                 'empl_resign_date' => $this->rukuruUtilEmptyToNull($this->empl_resign_date),
-                'empl_paid_leave_pay' => $this->rukuruUtilMoneyValue($this->empl_paid_leave_pay),
+                'empl_paid_leave_pay' => 0,
                 'empl_main_client_id' => $this->empl_main_client_id,
                 'empl_main_clientplace_id' => $this->empl_main_clientplace_id,
+                'empl_main_client_name' => $this->empl_main_client_name,
                 'empl_wt_cd_list' => implode(';', $this->wt_cd_list),
                 'empl_notes' => $this->empl_notes,
             ]);

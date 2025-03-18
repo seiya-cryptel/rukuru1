@@ -327,22 +327,32 @@ class PhpSpreadsheetService
                 ->get();
             foreach($employeeWorks as $employeeWork)
             {
-                $clientWorkType = modelClientWorkTypes::where('client_id', $employeeWork->client_id)
+                if($employeeWork->leave) {
+                    $nCol = 1;
+                    $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_date);
+                    $sheet->getcell([$nCol++, $nRow])->setValue('有休');
+                    $nCol += 7;
+                    $sheet->getcell([$nCol++, $nRow])->setValue($this->rukuruUtilMoneyValue($Salary->paid_leave_pay, 0));
+                }
+                else
+                {
+                    $clientWorkType = modelClientWorkTypes::where('client_id', $employeeWork->client_id)
                     ->where('clientplace_id', $employeeWork->clientplace_id)
                     ->where('wt_cd', $employeeWork->wt_cd)
                     ->first();
 
-                $nCol = 1;
-                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_date);
-                $sheet->getcell([$nCol++, $nRow])->setValue($clientWorkType->wt_name);
-                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_log_start);
-                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_log_end);
-                $sheet->getcell([$nCol++, $nRow])->setValue(date('md Hi', strtotime($employeeWork->wrk_work_start)));
-                $sheet->getcell([$nCol++, $nRow])->setValue(date('md Hi', strtotime($employeeWork->wrk_work_end)));
-                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_break);
-                $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_work_hours);
-                $sheet->getcell([$nCol++, $nRow])->setValue($this->rukuruUtilMoneyValue($employeeWork->payhour, 0));
-                $sheet->getcell([$nCol++, $nRow])->setValue($this->rukuruUtilMoneyValue($employeeWork->wrk_pay, 0));
+                    $nCol = 1;
+                    $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_date);
+                    $sheet->getcell([$nCol++, $nRow])->setValue($clientWorkType->wt_name);
+                    $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_log_start);
+                    $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_log_end);
+                    $sheet->getcell([$nCol++, $nRow])->setValue(date('md Hi', strtotime($employeeWork->wrk_work_start)));
+                    $sheet->getcell([$nCol++, $nRow])->setValue(date('md Hi', strtotime($employeeWork->wrk_work_end)));
+                    $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_break);
+                    $sheet->getcell([$nCol++, $nRow])->setValue($employeeWork->wrk_work_hours);
+                    $sheet->getcell([$nCol++, $nRow])->setValue($this->rukuruUtilMoneyValue($employeeWork->payhour, 0));
+                    $sheet->getcell([$nCol++, $nRow])->setValue($this->rukuruUtilMoneyValue($employeeWork->wrk_pay, 0));
+                }
                 $nRow++;
             }
             $nRow++;

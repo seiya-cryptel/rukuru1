@@ -18,6 +18,7 @@ use App\Models\clientworktypes as modelClientWorktypes;
 use App\Models\worktype as modelWorktypes;
 use App\Models\employees as modelEmployees;
 use App\Models\employeeworks as modelEmployeeWorks;
+use App\Models\salary;
 
 /**
  * 勤怠入力画面標準
@@ -217,6 +218,20 @@ abstract class EmployeeworksBase extends Component
             }
             $dayIndex++;
         }
+    }
+
+    /**
+     * 従業員の有給日当を取得する
+     * @param $employeeId 従業員ID
+     */
+    protected function getEmployeeLeaveDays($employeeId)
+    {
+        // 従業員の給与レコードを検索する
+        $Salary = salary::where('employee_id', $employeeId)
+            ->where('work_year', $this->workYear)
+            ->where('work_month', $this->workMonth)
+            ->first();
+        return $Salary ? $Salary->salary_leave_days : 0;
     }
 
     /**

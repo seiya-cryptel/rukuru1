@@ -45,7 +45,7 @@ class Masterallowdeducts extends Component
     public function render()
     {
         $Mads = modelMad::orderBy('mad_cd')
-            ->paginate(AppConsts::PAGINATE_SIZE);
+            ->paginate(AppConsts::PAGINATION);
         return view('livewire.masterallowdeducts', compact('Mads'));
     }
 

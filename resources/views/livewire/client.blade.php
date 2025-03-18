@@ -1,12 +1,12 @@
 <div>
     <div class="col-md-8 mb-2">
         @if(session()->has('success'))
-            <div class="alert alert-success" role="alert">
+            <div class="alert alert-success" style="color: blue;" role="alert">
                 {{ session()->get('success') }}
             </div>
         @endif                
         @if(session()->has('error'))
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" style="color: red;" role="alert">
                 {{ session()->get('error') }}
             </div>
         @endif
@@ -19,16 +19,20 @@
             <table class="min-w-full table-auto text-sm">
                 <thead class="bg-gray-200">
                     <tr>
-                        <th style="width: 4rem;">{{ __('Code') }}</th>
-                        <th>{{ __('Client') }}{{ __('Name') }}</th>
-                        <th>{{ __('Notes') }}</th>
-                        <th> </th>
+                        <th style="width: 8rem;"> </th>
+                        <th style="width: 3rem;">{{ __('Code') }}</th>
+                        <th style="width: 20rem;">{{ __('Client') }}</th>
+                        <th>{{ __('Name') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (count($Clients) > 0)
                         @foreach ($Clients as $Client)
                             <tr class="border-b">
+                                <td>
+                                    <button wire:click="editClient({{$Client->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
+                                    <button onclick="deleteClient({{$Client->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
+                                </td>
                                 <td>
                                     {{$Client->cl_cd}}
                                 </td>
@@ -37,10 +41,6 @@
                                 </td>
                                 <td>
                                     {{$Client->cl_notes}}
-                                </td>
-                                <td>
-                                    <button wire:click="editClient({{$Client->id}})" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded">{{ __('Edit') }}</button>
-                                    <button onclick="deleteClient({{$Client->id}})" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded">{{ __('Delete') }}</button>
                                 </td>
                             </tr>
                         @endforeach

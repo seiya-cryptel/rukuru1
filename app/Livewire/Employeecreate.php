@@ -34,9 +34,10 @@ class Employeecreate extends EmployeeBase
         $this->empl_mobile = '';
         $this->empl_hire_date = '';
         $this->empl_resign_date = '';
-        $this->empl_paid_leave_pay = '';
+        $this->empl_paid_leave_pay = '0';
         $this->empl_main_client_id = '';
         $this->empl_main_clientplace_id = '';
+        $this->empl_main_client_name = '';
         $this->wt_cd_list = [];
         $this->empl_notes = '';
     }
@@ -80,9 +81,10 @@ class Employeecreate extends EmployeeBase
                 'empl_mobile' => $this->empl_mobile,
                 'empl_hire_date' => $this->rukuruUtilEmptyToNull($this->empl_hire_date),
                 'empl_resign_date' => $this->rukuruUtilEmptyToNull($this->empl_resign_date),
-                'empl_paid_leave_pay' => $this->rukuruUtilMoneyValue($this->empl_paid_leave_pay),
+                'empl_paid_leave_pay' => 0,
                 'empl_main_client_id' => $this->empl_main_client_id,
                 'empl_main_clientplace_id' => $this->empl_main_clientplace_id,
+                'empl_main_client_name' => $this->empl_main_client_name,
                 'empl_wt_cd_list' => implode(';', $this->wt_cd_list),
                 'empl_notes' => $this->empl_notes,
             ]);
